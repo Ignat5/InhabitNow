@@ -1,0 +1,12 @@
+CREATE TABLE TaskTable(
+    id TEXT NOT NULL PRIMARY KEY,
+    type TEXT NOT NULL,
+    progressType TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    startEpochDay INTEGER NOT NULL,
+    endEpochDay INTEGER NOT NULL,
+    priority INTEGER NOT NULL,
+    createdAt INTEGER NOT NULL,
+    deletedAt INTEGER
+);

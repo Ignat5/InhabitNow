@@ -1,0 +1,106 @@
+[versions]
+# gradle
+agp = "8.2.2"
+
+# kotlin
+kotlin = "1.9.22"
+kotlin-coroutines = "1.8.0"
+kotlin-datetime = "0.4.0"
+kotlin-serialization = "1.5.1"
+
+# ksp
+ksp = "1.9.22-1.0.17"
+# db
+sqldelight = "2.0.0"
+# preferences
+settings = "1.1.1"
+
+# android
+
+# dagger
+hilt = "2.48"
+hilt-compiler = "1.2.0"
+
+# preferences
+datastore = "1.0.0"
+
+# lifecycle
+lifecycle = "2.7.0"
+
+# compose
+compose = "1.6.2"
+compose-compiler = "1.5.10"
+compose-material3 = "1.2.0"
+androidx-activityCompose = "1.8.2"
+compose-lifecycle-viewmodel = "2.7.0"
+compose-navigation = "2.7.7"
+
+[libraries]
+# kotlin
+kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
+kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlin-datetime" }
+kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin-serialization" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+
+# db
+sqldelight-runtime = { group = "app.cash.sqldelight", name = "runtime", version.ref = "sqldelight" }
+sqldelight-coroutines = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
+sqldelight-androidDriver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
+sqldelight-nativeDriver = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }
+
+# settings
+multiplatform-settings-core = { group = "com.russhwolf", name = "multiplatform-settings", version.ref = "settings" }
+multiplatform-settings-coroutine = { group = "com.russhwolf", name = "multiplatform-settings-coroutines", version.ref = "settings" }
+multiplatform-settings-datastore = { group = "com.russhwolf", name = "multiplatform-settings-datastore", version.ref = "settings" }
+
+# android
+
+# dagger
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hilt-compiler" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-compiler" }
+
+# preferences
+android-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+
+# lifecycle
+android-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
+android-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+
+# compose
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
+compose-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "compose-lifecycle-viewmodel" }
+compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
+compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compose-compiler" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+
+[bundles]
+multiplatform-settings = ["multiplatform-settings-core", "multiplatform-settings-coroutine"]
+sqldelight = ["sqldelight-runtime", "sqldelight-coroutines"]
+compose = [
+    "androidx-activity-compose",
+    "compose-ui",
+    "compose-ui-tooling",
+    "compose-ui-tooling-preview",
+    "compose-foundation",
+    "compose-material3",
+    "compose-lifecycle-viewmodel",
+    "compose-navigation",
+    "compose-compiler"
+]
