@@ -1,7 +1,7 @@
 package com.example.inhabitnow.domain.util
 
 import com.example.inhabitnow.data.model.reminder.ReminderEntity
-import com.example.inhabitnow.data.model.reminder.ReminderWithContentEntity
+import com.example.inhabitnow.data.model.reminder.content.ReminderContentEntity
 import com.example.inhabitnow.data.model.task.TaskEntity
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
@@ -9,7 +9,7 @@ import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
-import com.example.inhabitnow.domain.model.reminder.ReminderWithContentModel
+import com.example.inhabitnow.domain.model.reminder.content.ReminderContentModel
 import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
@@ -68,18 +68,20 @@ private fun ArchiveContentEntity.toArchiveContentModel(): TaskContentModel.Archi
     TaskContentModel.ArchiveContent(this.content.isArchived)
 
 /** reminder **/
-//fun ReminderWithContentEntity.toReminderWithContentModel() = ReminderWithContentModel(
-//    reminder = this.reminder.toReminderModel(),
-//    scheduleContent = ,
-//    timeContent =
-//)
-
-private fun ReminderEntity.toReminderModel() = ReminderModel(
-    id = id,
-    taskId = taskId,
-    type = type,
-    createdAt = createdAt
+fun ReminderEntity.toReminderModel() = ReminderModel(
+    id = this.id,
+    taskId = this.taskId,
+    type = this.type,
+    time = this.time,
+    schedule = this.schedule.toScheduleContentModel(),
+    createdAt = this.createdAt
 )
+
+private fun ReminderContentEntity.ScheduleContent.toScheduleContentModel() =
+    when (this) {
+        is ReminderContentEntity.ScheduleContent.EveryDay -> ReminderContentModel.ScheduleContent.EveryDay
+        is ReminderContentEntity.ScheduleContent.DaysOfWeek -> ReminderContentModel.ScheduleContent.DaysOfWeek(this.daysOfWeek)
+    }
 
 /** other **/
 

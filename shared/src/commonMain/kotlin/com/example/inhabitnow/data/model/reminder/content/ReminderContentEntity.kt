@@ -14,11 +14,9 @@ sealed interface ReminderContentEntity {
         @SerialName("ReminderContent.ScheduleContent.EveryDay")
         @Serializable
         data object EveryDay : ScheduleContent
+
         @SerialName("ReminderContent.ScheduleContent.DaysOfWeek")
         @Serializable
         data class DaysOfWeek(val daysOfWeek: Set<DayOfWeek>) : ScheduleContent
     }
-    @SerialName("ReminderContent.TimeContent")
-    @Serializable
-    data class TimeContent(val time: LocalTime) : ReminderContentEntity
 }
