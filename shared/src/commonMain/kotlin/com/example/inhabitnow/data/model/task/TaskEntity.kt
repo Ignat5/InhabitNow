@@ -2,6 +2,7 @@ package com.example.inhabitnow.data.model.task
 
 import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
+import kotlinx.datetime.LocalDate
 
 data class TaskEntity(
     val id: String,
@@ -9,9 +10,9 @@ data class TaskEntity(
     val progressType: TaskProgressType,
     val title: String,
     val description: String,
-    val startEpochDay: Long,
-    val endEpochDay: Long,
-    val priority: Long,
+    val startDate: LocalDate,
+    val endDate: LocalDate?,
+    val priority: String,
     val createdAt: Long,
     val deletedAt: Long?
 )

@@ -30,11 +30,8 @@ private fun TaskEntity.toTaskModel() = TaskModel(
     progressType = progressType,
     title = title,
     description = description,
-    startDate = startEpochDay.toLocalDate(),
-    endDate = this.endEpochDay.let { epochDay ->
-        if (isDistantFuture(epochDay)) null
-        else epochDay.toLocalDate()
-    },
+    startDate = startDate,
+    endDate = this.endDate,
     priority = priority,
     createdAt = createdAt,
     deletedAt = deletedAt
@@ -84,9 +81,3 @@ private fun ReminderContentEntity.ScheduleContent.toScheduleContentModel() =
     }
 
 /** other **/
-
-private fun Long.toLocalDate(): LocalDate = this.let { epochDay ->
-    LocalDate.fromEpochDays(epochDay.toInt())
-}
-
-private fun isDistantFuture(epochDay: Long): Boolean = epochDay == DomainConst.distantFutureEpochDay

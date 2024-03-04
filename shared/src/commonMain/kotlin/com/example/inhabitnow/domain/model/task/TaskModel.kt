@@ -12,7 +12,7 @@ data class TaskModel(
     val description: String,
     val startDate: LocalDate,
     val endDate: LocalDate?,
-    val priority: Long,
+    val priority: String,
     val createdAt: Long,
     val deletedAt: Long?
 )

@@ -14,6 +14,7 @@ import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import database.ReminderTable
 import database.TaskContentTable
 import database.TaskTable
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -26,11 +27,27 @@ fun TaskEntity.toTaskTable(json: Json) = TaskTable(
     progressType = progressType.toJson(json),
     title = title,
     description = description,
-    startEpochDay = startEpochDay,
-    endEpochDay = endEpochDay,
+    startEpochDay = startDate.toEpochDay(),
+    endEpochDay = (endDate ?: DataConst.distantFutureDate).toEpochDay(),
     priority = priority,
     createdAt = createdAt,
     deletedAt = deletedAt
+)
+
+fun TaskTable.toTaskEntity(json: Json) = TaskEntity(
+    id = this.id,
+    type = this.type.fromJsonTaskType(json),
+    progressType = this.progressType.fromJsonTaskProgressType(json),
+    title = this.title,
+    description = this.description,
+    startDate = this.startEpochDay.toLocalDate(),
+    endDate = this.endEpochDay.toLocalDate().let { date ->
+        if (date != DataConst.distantFutureDate) date
+        else null
+    },
+    priority = this.priority,
+    createdAt = this.createdAt,
+    deletedAt = this.deletedAt
 )
 
 fun <T : TaskContentEntity> BaseTaskContentEntity<T>.toTaskContentTable(json: Json) =
@@ -84,7 +101,11 @@ fun TaskContentTable.toBaseTaskContentEntity(json: Json): BaseTaskContentEntity<
 }
 
 fun TaskType.toJson(json: Json) = json.encodeToString(this)
+fun String.fromJsonTaskType(json: Json) = json.decodeFromString<TaskType>(this)
+
 fun TaskProgressType.toJson(json: Json) = json.encodeToString(this)
+fun String.fromJsonTaskProgressType(json: Json) = json.decodeFromString<TaskProgressType>(this)
+
 fun TaskContentEntity.Type.toJson(json: Json) = json.encodeToString(this)
 fun TaskContentEntity.toJson(json: Json) = json.encodeToString<TaskContentEntity>(this)
 
@@ -130,3 +151,6 @@ private fun ReminderType.toJson(json: Json) =
 
 private fun String.fromJsonReminderType(json: Json) =
     json.decodeFromString<ReminderType>(this)
+
+private fun LocalDate.toEpochDay() = this.toEpochDays().toLong()
+private fun Long.toLocalDate() = LocalDate.fromEpochDays(this.toInt())
