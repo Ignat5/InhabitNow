@@ -21,6 +21,16 @@ CREATE TABLE IF NOT EXISTS TaskContentTable(
     FOREIGN KEY (taskId) REFERENCES TaskTable(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS ReminderTable(
+    id TEXT NOT NULL PRIMARY KEY,
+    taskId TEXT NOT NULL,
+    type TEXT NOT NULL,
+    scheduleContent TEXT NOT NULL,
+    timeContent TEXT NOT NULL,
+    createdAt INTEGER NOT NULL,
+    FOREIGN KEY (taskId) REFERENCES TaskTable(id) ON DELETE CASCADE
+);
+
 insertTask:
 INSERT OR REPLACE INTO TaskTable
 VALUES ?;

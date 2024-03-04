@@ -1,11 +1,15 @@
 package com.example.inhabitnow.domain.util
 
+import com.example.inhabitnow.data.model.reminder.ReminderEntity
+import com.example.inhabitnow.data.model.reminder.ReminderWithContentEntity
 import com.example.inhabitnow.data.model.task.TaskEntity
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
 import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
+import com.example.inhabitnow.domain.model.reminder.ReminderModel
+import com.example.inhabitnow.domain.model.reminder.ReminderWithContentModel
 import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
@@ -62,6 +66,20 @@ private fun FrequencyContentEntity.toFrequencyContentModel(): TaskContentModel.F
 
 private fun ArchiveContentEntity.toArchiveContentModel(): TaskContentModel.ArchiveContent =
     TaskContentModel.ArchiveContent(this.content.isArchived)
+
+/** reminder **/
+//fun ReminderWithContentEntity.toReminderWithContentModel() = ReminderWithContentModel(
+//    reminder = this.reminder.toReminderModel(),
+//    scheduleContent = ,
+//    timeContent =
+//)
+
+private fun ReminderEntity.toReminderModel() = ReminderModel(
+    id = id,
+    taskId = taskId,
+    type = type,
+    createdAt = createdAt
+)
 
 /** other **/
 
