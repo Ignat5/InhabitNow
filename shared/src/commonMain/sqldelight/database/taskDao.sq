@@ -1,4 +1,4 @@
-CREATE TABLE TaskTable(
+CREATE TABLE IF NOT EXISTS TaskTable(
     id TEXT NOT NULL PRIMARY KEY,
     type TEXT NOT NULL,
     progressType TEXT NOT NULL,
@@ -10,3 +10,21 @@ CREATE TABLE TaskTable(
     createdAt INTEGER NOT NULL,
     deletedAt INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS TaskContentTable(
+    id TEXT NOT NULL PRIMARY KEY,
+    taskId TEXT NOT NULL,
+    contentType TEXT NOT NULL,
+    content TEXT NOT NULL,
+    startEpochDay INTEGER NOT NULL,
+    createdAt INTEGER NOT NULL,
+    FOREIGN KEY (taskId) REFERENCES TaskTable(id) ON DELETE CASCADE
+);
+
+insertTask:
+INSERT OR REPLACE INTO TaskTable
+VALUES ?;
+
+insertTaskContent:
+INSERT OR REPLACE INTO TaskContentTable
+VALUES ?;
