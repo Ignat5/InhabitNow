@@ -1,5 +1,6 @@
 package com.example.inhabitnow.data.repository.task
 
+import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.data.data_source.task.TaskDataSource
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.util.toTaskContentTable
@@ -14,7 +15,7 @@ class DefaultTaskRepository(
     private val defaultDispatcher: CoroutineDispatcher
 ) : TaskRepository {
 
-    suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity) =
+    override suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {
             taskDataSource.insertTaskWithContent(
                 taskTable = taskWithContentEntity.task.toTaskTable(json),

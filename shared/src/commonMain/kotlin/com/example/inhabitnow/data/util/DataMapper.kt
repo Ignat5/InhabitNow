@@ -3,8 +3,11 @@ package com.example.inhabitnow.data.util
 import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.data.model.task.TaskEntity
-import com.example.inhabitnow.data.model.task.content.base.BaseTaskContentEntity
-import com.example.inhabitnow.data.model.task.content.base.TaskContentEntity
+import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
+import com.example.inhabitnow.data.model.task.content.BaseTaskContentEntity
+import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
+import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
+import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import database.TaskContentTable
 import database.TaskTable
 import kotlinx.serialization.encodeToString
@@ -30,18 +33,58 @@ fun <T : TaskContentEntity> BaseTaskContentEntity<T>.toTaskContentTable(json: Js
         id = id,
         taskId = taskId,
         content = content.toJson(json),
-        contentType = when (content) {
-            is TaskContentEntity.ProgressContent -> TaskContentEntity.Type.Progress
-            is TaskContentEntity.FrequencyContent -> TaskContentEntity.Type.Frequency
-            is TaskContentEntity.ArchiveContent -> TaskContentEntity.Type.Archive
-            else -> throw IllegalStateException()
+        contentType = when (this) {
+            is ProgressContentEntity -> TaskContentEntity.Type.Progress
+            is FrequencyContentEntity -> TaskContentEntity.Type.Frequency
+            is ArchiveContentEntity -> TaskContentEntity.Type.Archive
         }.toJson(json),
         startEpochDay = startEpochDay,
         createdAt = createdAt
     )
 
+fun TaskContentTable.toBaseTaskContentEntity(json: Json): BaseTaskContentEntity<*>? = try {
+    when (val decodedContent = content.fromJsonTaskContentEntity(json)) {
+        is TaskContentEntity.ProgressContent -> {
+            ProgressContentEntity(
+                id = id,
+                taskId = taskId,
+                content = decodedContent,
+                startEpochDay = startEpochDay,
+                createdAt = createdAt
+            )
+        }
+
+        is TaskContentEntity.FrequencyContent -> {
+            FrequencyContentEntity(
+                id = id,
+                taskId = taskId,
+                content = decodedContent,
+                startEpochDay = startEpochDay,
+                createdAt = createdAt
+            )
+        }
+
+        is TaskContentEntity.ArchiveContent -> {
+            ArchiveContentEntity(
+                id = id,
+                taskId = taskId,
+                content = decodedContent,
+                startEpochDay = startEpochDay,
+                createdAt = createdAt
+            )
+        }
+    }
+} catch (e: Exception) {
+    null
+}
 
 fun TaskType.toJson(json: Json) = json.encodeToString(this)
 fun TaskProgressType.toJson(json: Json) = json.encodeToString(this)
 fun TaskContentEntity.Type.toJson(json: Json) = json.encodeToString(this)
 fun TaskContentEntity.toJson(json: Json) = json.encodeToString<TaskContentEntity>(this)
+
+private fun String.fromJsonTaskContentEntity(json: Json): TaskContentEntity =
+    json.decodeFromString<TaskContentEntity>(this)
+
+private fun String.fromJsonContentType(json: Json) =
+    json.decodeFromString<TaskContentEntity.Type>(this)
