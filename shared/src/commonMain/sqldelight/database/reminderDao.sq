@@ -1,0 +1,3 @@
+insertReminder:
+INSERT OR REPLACE INTO ReminderTable
+VALUES ?;

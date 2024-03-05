@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.core.di.module
+package com.example.inhabitnow.android.core.di.module.core
 
 import android.content.Context
 import app.cash.sqldelight.db.SqlDriver

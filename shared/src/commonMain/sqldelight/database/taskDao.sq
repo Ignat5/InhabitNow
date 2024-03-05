@@ -1,4 +1,4 @@
-CREATE TABLE TaskTable(
+CREATE TABLE IF NOT EXISTS TaskTable(
     id TEXT NOT NULL PRIMARY KEY,
     type TEXT NOT NULL,
     progressType TEXT NOT NULL,
@@ -6,7 +6,59 @@ CREATE TABLE TaskTable(
     description TEXT NOT NULL,
     startEpochDay INTEGER NOT NULL,
     endEpochDay INTEGER NOT NULL,
-    priority INTEGER NOT NULL,
+    priority TEXT NOT NULL,
     createdAt INTEGER NOT NULL,
     deletedAt INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS TaskContentTable(
+    id TEXT NOT NULL PRIMARY KEY,
+    taskId TEXT NOT NULL,
+    contentType TEXT NOT NULL,
+    content TEXT NOT NULL,
+    startEpochDay INTEGER NOT NULL,
+    createdAt INTEGER NOT NULL,
+    FOREIGN KEY (taskId) REFERENCES TaskTable(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS ReminderTable(
+    id TEXT NOT NULL PRIMARY KEY,
+    taskId TEXT NOT NULL,
+    type TEXT NOT NULL,
+    schedule TEXT NOT NULL,
+    time TEXT NOT NULL,
+    createdAt INTEGER NOT NULL,
+    FOREIGN KEY (taskId) REFERENCES TaskTable(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS RecordTable(
+    id TEXT NOT NULL PRIMARY KEY,
+    taskId TEXT NOT NULL,
+    epochDay INTEGER NOT NULL,
+    entry TEXT NOT NULL,
+    createdAt INTEGER NOT NULL,
+    FOREIGN KEY (taskId) REFERENCES TaskTable(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS TagTable(
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    colorType TEXT NOT NULL,
+    createdAt INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS TagCrossTable(
+    taskId TEXT NOT NULL,
+    tagId TEXT NOT NULL,
+    FOREIGN KEY (taskId) REFERENCES TaskTable(id) ON DELETE CASCADE,
+    FOREIGN KEY (tagId) REFERENCES TagTable(id) ON DELETE CASCADE,
+    PRIMARY KEY (taskId, tagId)
+);
+
+insertTask:
+INSERT OR REPLACE INTO TaskTable
+VALUES ?;
+
+insertTaskContent:
+INSERT OR REPLACE INTO TaskContentTable
+VALUES ?;

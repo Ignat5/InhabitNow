@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    GreetingView("nothing to see here")
+                    GreetingView("nothing to see here, or is there")
                 }
             }
         }

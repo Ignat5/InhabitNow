@@ -1,0 +1,3 @@
+insertRecord:
+INSERT OR REPLACE INTO RecordTable
+VALUES ?;
