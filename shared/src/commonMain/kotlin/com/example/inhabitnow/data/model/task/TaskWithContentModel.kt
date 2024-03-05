@@ -4,8 +4,8 @@ import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
 import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 
-data class TaskWithContentEntity(
-    val task: TaskEntity,
+data class TaskWithContentModel(
+    val task: TaskModel,
     val progressContent: ProgressContentEntity,
     val frequencyContent: FrequencyContentEntity,
     val archiveContent: ArchiveContentEntity

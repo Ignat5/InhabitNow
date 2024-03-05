@@ -2,7 +2,7 @@ package com.example.inhabitnow.data.repository.reminder
 
 import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.data.data_source.reminder.ReminderDataSource
-import com.example.inhabitnow.data.model.reminder.ReminderEntity
+import com.example.inhabitnow.data.model.reminder.ReminderModel
 import com.example.inhabitnow.data.util.toReminderTable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -14,9 +14,9 @@ class DefaultReminderRepository(
     private val defaultDispatcher: CoroutineDispatcher
 ) : ReminderRepository {
 
-    override suspend fun saveReminder(reminderEntity: ReminderEntity): ResultModel<Unit> =
+    override suspend fun saveReminder(reminderModel: ReminderModel): ResultModel<Unit> =
         withContext(defaultDispatcher) {
-            reminderDataSource.insertReminder(reminderEntity.toReminderTable(json))
+            reminderDataSource.insertReminder(reminderModel.toReminderTable(json))
         }
 
 }

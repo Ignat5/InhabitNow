@@ -1,6 +1,6 @@
 package com.example.inhabitnow.data.model.task.content
 
-sealed interface BaseTaskContentEntity<out T : TaskContentEntity> {
+sealed interface BaseTaskContentModel<out T : TaskContentModel> {
     val id: String
     val taskId: String
     val content: T
@@ -11,23 +11,23 @@ sealed interface BaseTaskContentEntity<out T : TaskContentEntity> {
 data class ProgressContentEntity(
     override val id: String,
     override val taskId: String,
-    override val content: TaskContentEntity.ProgressContent,
+    override val content: TaskContentModel.ProgressContent,
     override val startEpochDay: Long,
     override val createdAt: Long
-) : BaseTaskContentEntity<TaskContentEntity.ProgressContent>
+) : BaseTaskContentModel<TaskContentModel.ProgressContent>
 
 data class FrequencyContentEntity(
     override val id: String,
     override val taskId: String,
-    override val content: TaskContentEntity.FrequencyContent,
+    override val content: TaskContentModel.FrequencyContent,
     override val startEpochDay: Long,
     override val createdAt: Long
-) : BaseTaskContentEntity<TaskContentEntity.FrequencyContent>
+) : BaseTaskContentModel<TaskContentModel.FrequencyContent>
 
 data class ArchiveContentEntity(
     override val id: String,
     override val taskId: String,
-    override val content: TaskContentEntity.ArchiveContent,
+    override val content: TaskContentModel.ArchiveContent,
     override val startEpochDay: Long,
     override val createdAt: Long
-) : BaseTaskContentEntity<TaskContentEntity.ArchiveContent>
+) : BaseTaskContentModel<TaskContentModel.ArchiveContent>

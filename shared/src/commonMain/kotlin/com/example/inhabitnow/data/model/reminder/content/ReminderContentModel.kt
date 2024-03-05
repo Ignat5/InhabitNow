@@ -1,16 +1,15 @@
 package com.example.inhabitnow.data.model.reminder.content
 
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @SerialName("ReminderContent")
 @Serializable
-sealed interface ReminderContentEntity {
+sealed interface ReminderContentModel {
     @SerialName("ReminderContent.ScheduleContent")
     @Serializable
-    sealed interface ScheduleContent : ReminderContentEntity {
+    sealed interface ScheduleContent : ReminderContentModel {
         @SerialName("ReminderContent.ScheduleContent.EveryDay")
         @Serializable
         data object EveryDay : ScheduleContent

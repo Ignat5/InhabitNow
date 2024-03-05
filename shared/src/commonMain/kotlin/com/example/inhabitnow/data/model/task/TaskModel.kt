@@ -1,4 +1,4 @@
-package com.example.inhabitnow.domain.model.task
+package com.example.inhabitnow.data.model.task
 
 import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
