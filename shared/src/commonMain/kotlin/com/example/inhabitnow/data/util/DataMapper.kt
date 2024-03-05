@@ -3,6 +3,8 @@ package com.example.inhabitnow.data.util
 import com.example.inhabitnow.core.type.ReminderType
 import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
+import com.example.inhabitnow.data.model.record.RecordEntity
+import com.example.inhabitnow.data.model.record.content.RecordContentEntity
 import com.example.inhabitnow.data.model.reminder.ReminderEntity
 import com.example.inhabitnow.data.model.reminder.content.ReminderContentEntity
 import com.example.inhabitnow.data.model.task.TaskEntity
@@ -11,6 +13,7 @@ import com.example.inhabitnow.data.model.task.content.BaseTaskContentEntity
 import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
+import database.RecordTable
 import database.ReminderTable
 import database.TaskContentTable
 import database.TaskTable
@@ -151,6 +154,32 @@ private fun ReminderType.toJson(json: Json) =
 
 private fun String.fromJsonReminderType(json: Json) =
     json.decodeFromString<ReminderType>(this)
+
+
+/** record **/
+fun RecordTable.toRecordEntity(json: Json) = RecordEntity(
+    id = id,
+    taskId = taskId,
+    date = epochDay.toLocalDate(),
+    entry = entry.fromJsonRecordEntry(json),
+    createdAt = createdAt
+)
+
+fun RecordEntity.toRecordTable(json: Json) = RecordTable(
+    id = id,
+    taskId = taskId,
+    epochDay = date.toEpochDay(),
+    entry = entry.toJson(json),
+    createdAt = createdAt
+)
+
+private fun RecordContentEntity.Entry.toJson(json: Json) =
+    json.encodeToString<RecordContentEntity.Entry>(this)
+
+private fun String.fromJsonRecordEntry(json: Json) =
+    json.decodeFromString<RecordContentEntity.Entry>(this)
+
+/** other **/
 
 private fun LocalDate.toEpochDay() = this.toEpochDays().toLong()
 private fun Long.toLocalDate() = LocalDate.fromEpochDays(this.toInt())
