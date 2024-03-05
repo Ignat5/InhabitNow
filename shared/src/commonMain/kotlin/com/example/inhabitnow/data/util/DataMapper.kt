@@ -1,12 +1,14 @@
 package com.example.inhabitnow.data.util
 
 import com.example.inhabitnow.core.type.ReminderType
+import com.example.inhabitnow.core.type.TagColorType
 import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.data.model.record.RecordModel
 import com.example.inhabitnow.data.model.record.content.RecordContentModel
 import com.example.inhabitnow.data.model.reminder.ReminderModel
 import com.example.inhabitnow.data.model.reminder.content.ReminderContentModel
+import com.example.inhabitnow.data.model.tag.TagModel
 import com.example.inhabitnow.data.model.task.TaskModel
 import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
 import com.example.inhabitnow.data.model.task.content.BaseTaskContentModel
@@ -15,6 +17,7 @@ import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentModel
 import database.RecordTable
 import database.ReminderTable
+import database.TagTable
 import database.TaskContentTable
 import database.TaskTable
 import kotlinx.datetime.LocalDate
@@ -178,6 +181,25 @@ private fun RecordContentModel.Entry.toJson(json: Json) =
 
 private fun String.fromJsonRecordEntry(json: Json) =
     json.decodeFromString<RecordContentModel.Entry>(this)
+
+/** tag model **/
+fun TagTable.toTagModel(json: Json) = TagModel(
+    id = id,
+    title = title,
+    colorType = colorType.fromJsonTagColorType(json),
+    createdAt = createdAt
+)
+
+fun TagModel.toTagTable(json: Json) = TagTable(
+    id = id,
+    title = title,
+    colorType = colorType.toJson(json),
+    createdAt = createdAt
+)
+
+private fun TagColorType.toJson(json: Json) = json.encodeToString(this)
+private fun String.fromJsonTagColorType(json: Json) =
+    json.decodeFromString<TagColorType>(this)
 
 /** other **/
 

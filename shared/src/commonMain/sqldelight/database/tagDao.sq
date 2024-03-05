@@ -1,0 +1,7 @@
+insertTag:
+INSERT OR REPLACE INTO TagTable
+VALUES ?;
+
+insertTagCross:
+INSERT OR REPLACE INTO TagCrossTable
+VALUES ?;
