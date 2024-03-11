@@ -1,6 +1,8 @@
 package com.example.inhabitnow.android.navigation.main
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -76,7 +78,7 @@ fun NavGraphBuilder.mainGraph() {
                 navController = navController,
                 startDestination = MainNavDest.AllScheduledTasksDestination.route,
                 route = AppNavDest.MainGraphDestination.route,
-                modifier = Modifier.padding(it)
+                modifier = Modifier.consumeWindowInsets(it)
             ) {
                 allScheduledTasks()
                 viewAllHabits()
