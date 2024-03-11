@@ -1,10 +1,13 @@
 package com.example.inhabitnow.android.presentation.base.ext
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.inhabitnow.android.presentation.base.components.config.BaseConfigState
+import com.example.inhabitnow.android.presentation.base.components.config.ScreenConfig
 import com.example.inhabitnow.android.presentation.base.components.event.ScreenEvent
 import com.example.inhabitnow.android.presentation.base.components.navigation.BaseNavigationState
 import com.example.inhabitnow.android.presentation.base.components.navigation.ScreenNavigation
@@ -15,20 +18,30 @@ import com.example.inhabitnow.android.presentation.base.state_holder.BaseResultS
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
 
 @Composable
-inline fun <SE : ScreenEvent, SS : ScreenState, SN: ScreenNavigation> BaseScreen(
-    viewModel: BaseViewModel<SE, SS, SN>,
+inline fun <SE : ScreenEvent, SS : ScreenState, SN : ScreenNavigation, SC : ScreenConfig> BaseScreen(
+    viewModel: BaseViewModel<SE, SS, SN, SC>,
     crossinline onNavigation: (destination: SN) -> Unit,
-    crossinline content: @Composable (state: SS, onEvent: (SE) -> Unit) -> Unit
+    crossinline configContent: @Composable (config: SC) -> Unit,
+    crossinline screenContent: @Composable (state: SS, onEvent: (SE) -> Unit) -> Unit
 ) {
     val state by viewModel.uiScreenState.collectAsStateWithLifecycle()
-    val baseNavigationState by viewModel.uiNavigationState.collectAsStateWithLifecycle()
+    val baseNavigationState by viewModel.uiScreenNavigationState.collectAsStateWithLifecycle()
+    val baseConfigState by viewModel.uiScreenConfigState.collectAsStateWithLifecycle()
     val onEvent = remember {
         val callback: (event: SE) -> Unit = { event ->
             viewModel.onEvent(event)
         }
         callback
     }
-    content(state, onEvent)
+    Box {
+        screenContent(state, onEvent)
+        when (val baseCS = baseConfigState) {
+            is BaseConfigState.Idle -> Unit
+            is BaseConfigState.Config -> {
+                configContent(baseCS.config)
+            }
+        }
+    }
     LaunchedEffect(baseNavigationState) {
         when (val baseNS = baseNavigationState) {
             is BaseNavigationState.Idle -> Unit

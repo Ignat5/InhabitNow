@@ -19,9 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -32,60 +35,99 @@ import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.navigation.all_scheduled_tasks.allScheduledTasks
 import com.example.inhabitnow.android.navigation.view_all_habits.viewAllHabits
 import com.example.inhabitnow.android.navigation.view_all_tasks.viewAllTasks
+import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
+import com.example.inhabitnow.android.presentation.main.MainViewModel
+import com.example.inhabitnow.android.presentation.main.components.MainScreenConfig
+import com.example.inhabitnow.android.presentation.main.components.MainScreenEvent
+import com.example.inhabitnow.android.presentation.main.components.MainScreenState
 
 fun NavGraphBuilder.mainGraph() {
     composable(route = AppNavDest.MainGraphDestination.route) {
         val navController = rememberNavController()
-        val currentBackStackEntry by navController.currentBackStackEntryAsState()
-        Scaffold(
-            topBar = {
-                val titleText = remember(currentBackStackEntry?.destination?.route) {
-                    val mainNavDest =
-                        (findMainNavDestByRoute(currentBackStackEntry?.destination?.route)
-                            ?: MainNavDest.AllScheduledTasksDestination)
-                    mainNavDest.toTitleText()
-                }
-                ScreenAppBar(
-                    titleText = titleText,
-                    onMenuClick = { /*TODO*/ },
-                    onSearchClick = { /* TODO */ }
-                )
+        val viewModel: MainViewModel = hiltViewModel()
+        BaseScreen(
+            viewModel = viewModel,
+            onNavigation = { destination ->
+
             },
-            bottomBar = {
-                ScreenBottomBar(
-                    currentBackStackEntry = currentBackStackEntry,
-                    onNavDestClick = { mainNavDest ->
-                        if (currentBackStackEntry?.destination?.route != mainNavDest.route) {
-                            navController.navigate(
-                                route = mainNavDest.route,
-                                navOptions = navOptions {
-                                    this.launchSingleTop = true
-                                    this.popUpTo(AppNavDest.MainGraphDestination.route) {
-                                        this.inclusive = false
-                                    }
-                                }
-                            )
+            configContent = { config ->
+                ScreenConfigContent(config)
+            },
+            screenContent = { state, onEvent ->
+                MainGraphStateless(
+                    navController = navController,
+                    state = state,
+                    onEvent = onEvent
+                )
+            }
+        )
+    }
+}
+
+@Composable
+private fun MainGraphStateless(
+    navController: NavHostController,
+    state: MainScreenState,
+    onEvent: (MainScreenEvent) -> Unit
+) {
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val onNavDestClick = remember {
+        val callback: (MainNavDest) -> Unit = { mainNavDest ->
+            if (currentBackStackEntry?.destination?.route != mainNavDest.route) {
+                navController.navigate(
+                    route = mainNavDest.route,
+                    navOptions = navOptions {
+                        this.launchSingleTop = true
+                        this.popUpTo(AppNavDest.MainGraphDestination.route) {
+                            this.inclusive = false
                         }
                     }
                 )
-            },
-            floatingActionButton = {
-                ScreenFAB(onClick = { /* TODO */ })
-            },
-            floatingActionButtonPosition = FabPosition.End
-        ) {
-            NavHost(
-                navController = navController,
-                startDestination = MainNavDest.AllScheduledTasksDestination.route,
-                route = AppNavDest.MainGraphDestination.route,
-                modifier = Modifier.consumeWindowInsets(it)
-            ) {
-                allScheduledTasks()
-                viewAllHabits()
-                viewAllTasks()
             }
         }
+        callback
     }
+    Scaffold(
+        topBar = {
+            val titleText = remember(currentBackStackEntry?.destination?.route) {
+                val mainNavDest =
+                    (findMainNavDestByRoute(currentBackStackEntry?.destination?.route)
+                        ?: MainNavDest.AllScheduledTasksDestination)
+                mainNavDest.toTitleText()
+            }
+            ScreenAppBar(
+                titleText = titleText,
+                onMenuClick = { /*TODO*/ },
+                onSearchClick = { /* TODO */ }
+            )
+        },
+        bottomBar = {
+            ScreenBottomBar(
+                currentBackStackEntry = currentBackStackEntry,
+                onNavDestClick = onNavDestClick
+            )
+        },
+        floatingActionButton = {
+            ScreenFAB(onClick = { onEvent(MainScreenEvent.OnCreateTaskClick) })
+        },
+        floatingActionButtonPosition = FabPosition.End
+    ) {
+        NavHost(
+            navController = navController,
+            startDestination = MainNavDest.AllScheduledTasksDestination.route,
+            route = AppNavDest.MainGraphDestination.route,
+            modifier = Modifier.consumeWindowInsets(it)
+        ) {
+            allScheduledTasks()
+            viewAllHabits()
+            viewAllTasks()
+        }
+    }
+}
+
+@Composable
+private fun ScreenConfigContent(config: MainScreenConfig) {
+
 }
 
 @Composable
@@ -100,7 +142,8 @@ private fun ScreenBottomBar(
         val allDestinations = remember { MainNavDest.allDestinations }
         allDestinations.forEach { mainNavDest ->
             val isSelected = remember(currentBackStackEntry?.destination?.route) {
-                currentBackStackEntry?.destination?.hierarchy?.any { it.route == mainNavDest.route } ?: false
+                currentBackStackEntry?.destination?.hierarchy?.any { it.route == mainNavDest.route }
+                    ?: false
             }
             NavigationBarItem(
                 selected = isSelected,
