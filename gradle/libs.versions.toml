@@ -95,6 +95,7 @@ multiplatform-settings = ["multiplatform-settings-core", "multiplatform-settings
 sqldelight = ["sqldelight-runtime", "sqldelight-coroutines"]
 compose = [
     "androidx-activity-compose",
+    "android-lifecycle-runtime-compose",
     "compose-ui",
     "compose-ui-tooling",
     "compose-ui-tooling-preview",

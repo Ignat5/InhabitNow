@@ -1,20 +1,19 @@
 package com.example.inhabitnow.data.util
 
 import com.example.inhabitnow.core.type.ReminderType
-import com.example.inhabitnow.core.type.TagColorType
 import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
-import com.example.inhabitnow.data.model.record.RecordModel
-import com.example.inhabitnow.data.model.record.content.RecordContentModel
-import com.example.inhabitnow.data.model.reminder.ReminderModel
-import com.example.inhabitnow.data.model.reminder.content.ReminderContentModel
-import com.example.inhabitnow.data.model.tag.TagModel
-import com.example.inhabitnow.data.model.task.TaskModel
+import com.example.inhabitnow.data.model.record.RecordEntity
+import com.example.inhabitnow.data.model.record.content.RecordContentEntity
+import com.example.inhabitnow.data.model.reminder.ReminderEntity
+import com.example.inhabitnow.data.model.reminder.content.ReminderContentEntity
+import com.example.inhabitnow.data.model.tag.TagEntity
+import com.example.inhabitnow.data.model.task.TaskEntity
 import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
-import com.example.inhabitnow.data.model.task.content.BaseTaskContentModel
+import com.example.inhabitnow.data.model.task.content.BaseTaskContentEntity
 import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
-import com.example.inhabitnow.data.model.task.content.TaskContentModel
+import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import database.RecordTable
 import database.ReminderTable
 import database.TagTable
@@ -27,7 +26,7 @@ import kotlinx.serialization.json.Json
 
 /** Task **/
 
-fun TaskModel.toTaskTable(json: Json) = TaskTable(
+fun TaskEntity.toTaskTable(json: Json) = TaskTable(
     id = id,
     type = type.toJson(json),
     progressType = progressType.toJson(json),
@@ -40,7 +39,7 @@ fun TaskModel.toTaskTable(json: Json) = TaskTable(
     deletedAt = deletedAt
 )
 
-fun TaskTable.toTaskModel(json: Json) = TaskModel(
+fun TaskTable.toTaskModel(json: Json) = TaskEntity(
     id = this.id,
     type = this.type.fromJsonTaskType(json),
     progressType = this.progressType.fromJsonTaskProgressType(json),
@@ -56,48 +55,48 @@ fun TaskTable.toTaskModel(json: Json) = TaskModel(
     deletedAt = this.deletedAt
 )
 
-fun <T : TaskContentModel> BaseTaskContentModel<T>.toTaskContentTable(json: Json) =
+fun <T : TaskContentEntity> BaseTaskContentEntity<T>.toTaskContentTable(json: Json) =
     TaskContentTable(
         id = id,
         taskId = taskId,
         content = content.toJson(json),
         contentType = when (this) {
-            is ProgressContentEntity -> TaskContentModel.Type.Progress
-            is FrequencyContentEntity -> TaskContentModel.Type.Frequency
-            is ArchiveContentEntity -> TaskContentModel.Type.Archive
+            is ProgressContentEntity -> TaskContentEntity.Type.Progress
+            is FrequencyContentEntity -> TaskContentEntity.Type.Frequency
+            is ArchiveContentEntity -> TaskContentEntity.Type.Archive
         }.toJson(json),
-        startEpochDay = startEpochDay,
+        startEpochDay = startDate.toEpochDay(),
         createdAt = createdAt
     )
 
-fun TaskContentTable.toBaseTaskContentModel(json: Json): BaseTaskContentModel<*>? = try {
+fun TaskContentTable.toBaseTaskContentModel(json: Json): BaseTaskContentEntity<*>? = try {
     when (val decodedContent = content.fromJsonTaskContentEntity(json)) {
-        is TaskContentModel.ProgressContent -> {
+        is TaskContentEntity.ProgressContent -> {
             ProgressContentEntity(
                 id = id,
                 taskId = taskId,
                 content = decodedContent,
-                startEpochDay = startEpochDay,
+                startDate = startEpochDay.toLocalDate(),
                 createdAt = createdAt
             )
         }
 
-        is TaskContentModel.FrequencyContent -> {
+        is TaskContentEntity.FrequencyContent -> {
             FrequencyContentEntity(
                 id = id,
                 taskId = taskId,
                 content = decodedContent,
-                startEpochDay = startEpochDay,
+                startDate = startEpochDay.toLocalDate(),
                 createdAt = createdAt
             )
         }
 
-        is TaskContentModel.ArchiveContent -> {
+        is TaskContentEntity.ArchiveContent -> {
             ArchiveContentEntity(
                 id = id,
                 taskId = taskId,
                 content = decodedContent,
-                startEpochDay = startEpochDay,
+                startDate = startEpochDay.toLocalDate(),
                 createdAt = createdAt
             )
         }
@@ -112,17 +111,17 @@ fun String.fromJsonTaskType(json: Json) = json.decodeFromString<TaskType>(this)
 fun TaskProgressType.toJson(json: Json) = json.encodeToString(this)
 fun String.fromJsonTaskProgressType(json: Json) = json.decodeFromString<TaskProgressType>(this)
 
-fun TaskContentModel.Type.toJson(json: Json) = json.encodeToString(this)
-fun TaskContentModel.toJson(json: Json) = json.encodeToString<TaskContentModel>(this)
+fun TaskContentEntity.Type.toJson(json: Json) = json.encodeToString(this)
+fun TaskContentEntity.toJson(json: Json) = json.encodeToString<TaskContentEntity>(this)
 
-private fun String.fromJsonTaskContentEntity(json: Json): TaskContentModel =
-    json.decodeFromString<TaskContentModel>(this)
+private fun String.fromJsonTaskContentEntity(json: Json): TaskContentEntity =
+    json.decodeFromString<TaskContentEntity>(this)
 
 private fun String.fromJsonContentType(json: Json) =
-    json.decodeFromString<TaskContentModel.Type>(this)
+    json.decodeFromString<TaskContentEntity.Type>(this)
 
 /** reminder **/
-fun ReminderTable.toReminderModel(json: Json) = ReminderModel(
+fun ReminderTable.toReminderModel(json: Json) = ReminderEntity(
     id = this.id,
     taskId = this.taskId,
     type = this.type.fromJsonReminderType(json),
@@ -131,7 +130,7 @@ fun ReminderTable.toReminderModel(json: Json) = ReminderModel(
     createdAt = this.createdAt
 )
 
-fun ReminderModel.toReminderTable(json: Json) = ReminderTable(
+fun ReminderEntity.toReminderTable(json: Json) = ReminderTable(
     id = this.id,
     taskId = this.taskId,
     type = this.type.toJson(json),
@@ -140,11 +139,11 @@ fun ReminderModel.toReminderTable(json: Json) = ReminderTable(
     createdAt = this.createdAt
 )
 
-private fun ReminderContentModel.ScheduleContent.toJson(json: Json) =
-    json.encodeToString<ReminderContentModel.ScheduleContent>(this)
+private fun ReminderContentEntity.ScheduleContent.toJson(json: Json) =
+    json.encodeToString<ReminderContentEntity.ScheduleContent>(this)
 
 private fun String.fromJsonScheduleContent(json: Json) =
-    json.decodeFromString<ReminderContentModel.ScheduleContent>(this)
+    json.decodeFromString<ReminderContentEntity.ScheduleContent>(this)
 
 private fun LocalTime.toJson(json: Json) =
     json.encodeToString<LocalTime>(this)
@@ -160,7 +159,7 @@ private fun String.fromJsonReminderType(json: Json) =
 
 
 /** record **/
-fun RecordTable.toRecordModel(json: Json) = RecordModel(
+fun RecordTable.toRecordModel(json: Json) = RecordEntity(
     id = id,
     taskId = taskId,
     date = epochDay.toLocalDate(),
@@ -168,7 +167,7 @@ fun RecordTable.toRecordModel(json: Json) = RecordModel(
     createdAt = createdAt
 )
 
-fun RecordModel.toRecordTable(json: Json) = RecordTable(
+fun RecordEntity.toRecordTable(json: Json) = RecordTable(
     id = id,
     taskId = taskId,
     epochDay = date.toEpochDay(),
@@ -176,30 +175,24 @@ fun RecordModel.toRecordTable(json: Json) = RecordTable(
     createdAt = createdAt
 )
 
-private fun RecordContentModel.Entry.toJson(json: Json) =
-    json.encodeToString<RecordContentModel.Entry>(this)
+private fun RecordContentEntity.Entry.toJson(json: Json) =
+    json.encodeToString<RecordContentEntity.Entry>(this)
 
 private fun String.fromJsonRecordEntry(json: Json) =
-    json.decodeFromString<RecordContentModel.Entry>(this)
+    json.decodeFromString<RecordContentEntity.Entry>(this)
 
 /** tag model **/
-fun TagTable.toTagModel(json: Json) = TagModel(
+fun TagTable.toTagModel(json: Json) = TagEntity(
     id = id,
     title = title,
-    colorType = colorType.fromJsonTagColorType(json),
     createdAt = createdAt
 )
 
-fun TagModel.toTagTable(json: Json) = TagTable(
+fun TagEntity.toTagTable(json: Json) = TagTable(
     id = id,
     title = title,
-    colorType = colorType.toJson(json),
     createdAt = createdAt
 )
-
-private fun TagColorType.toJson(json: Json) = json.encodeToString(this)
-private fun String.fromJsonTagColorType(json: Json) =
-    json.decodeFromString<TagColorType>(this)
 
 /** other **/
 

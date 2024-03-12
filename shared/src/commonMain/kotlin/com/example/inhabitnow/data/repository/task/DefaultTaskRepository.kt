@@ -2,7 +2,7 @@ package com.example.inhabitnow.data.repository.task
 
 import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.data.data_source.task.TaskDataSource
-import com.example.inhabitnow.data.model.task.TaskWithContentModel
+import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.util.toTaskContentTable
 import com.example.inhabitnow.data.util.toTaskTable
 import kotlinx.coroutines.CoroutineDispatcher
@@ -15,14 +15,14 @@ class DefaultTaskRepository(
     private val defaultDispatcher: CoroutineDispatcher
 ) : TaskRepository {
 
-    override suspend fun saveTaskWithContent(taskWithContentModel: TaskWithContentModel): ResultModel<Unit> =
+    override suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {
             taskDataSource.insertTaskWithContent(
-                taskTable = taskWithContentModel.task.toTaskTable(json),
+                taskTable = taskWithContentEntity.task.toTaskTable(json),
                 allTaskContent = listOf(
-                    taskWithContentModel.progressContent.toTaskContentTable(json),
-                    taskWithContentModel.frequencyContent.toTaskContentTable(json),
-                    taskWithContentModel.archiveContent.toTaskContentTable(json)
+                    taskWithContentEntity.progressContent.toTaskContentTable(json),
+                    taskWithContentEntity.frequencyContent.toTaskContentTable(json),
+                    taskWithContentEntity.archiveContent.toTaskContentTable(json)
                 )
             )
         }
