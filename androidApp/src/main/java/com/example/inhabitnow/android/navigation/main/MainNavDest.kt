@@ -16,5 +16,7 @@ sealed class MainNavDest(val route: String) {
                 ViewAllHabitsDestination,
                 ViewAllTasksDestination
             )
+        val startDestination
+            get() = AllScheduledTasksDestination
     }
 }

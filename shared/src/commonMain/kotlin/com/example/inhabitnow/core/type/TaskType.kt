@@ -1,7 +1,7 @@
 package com.example.inhabitnow.core.type
 
 enum class TaskType {
-    SingleTask,
+    Habit,
     RecurringTask,
-    Habit
+    SingleTask,
 }

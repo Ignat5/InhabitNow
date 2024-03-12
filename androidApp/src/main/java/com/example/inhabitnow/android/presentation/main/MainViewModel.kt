@@ -8,6 +8,9 @@ import com.example.inhabitnow.android.presentation.main.components.MainScreenCon
 import com.example.inhabitnow.android.presentation.main.components.MainScreenEvent
 import com.example.inhabitnow.android.presentation.main.components.MainScreenNavigation
 import com.example.inhabitnow.android.presentation.main.components.MainScreenState
+import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
+import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
+import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +30,50 @@ class MainViewModel @Inject constructor(
     override fun onEvent(event: MainScreenEvent) {
         when (event) {
             is MainScreenEvent.OnCreateTaskClick -> onCreateTaskClick()
+            is MainScreenEvent.ResultEvent -> onResultEvent(event)
+        }
+    }
+
+    private fun onResultEvent(event: MainScreenEvent.ResultEvent) {
+        when (event) {
+            is MainScreenEvent.ResultEvent.PickTaskType -> onPickTaskTypeResult(event)
+            is MainScreenEvent.ResultEvent.PickTaskProgressType ->
+                onPickTaskProgressTypeResult(event)
+        }
+    }
+
+    private fun onPickTaskProgressTypeResult(event: MainScreenEvent.ResultEvent.PickTaskProgressType) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskProgressTypeScreenResult.Confirm -> onConfirmPickTaskProgressType(result)
+                is PickTaskProgressTypeScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskProgressType(result: PickTaskProgressTypeScreenResult.Confirm) {
+        /* TODO */
+    }
+
+    private fun onPickTaskTypeResult(event: MainScreenEvent.ResultEvent.PickTaskType) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskTypeScreenResult.Confirm -> onConfirmPickTaskType(result)
+                is PickTaskTypeScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskType(result: PickTaskTypeScreenResult.Confirm) {
+        onIdleToAction {
+            when (result.taskType) {
+                TaskType.SingleTask, TaskType.RecurringTask -> {}
+                TaskType.Habit -> {
+                    setUpConfigState(
+                        MainScreenConfig.PickTaskProgressType(TaskProgressType.entries)
+                    )
+                }
+            }
         }
     }
 
