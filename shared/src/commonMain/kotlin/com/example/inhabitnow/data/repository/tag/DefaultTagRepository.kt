@@ -2,7 +2,7 @@ package com.example.inhabitnow.data.repository.tag
 
 import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.data.data_source.tag.TagDataSource
-import com.example.inhabitnow.data.model.tag.TagModel
+import com.example.inhabitnow.data.model.tag.TagEntity
 import com.example.inhabitnow.data.util.toTagTable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -14,9 +14,9 @@ class DefaultTagRepository(
     private val defaultDispatcher: CoroutineDispatcher
 ) : TagRepository {
 
-    override suspend fun saveTag(tagModel: TagModel): ResultModel<Unit> =
+    override suspend fun saveTag(tagEntity: TagEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {
-            tagDataSource.insertTag(tagModel.toTagTable(json))
+            tagDataSource.insertTag(tagEntity.toTagTable(json))
         }
 
 }

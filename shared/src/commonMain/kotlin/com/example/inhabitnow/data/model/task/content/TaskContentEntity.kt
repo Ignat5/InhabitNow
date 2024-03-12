@@ -8,13 +8,13 @@ import kotlinx.serialization.Serializable
 
 @SerialName("TaskContent")
 @Serializable
-sealed interface TaskContentModel {
+sealed interface TaskContentEntity {
 
     enum class Type { Progress, Frequency, Archive }
 
     @SerialName("TaskContent.ProgressContent")
     @Serializable
-    sealed class ProgressContent : TaskContentModel {
+    sealed class ProgressContent : TaskContentEntity {
 
         @SerialName("TaskContent.ProgressContent.YesNo")
         @Serializable
@@ -39,7 +39,7 @@ sealed interface TaskContentModel {
 
     @SerialName("TaskContent.FrequencyContent")
     @Serializable
-    sealed class FrequencyContent : TaskContentModel {
+    sealed class FrequencyContent : TaskContentEntity {
         @SerialName("TaskContent.FrequencyContent.OneDay")
         @Serializable
         data object OneDay : FrequencyContent()
@@ -55,6 +55,6 @@ sealed interface TaskContentModel {
 
     @SerialName("TaskContent.ArchiveContent")
     @Serializable
-    data class ArchiveContent(val isArchived: Boolean) : TaskContentModel
+    data class ArchiveContent(val isArchived: Boolean) : TaskContentEntity
 
 }

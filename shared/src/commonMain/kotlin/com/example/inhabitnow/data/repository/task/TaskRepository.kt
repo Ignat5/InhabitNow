@@ -1,8 +1,8 @@
 package com.example.inhabitnow.data.repository.task
 
 import com.example.inhabitnow.core.model.ResultModel
-import com.example.inhabitnow.data.model.task.TaskWithContentModel
+import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 
 interface TaskRepository {
-    suspend fun saveTaskWithContent(taskWithContentModel: TaskWithContentModel): ResultModel<Unit>
+    suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit>
 }

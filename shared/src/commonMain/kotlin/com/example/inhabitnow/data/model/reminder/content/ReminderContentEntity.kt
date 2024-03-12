@@ -6,10 +6,10 @@ import kotlinx.serialization.Serializable
 
 @SerialName("ReminderContent")
 @Serializable
-sealed interface ReminderContentModel {
+sealed interface ReminderContentEntity {
     @SerialName("ReminderContent.ScheduleContent")
     @Serializable
-    sealed interface ScheduleContent : ReminderContentModel {
+    sealed interface ScheduleContent : ReminderContentEntity {
         @SerialName("ReminderContent.ScheduleContent.EveryDay")
         @Serializable
         data object EveryDay : ScheduleContent

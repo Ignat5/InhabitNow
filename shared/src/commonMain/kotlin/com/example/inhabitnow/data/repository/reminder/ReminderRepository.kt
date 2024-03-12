@@ -1,8 +1,8 @@
 package com.example.inhabitnow.data.repository.reminder
 
 import com.example.inhabitnow.core.model.ResultModel
-import com.example.inhabitnow.data.model.reminder.ReminderModel
+import com.example.inhabitnow.data.model.reminder.ReminderEntity
 
 interface ReminderRepository {
-    suspend fun saveReminder(reminderModel: ReminderModel): ResultModel<Unit>
+    suspend fun saveReminder(reminderEntity: ReminderEntity): ResultModel<Unit>
 }
