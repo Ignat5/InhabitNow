@@ -10,19 +10,23 @@ import com.example.inhabitnow.android.presentation.main.components.MainScreenNav
 import com.example.inhabitnow.android.presentation.main.components.MainScreenState
 import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
+import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
+import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val saveDefaultTaskUseCase: SaveDefaultTaskUseCase
 ) : BaseViewModel<MainScreenEvent, MainScreenState, MainScreenNavigation, MainScreenConfig>() {
 
     override val uiScreenState: StateFlow<MainScreenState> = MutableStateFlow(MainScreenState)
@@ -52,7 +56,10 @@ class MainViewModel @Inject constructor(
     }
 
     private fun onConfirmPickTaskProgressType(result: PickTaskProgressTypeScreenResult.Confirm) {
-        /* TODO */
+        onConfirmCreateTask(
+            taskType = TaskType.Habit,
+            taskProgressType = result.taskProgressType
+        )
     }
 
     private fun onPickTaskTypeResult(event: MainScreenEvent.ResultEvent.PickTaskType) {
@@ -67,11 +74,29 @@ class MainViewModel @Inject constructor(
     private fun onConfirmPickTaskType(result: PickTaskTypeScreenResult.Confirm) {
         onIdleToAction {
             when (result.taskType) {
-                TaskType.SingleTask, TaskType.RecurringTask -> {}
+                TaskType.SingleTask, TaskType.RecurringTask -> {
+                    onConfirmCreateTask(result.taskType, TaskProgressType.YesNo)
+                }
+
                 TaskType.Habit -> {
                     setUpConfigState(
                         MainScreenConfig.PickTaskProgressType(TaskProgressType.entries)
                     )
+                }
+            }
+        }
+    }
+
+    private fun onConfirmCreateTask(taskType: TaskType, taskProgressType: TaskProgressType) {
+        onIdleToAction {
+            viewModelScope.launch {
+                when (val resultModel = saveDefaultTaskUseCase(taskType, taskProgressType)) {
+                    is ResultModel.Success -> {
+                        val taskId = resultModel.data
+                        setUpNavigationState(MainScreenNavigation.CreateTask(taskId))
+                    }
+
+                    is ResultModel.Error -> { /* TODO */ }
                 }
             }
         }

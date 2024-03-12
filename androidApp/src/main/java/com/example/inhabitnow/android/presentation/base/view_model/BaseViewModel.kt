@@ -25,7 +25,7 @@ abstract class BaseViewModel<SE : ScreenEvent, SS : ScreenState, SN : ScreenNavi
 
     val uiScreenNavigationState: StateFlow<BaseNavigationState<SN>> = _uiScreenNavigationState
 
-    protected fun navigate(destination: SN) = _uiScreenNavigationState.update {
+    protected fun setUpNavigationState(destination: SN) = _uiScreenNavigationState.update {
         BaseNavigationState.Destination(destination)
     }
 
