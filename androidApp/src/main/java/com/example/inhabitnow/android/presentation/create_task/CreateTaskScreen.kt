@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,6 +39,7 @@ import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
+import kotlinx.datetime.LocalDate
 
 @Composable
 fun CreateTaskScreen(onNavigation: (CreateTaskScreenNavigation) -> Unit) {
@@ -76,41 +76,114 @@ private fun CreateTaskScreenStateless(
                 .padding(it)
         ) {
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                titleItem(
-                    title = state.taskWithContent?.task?.title ?: "",
-                    onClick = { /* TODO */ }
-                )
+                run {
+                    titleItem(
+                        title = state.taskTitle,
+                        onClick = { /* TODO */ }
+                    )
 
-                itemDivider()
+                    itemDivider()
+                }
 
-                descriptionItem(
-                    description = state.taskWithContent?.task?.description ?: "",
-                    onClick = { /* TODO */ }
-                )
+                run {
+                    descriptionItem(
+                        description = state.taskDescription,
+                        onClick = { /* TODO */ }
+                    )
 
-                itemDivider()
+                    itemDivider()
+                }
 
-                dailyGoalItem(
-                    taskProgressContent = state.taskWithContent?.progressContent,
-                    onClick = { /* TODO */ }
-                )
+                run {
+                    when (state.taskProgressContent) {
+                        is UITaskContent.Progress.Number -> {
+                            numberProgressItem(
+                                taskProgressContent = state.taskProgressContent.progressContent,
+                                onClick = { /* TODO */ }
+                            )
+                            itemDivider()
+                        }
 
-                itemDivider()
+                        is UITaskContent.Progress.Time -> {
+                            timeProgressItem(
+                                taskProgressContent = state.taskProgressContent.progressContent,
+                                onClick = { /* TODO */ }
+                            )
+                            itemDivider()
+                        }
 
-                frequencyItem(
-                    taskFrequencyContent = state.taskWithContent?.frequencyContent,
-                    onClick = { /* TODO */ }
-                )
+                        else -> Unit
+                    }
 
-                itemDivider()
+                }
 
-                dateItems(
-                    taskWithContentModel = state.taskWithContent,
-                    onStartDateClick = { /* TODO */ },
-                    onEndDateClick = { /* TODO */ },
-                    onDateClick = { /* TODO */ }
-                )
+                run {
+                    when (state.taskFrequencyContent) {
+                        is UITaskContent.Frequency.EveryDay -> {
+                            frequencyItem(
+                                frequencyContent = state.taskFrequencyContent.frequencyContent,
+                                onClick = {}
+                            )
+                            itemDivider()
+                        }
 
+                        is UITaskContent.Frequency.DaysOfWeek -> {
+                            frequencyItem(
+                                frequencyContent = state.taskFrequencyContent.frequencyContent,
+                                onClick = {}
+                            )
+                            itemDivider()
+                        }
+
+                        else -> Unit
+                    }
+                }
+
+                run {
+                    when (state.taskDateContent) {
+                        is UITaskContent.Date.OneDay -> {
+                            dateItem(
+                                dateContent = state.taskDateContent,
+                                onClick = {}
+                            )
+                            itemDivider()
+                        }
+
+                        is UITaskContent.Date.Period -> {
+                            dateItem(
+                                dateContent = state.taskDateContent,
+                                onStartDateClick = {},
+                                onEndDateClick = {}
+                            )
+                            itemDivider()
+                        }
+
+                        else -> Unit
+                    }
+                }
+
+                run {
+                    timeAndRemindersItem(
+                        reminderCount = state.taskRemindersCount,
+                        onClick = {}
+                    )
+                    itemDivider()
+                }
+
+                run {
+                    tagsItem(
+                        tagCount = state.taskTagCount,
+                        onClick = {}
+                    )
+                    itemDivider()
+                }
+
+                run {
+                    priorityItem(
+                        priority = state.taskPriority,
+                        onClick = {}
+                    )
+                }
             }
         }
     }
@@ -150,92 +223,175 @@ private fun LazyListScope.descriptionItem(
     }
 }
 
-private fun LazyListScope.dailyGoalItem(
-    taskProgressContent: TaskContentModel.ProgressContent?,
+private fun LazyListScope.numberProgressItem(
+    taskProgressContent: TaskContentModel.ProgressContent.Number,
     onClick: () -> Unit
 ) {
-    if (taskProgressContent == null) return
     item(
         key = ConfigItemType.DailyGoal,
         contentType = ConfigContentType.Standard
     ) {
         val dataText = remember(taskProgressContent) {
-            when (taskProgressContent) {
-                is TaskContentModel.ProgressContent.YesNo -> null
-                is TaskContentModel.ProgressContent.Number -> taskProgressContent.toDisplay()
-                is TaskContentModel.ProgressContent.Time -> taskProgressContent.toDisplay()
-            }
+            taskProgressContent.toDisplay()
         }
         StandardItemConfig(
             iconResId = R.drawable.ic_goal,
             titleText = "Daily goal",
-            dataText = dataText ?: return@item,
+            dataText = dataText,
+            onClick = onClick
+        )
+    }
+}
+
+private fun LazyListScope.timeProgressItem(
+    taskProgressContent: TaskContentModel.ProgressContent.Time,
+    onClick: () -> Unit
+) {
+    item(
+        key = ConfigItemType.DailyGoal,
+        contentType = ConfigContentType.Standard
+    ) {
+        val dataText = remember(taskProgressContent) {
+            taskProgressContent.toDisplay()
+        }
+        StandardItemConfig(
+            iconResId = R.drawable.ic_goal,
+            titleText = "Daily goal",
+            dataText = dataText,
             onClick = onClick
         )
     }
 }
 
 private fun LazyListScope.frequencyItem(
-    taskFrequencyContent: TaskContentModel.FrequencyContent?,
+    frequencyContent: TaskContentModel.FrequencyContent.EveryDay,
     onClick: () -> Unit
 ) {
-    if (taskFrequencyContent == null) return
-    item(
-        key = ConfigItemType.Frequency,
-        contentType = ConfigContentType.Standard
-    ) {
-        val dataText = remember(taskFrequencyContent) {
-            when (taskFrequencyContent) {
-                is TaskContentModel.FrequencyContent.OneDay -> null
-                is TaskContentModel.FrequencyContent.EveryDay -> taskFrequencyContent.toDisplay()
-                is TaskContentModel.FrequencyContent.DaysOfWeek -> taskFrequencyContent.toDisplay()
-            }
+    item {
+        val dataText = remember(frequencyContent) {
+            frequencyContent.toDisplay()
         }
         StandardItemConfig(
             iconResId = R.drawable.ic_frequency,
             titleText = "Frequency",
-            dataText = dataText ?: return@item,
+            dataText = dataText,
             onClick = onClick
         )
     }
 }
 
-private fun LazyListScope.dateItems(
-    taskWithContentModel: TaskWithContentModel?,
-    onStartDateClick: () -> Unit,
-    onEndDateClick: () -> Unit,
-    onDateClick: () -> Unit,
+private fun LazyListScope.frequencyItem(
+    frequencyContent: TaskContentModel.FrequencyContent.DaysOfWeek,
+    onClick: () -> Unit
 ) {
-    if (taskWithContentModel == null) return
-
-    when (taskWithContentModel.task.type) {
-        TaskType.SingleTask -> {
-            item(
-                key = ConfigItemType.Date,
-                contentType = ConfigContentType.Standard
-            ) {
-                StandardItemConfig(
-                    iconResId = R.drawable.ic_start_date,
-                    titleText = "Date",
-                    dataText = taskWithContentModel.task.startDate.toDayMonthYear(),
-                    onClick = onDateClick
-                )
-            }
+    item {
+        val dataText = remember(frequencyContent) {
+            frequencyContent.toDisplay()
         }
+        StandardItemConfig(
+            iconResId = R.drawable.ic_frequency,
+            titleText = "Frequency",
+            dataText = dataText,
+            onClick = onClick
+        )
+    }
+}
 
-        TaskType.RecurringTask, TaskType.Habit -> {
-            item(
-                key = ConfigItemType.StartDate,
-                contentType = ConfigContentType.Standard
-            ) {
-                StandardItemConfig(
-                    iconResId = R.drawable.ic_start_date,
-                    titleText = "Start date",
-                    dataText = taskWithContentModel.task.startDate.toDayMonthYear(),
-                    onClick = onStartDateClick
-                )
-            }
-        }
+private fun LazyListScope.dateItem(
+    dateContent: UITaskContent.Date.OneDay,
+    onClick: () -> Unit
+) {
+    item(
+        key = ConfigItemType.Date,
+        contentType = ConfigContentType.Standard
+    ) {
+        StandardItemConfig(
+            iconResId = R.drawable.ic_start_date,
+            titleText = "Date",
+            dataText = dateContent.date.toDayMonthYear(),
+            onClick = onClick
+        )
+    }
+}
+
+private fun LazyListScope.dateItem(
+    dateContent: UITaskContent.Date.Period,
+    onStartDateClick: () -> Unit,
+    onEndDateClick: () -> Unit
+) {
+    item(
+        key = ConfigItemType.StartDate,
+        contentType = ConfigContentType.Standard
+    ) {
+        StandardItemConfig(
+            iconResId = R.drawable.ic_start_date,
+            titleText = "Start date",
+            dataText = dateContent.startDate.toDayMonthYear(),
+            onClick = onStartDateClick
+        )
+    }
+    itemDivider()
+    item(
+        key = ConfigItemType.EndDate,
+        contentType = ConfigContentType.Switch
+    ) {
+        StandardItemConfig(
+            iconResId = R.drawable.ic_end_date,
+            titleText = "End date",
+            dataText = dateContent.endDate?.toDayMonthYear() ?: " --- ",
+            onClick = onEndDateClick
+        )
+    }
+}
+
+private fun LazyListScope.timeAndRemindersItem(
+    reminderCount: Int,
+    onClick: () -> Unit
+) {
+    item(
+        key = ConfigItemType.TimeAndReminders,
+        contentType = ConfigContentType.Standard
+    ) {
+        StandardItemConfig(
+            iconResId = R.drawable.ic_notification,
+            titleText = "Time and reminders",
+            dataText = "$reminderCount",
+            onClick = onClick
+        )
+    }
+}
+
+private fun LazyListScope.tagsItem(
+    tagCount: Int,
+    onClick: () -> Unit
+) {
+    item(
+        key = ConfigItemType.Tags,
+        contentType = ConfigContentType.Standard
+    ) {
+        StandardItemConfig(
+            iconResId = R.drawable.ic_tag,
+            titleText = "Tags",
+            dataText = "$tagCount",
+            onClick = onClick
+        )
+    }
+}
+
+private fun LazyListScope.priorityItem(
+    priority: String,
+    onClick: () -> Unit
+) {
+    item(
+        key = ConfigItemType.Priority,
+        contentType = ConfigContentType.Standard
+    ) {
+        StandardItemConfig(
+            iconResId = R.drawable.ic_priority,
+            titleText = "Priority",
+            dataText = priority,
+            onClick = onClick
+        )
     }
 }
 
@@ -295,7 +451,10 @@ private enum class ConfigItemType {
     Frequency,
     Date,
     StartDate,
-    EndDate
+    EndDate,
+    TimeAndReminders,
+    Tags,
+    Priority
 }
 
 private enum class ConfigContentType {
