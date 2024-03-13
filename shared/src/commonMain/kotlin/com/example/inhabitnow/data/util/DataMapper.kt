@@ -9,6 +9,7 @@ import com.example.inhabitnow.data.model.reminder.ReminderEntity
 import com.example.inhabitnow.data.model.reminder.content.ReminderContentEntity
 import com.example.inhabitnow.data.model.tag.TagEntity
 import com.example.inhabitnow.data.model.task.TaskEntity
+import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
 import com.example.inhabitnow.data.model.task.content.BaseTaskContentEntity
 import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
@@ -16,9 +17,12 @@ import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import database.RecordTable
 import database.ReminderTable
+import database.SelectTaskWithContentById
 import database.TagTable
 import database.TaskContentTable
 import database.TaskTable
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.encodeToString
@@ -39,7 +43,7 @@ fun TaskEntity.toTaskTable(json: Json) = TaskTable(
     deletedAt = deletedAt
 )
 
-fun TaskTable.toTaskModel(json: Json) = TaskEntity(
+fun TaskTable.toTaskEntity(json: Json) = TaskEntity(
     id = this.id,
     type = this.type.fromJsonTaskType(json),
     progressType = this.progressType.fromJsonTaskProgressType(json),
@@ -69,7 +73,7 @@ fun <T : TaskContentEntity> BaseTaskContentEntity<T>.toTaskContentTable(json: Js
         createdAt = createdAt
     )
 
-fun TaskContentTable.toBaseTaskContentModel(json: Json): BaseTaskContentEntity<*>? = try {
+fun TaskContentTable.toBaseTaskContentEntity(json: Json): BaseTaskContentEntity<*>? = try {
     when (val decodedContent = content.fromJsonTaskContentEntity(json)) {
         is TaskContentEntity.ProgressContent -> {
             ProgressContentEntity(
@@ -182,19 +186,94 @@ private fun String.fromJsonRecordEntry(json: Json) =
     json.decodeFromString<RecordContentEntity.Entry>(this)
 
 /** tag model **/
-fun TagTable.toTagModel(json: Json) = TagEntity(
+fun TagTable.toTagModel() = TagEntity(
     id = id,
     title = title,
     createdAt = createdAt
 )
 
-fun TagEntity.toTagTable(json: Json) = TagTable(
+fun TagEntity.toTagTable() = TagTable(
     id = id,
     title = title,
     createdAt = createdAt
 )
+
+/** complex **/
+
+suspend fun TaskTable.toTaskWithContentEntity(
+    allTaskContent: List<TaskContentTable>,
+    json: Json
+): TaskWithContentEntity? {
+    val task = this.toTaskEntity(json)
+    return coroutineScope {
+        val progressContent = async {
+            allTaskContent.toBaseTaskContentEntity(
+                contentType = TaskContentEntity.Type.Progress,
+                json = json
+            ) as? ProgressContentEntity
+        }
+
+        val frequencyContent = async {
+            allTaskContent.toBaseTaskContentEntity(
+                contentType = TaskContentEntity.Type.Frequency,
+                json = json
+            ) as? FrequencyContentEntity
+        }
+
+        val archiveContent = async {
+            allTaskContent.toBaseTaskContentEntity(
+                contentType = TaskContentEntity.Type.Archive,
+                json = json
+            ) as? ArchiveContentEntity
+        }
+
+        TaskWithContentEntity(
+            task = task,
+            progressContent = progressContent.await() ?: return@coroutineScope null,
+            frequencyContent = frequencyContent.await() ?: return@coroutineScope null,
+            archiveContent = archiveContent.await() ?: return@coroutineScope null
+        )
+    }
+}
+
+private fun List<TaskContentTable>.toBaseTaskContentEntity(
+    contentType: TaskContentEntity.Type,
+    json: Json
+): BaseTaskContentEntity<*>? = this.let { allTaskContent ->
+    val encodedContentType = contentType.toJson(json)
+    allTaskContent
+        .find { it.contentType == encodedContentType }
+        ?.toBaseTaskContentEntity(json)
+}
 
 /** other **/
 
 private fun LocalDate.toEpochDay() = this.toEpochDays().toLong()
 private fun Long.toLocalDate() = LocalDate.fromEpochDays(this.toInt())
+
+/** query mappings  **/
+fun SelectTaskWithContentById.toTaskTable(): TaskTable {
+    return TaskTable(
+        id = task_id,
+        type = task_type,
+        progressType = task_progressType,
+        title = task_title,
+        description = task_description,
+        startEpochDay = task_startEpochDay,
+        endEpochDay = task_endEpochDay,
+        priority = task_priority,
+        createdAt = task_createdAt,
+        deletedAt = task_deletedAt
+    )
+}
+
+fun SelectTaskWithContentById.toTaskContentTable(): TaskContentTable {
+    return TaskContentTable(
+        id = taskContent_id,
+        taskId = taskContent_taskId,
+        contentType = taskContent_contentType,
+        content = taskContent_content,
+        startEpochDay = taskContent_startEpochDay,
+        createdAt = taskContent_createdAt
+    )
+}
