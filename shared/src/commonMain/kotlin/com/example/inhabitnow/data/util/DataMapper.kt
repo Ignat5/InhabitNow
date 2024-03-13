@@ -204,8 +204,10 @@ suspend fun TaskTable.toTaskWithContentEntity(
     allTaskContent: List<TaskContentTable>,
     json: Json
 ): TaskWithContentEntity? {
-    val task = this.toTaskEntity(json)
     return coroutineScope {
+        val task = async {
+            this@toTaskWithContentEntity.toTaskEntity(json)
+        }
         val progressContent = async {
             allTaskContent.toBaseTaskContentEntity(
                 contentType = TaskContentEntity.Type.Progress,
@@ -228,7 +230,7 @@ suspend fun TaskTable.toTaskWithContentEntity(
         }
 
         TaskWithContentEntity(
-            task = task,
+            task = task.await(),
             progressContent = progressContent.await() ?: return@coroutineScope null,
             frequencyContent = frequencyContent.await() ?: return@coroutineScope null,
             archiveContent = archiveContent.await() ?: return@coroutineScope null

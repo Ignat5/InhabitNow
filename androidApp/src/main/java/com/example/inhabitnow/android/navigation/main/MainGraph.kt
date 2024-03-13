@@ -47,6 +47,7 @@ import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.main.MainViewModel
 import com.example.inhabitnow.android.presentation.main.components.MainScreenConfig
 import com.example.inhabitnow.android.presentation.main.components.MainScreenEvent
+import com.example.inhabitnow.android.presentation.main.components.MainScreenNavigation
 import com.example.inhabitnow.android.presentation.main.components.MainScreenState
 import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressType
 import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
@@ -57,14 +58,20 @@ import com.example.inhabitnow.android.ui.base.BaseDialogActionButtons
 import com.example.inhabitnow.android.ui.base.BaseDialogBody
 import com.example.inhabitnow.android.ui.base.BaseDialogTitle
 
-fun NavGraphBuilder.mainGraph() {
+fun NavGraphBuilder.mainGraph(
+    onNavigateToCreateTask: (taskId: String) -> Unit
+) {
     composable(route = AppNavDest.MainGraphDestination.route) {
-        val viewModel: MainViewModel = hiltViewModel()
         val navController = rememberNavController()
+        val viewModel: MainViewModel = hiltViewModel()
         BaseScreen(
             viewModel = viewModel,
             onNavigation = { destination ->
-
+                when (destination) {
+                    is MainScreenNavigation.CreateTask -> {
+                        onNavigateToCreateTask(destination.taskId)
+                    }
+                }
             },
             configContent = { config ->
                 ScreenConfigContent(
@@ -78,72 +85,59 @@ fun NavGraphBuilder.mainGraph() {
                 )
             },
             screenContent = { state, onEvent ->
-                MainGraph(
-                    navController = navController,
-                    state = state,
-                    onEvent = onEvent
-                )
-            }
-        )
-    }
-}
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-private fun MainGraph(
-    navController: NavHostController,
-    state: MainScreenState,
-    onEvent: (MainScreenEvent) -> Unit
-) {
-    val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val onNavDestClick = remember {
-        val callback: (MainNavDest) -> Unit = { mainNavDest ->
-            if (currentBackStackEntry?.destination?.route != mainNavDest.route) {
-                navController.navigate(
-                    route = mainNavDest.route,
-                    navOptions = navOptions {
-                        this.launchSingleTop = true
-                        this.popUpTo(AppNavDest.MainGraphDestination.route) {
-                            this.inclusive = false
+                val currentBackStackEntry by navController.currentBackStackEntryAsState()
+                val onNavDestClick = remember {
+                    val callback: (MainNavDest) -> Unit = { mainNavDest ->
+                        if (currentBackStackEntry?.destination?.route != mainNavDest.route) {
+                            navController.navigate(
+                                route = mainNavDest.route,
+                                navOptions = navOptions {
+                                    this.launchSingleTop = true
+                                    this.popUpTo(AppNavDest.MainGraphDestination.route) {
+                                        this.inclusive = false
+                                    }
+                                }
+                            )
                         }
                     }
-                )
+                    callback
+                }
+                Scaffold(
+                    topBar = {
+                        val titleText = remember(currentBackStackEntry?.destination?.route) {
+                            (findMainNavDestByRoute(currentBackStackEntry?.destination?.route)
+                                ?: MainNavDest.startDestination).toTitleText()
+                        }
+                        ScreenAppBar(
+                            titleText = titleText,
+                            onMenuClick = { /*TODO*/ },
+                            onSearchClick = { /* TODO */ }
+                        )
+                    },
+                    bottomBar = {
+                        ScreenBottomBar(
+                            currentBackStackEntry = currentBackStackEntry,
+                            onNavDestClick = onNavDestClick
+                        )
+                    },
+                    floatingActionButton = {
+                        ScreenFAB(onClick = { onEvent(MainScreenEvent.OnCreateTaskClick) })
+                    },
+                    floatingActionButtonPosition = FabPosition.End
+                ) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = MainNavDest.AllScheduledTasksDestination.route,
+                        route = AppNavDest.MainGraphDestination.route,
+                        modifier = Modifier.padding(it)
+                    ) {
+                        allScheduledTasks()
+                        viewAllHabits()
+                        viewAllTasks()
+                    }
+                }
             }
-        }
-        callback
-    }
-    Scaffold(
-        topBar = {
-            val titleText = remember(currentBackStackEntry?.destination?.route) {
-                (findMainNavDestByRoute(currentBackStackEntry?.destination?.route)
-                    ?: MainNavDest.startDestination).toTitleText()
-            }
-            ScreenAppBar(
-                titleText = titleText,
-                onMenuClick = { /*TODO*/ },
-                onSearchClick = { /* TODO */ }
-            )
-        },
-        bottomBar = {
-            ScreenBottomBar(
-                currentBackStackEntry = currentBackStackEntry,
-                onNavDestClick = onNavDestClick
-            )
-        },
-        floatingActionButton = {
-            ScreenFAB(onClick = { onEvent(MainScreenEvent.OnCreateTaskClick) })
-        },
-        floatingActionButtonPosition = FabPosition.End
-    ) {
-        NavHost(
-            navController = navController,
-            startDestination = MainNavDest.AllScheduledTasksDestination.route,
-            route = AppNavDest.MainGraphDestination.route
-        ) {
-            allScheduledTasks()
-            viewAllHabits()
-            viewAllTasks()
-        }
+        )
     }
 }
 

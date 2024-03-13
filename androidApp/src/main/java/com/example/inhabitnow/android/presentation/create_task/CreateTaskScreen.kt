@@ -1,5 +1,6 @@
 package com.example.inhabitnow.android.presentation.create_task
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,11 +13,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.create_task.components.CreateTaskScreenEvent
@@ -36,10 +42,8 @@ import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 
 @Composable
-fun CreateTaskScreen(
-    viewModel: CreateTaskViewModel,
-    onNavigation: (CreateTaskScreenNavigation) -> Unit
-) {
+fun CreateTaskScreen(onNavigation: (CreateTaskScreenNavigation) -> Unit) {
+    val viewModel: CreateTaskViewModel = hiltViewModel()
     BaseScreen(
         viewModel = viewModel,
         onNavigation = onNavigation,
@@ -56,45 +60,52 @@ private fun CreateTaskScreenStateless(
     state: CreateTaskScreenState,
     onEvent: (CreateTaskScreenEvent) -> Unit
 ) {
+    BackHandler { onEvent(CreateTaskScreenEvent.OnDismissRequest) }
     Scaffold(
-        topBar = {}
+        topBar = {
+            ScreenTopBar(
+                canSave = state.canSave,
+                onSaveClick = { onEvent(CreateTaskScreenEvent.OnSaveClick) },
+                onCloseClick = { onEvent(CreateTaskScreenEvent.OnDismissRequest) }
+            )
+        }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .consumeWindowInsets(it)
+                .padding(it)
         ) {
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 titleItem(
-                    title = state.taskWithContentModel?.task?.title ?: "",
+                    title = state.taskWithContent?.task?.title ?: "",
                     onClick = { /* TODO */ }
                 )
 
                 itemDivider()
 
                 descriptionItem(
-                    description = state.taskWithContentModel?.task?.description ?: "",
+                    description = state.taskWithContent?.task?.description ?: "",
                     onClick = { /* TODO */ }
                 )
 
                 itemDivider()
 
                 dailyGoalItem(
-                    taskProgressContent = state.taskWithContentModel?.progressContent,
+                    taskProgressContent = state.taskWithContent?.progressContent,
                     onClick = { /* TODO */ }
                 )
 
                 itemDivider()
 
                 frequencyItem(
-                    taskFrequencyContent = state.taskWithContentModel?.frequencyContent,
+                    taskFrequencyContent = state.taskWithContent?.frequencyContent,
                     onClick = { /* TODO */ }
                 )
 
                 itemDivider()
 
                 dateItems(
-                    taskWithContentModel = state.taskWithContentModel,
+                    taskWithContentModel = state.taskWithContent,
                     onStartDateClick = { /* TODO */ },
                     onEndDateClick = { /* TODO */ },
                     onDateClick = { /* TODO */ }
@@ -211,6 +222,7 @@ private fun LazyListScope.dateItems(
                 )
             }
         }
+
         TaskType.RecurringTask, TaskType.Habit -> {
             item(
                 key = ConfigItemType.StartDate,
@@ -289,4 +301,35 @@ private enum class ConfigItemType {
 private enum class ConfigContentType {
     Standard,
     Switch
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ScreenTopBar(
+    canSave: Boolean,
+    onSaveClick: () -> Unit,
+    onCloseClick: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Text(text = "Create activity")
+        },
+        navigationIcon = {
+            IconButton(onClick = onCloseClick) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_close),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    contentDescription = null
+                )
+            }
+        },
+        actions = {
+            TextButton(
+                onClick = onSaveClick,
+                enabled = canSave
+            ) {
+                Text(text = "save")
+            }
+        }
+    )
 }

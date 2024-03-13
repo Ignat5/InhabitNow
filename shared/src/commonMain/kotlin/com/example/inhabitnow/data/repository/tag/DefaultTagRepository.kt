@@ -16,7 +16,7 @@ class DefaultTagRepository(
 
     override suspend fun saveTag(tagEntity: TagEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {
-            tagDataSource.insertTag(tagEntity.toTagTable(json))
+            tagDataSource.insertTag(tagEntity.toTagTable())
         }
 
 }
