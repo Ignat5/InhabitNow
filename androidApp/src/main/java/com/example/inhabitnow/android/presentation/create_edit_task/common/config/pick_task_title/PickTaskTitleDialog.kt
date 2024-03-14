@@ -17,6 +17,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenState
 import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
+import com.example.inhabitnow.android.ui.base.BaseTextFiledBuilder
 
 @Composable
 fun PickTaskTitleDialog(
@@ -41,43 +42,30 @@ private fun PickTaskTitleDialogStateless(
         actionButtons = BaseDialogBuilder.ActionButtons(
             confirmButton = {
                 BaseDialogBuilder.ActionButton(
-                    text = "confirm",
+                    text = "Confirm",
                     enabled = state.canConfirm,
                     onClick = { onEvent(PickTaskTitleScreenEvent.OnConfirmClick) }
                 )
             },
             dismissButton = {
                 BaseDialogBuilder.ActionButton(
-                    text = "cancel",
+                    text = "Cancel",
                     onClick = { onEvent(PickTaskTitleScreenEvent.OnDismissRequest) }
                 )
             }
         )
     ) {
-        val focusRequester = remember {
-            FocusRequester()
-        }
-        val textFiled = remember(state.inputTitle) {
-            TextFieldValue(
-                text = state.inputTitle,
-                selection = TextRange(state.inputTitle.length)
-            )
-        }
-        OutlinedTextField(
-            value = textFiled,
+        BaseTextFiledBuilder.BaseOutlinedTextField(
+            text = state.inputTitle,
             onValueChange = {
-                onEvent(PickTaskTitleScreenEvent.OnInputUpdate(it.text))
+                onEvent(PickTaskTitleScreenEvent.OnInputUpdate(it))
             },
+            modifier = Modifier.fillMaxWidth(),
+            isInitFocused = true,
             singleLine = true,
             label = {
                 Text(text = "name")
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester)
         )
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
-        }
     }
 }
