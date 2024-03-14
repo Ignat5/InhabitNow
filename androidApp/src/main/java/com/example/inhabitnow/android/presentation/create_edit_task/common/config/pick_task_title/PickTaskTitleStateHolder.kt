@@ -15,9 +15,8 @@ import kotlinx.coroutines.flow.update
 
 class PickTaskTitleStateHolder(
     initTitle: String,
-    holderScope: CoroutineScope
+    override val holderScope: CoroutineScope
 ) : BaseResultStateHolder<PickTaskTitleScreenEvent, PickTaskTitleScreenState, PickTaskTitleScreenResult>(
-    holderScope
 ) {
 
     private val inputTitleState = MutableStateFlow(initTitle)

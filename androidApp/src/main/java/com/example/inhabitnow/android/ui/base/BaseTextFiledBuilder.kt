@@ -16,7 +16,7 @@ object BaseTextFiledBuilder {
 
     @Composable
     fun BaseOutlinedTextField(
-        text: String,
+        value: String,
         onValueChange: (String) -> Unit,
         modifier: Modifier = Modifier,
         isInitFocused: Boolean = false,
@@ -30,14 +30,14 @@ object BaseTextFiledBuilder {
         keyboardActions: KeyboardActions = KeyboardActions.Default,
     ) {
         val focusRequester = initFocusRequester()
-        val textFiled = remember(text) {
+        val textFiledValue = remember(value) {
             TextFieldValue(
-                text = text,
-                selection = TextRange(text.length)
+                text = value,
+                selection = TextRange(value.length)
             )
         }
         OutlinedTextField(
-            value = textFiled,
+            value = textFiledValue,
             onValueChange = {
                 onValueChange(it.text)
             },

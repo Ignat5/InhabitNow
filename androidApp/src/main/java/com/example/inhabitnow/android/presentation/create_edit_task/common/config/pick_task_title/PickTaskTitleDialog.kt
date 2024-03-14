@@ -1,17 +1,9 @@
 package com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
@@ -56,7 +48,7 @@ private fun PickTaskTitleDialogStateless(
         )
     ) {
         BaseTextFiledBuilder.BaseOutlinedTextField(
-            text = state.inputTitle,
+            value = state.inputTitle,
             onValueChange = {
                 onEvent(PickTaskTitleScreenEvent.OnInputUpdate(it))
             },

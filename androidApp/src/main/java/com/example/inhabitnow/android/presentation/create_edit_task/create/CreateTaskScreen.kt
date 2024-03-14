@@ -33,6 +33,8 @@ import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.PickTaskNumberProgressDialog
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
@@ -51,8 +53,8 @@ fun CreateTaskScreen(onNavigation: (CreateTaskScreenNavigation) -> Unit) {
         configContent = { config ->
             CreateTaskScreenConfigStateless(
                 config = config,
-                onPickTaskTitleResult = {
-                    viewModel.onEvent(CreateTaskScreenEvent.ResultEvent.PickTaskTitle(it))
+                onResultEvent = { resultEvent ->
+                    viewModel.onEvent(resultEvent)
                 }
             )
         }
@@ -107,7 +109,9 @@ private fun CreateTaskScreenStateless(
                         is UITaskContent.Progress.Number -> {
                             numberProgressItem(
                                 taskProgressContent = state.taskProgressContent.progressContent,
-                                onClick = { /* TODO */ }
+                                onClick = {
+                                    onEvent(CreateTaskScreenEvent.ConfigEvent.OnConfigTaskNumberProgressClick)
+                                }
                             )
                             itemDivider()
                         }
@@ -200,13 +204,24 @@ private fun CreateTaskScreenStateless(
 @Composable
 private fun CreateTaskScreenConfigStateless(
     config: CreateTaskScreenConfig,
-    onPickTaskTitleResult: (PickTaskTitleScreenResult) -> Unit
+    onResultEvent: (CreateTaskScreenEvent.ResultEvent) -> Unit
 ) {
     when (config) {
         is CreateTaskScreenConfig.PickTitle -> {
             PickTaskTitleDialog(
                 stateHolder = config.stateHolder,
-                onResult = onPickTaskTitleResult
+                onResult = {
+                    onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskTitle(it))
+                }
+            )
+        }
+
+        is CreateTaskScreenConfig.PickTaskNumberProgress -> {
+            PickTaskNumberProgressDialog(
+                stateHolder = config.stateHolder,
+                onResult = {
+                    onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskNumberProgress(it))
+                }
             )
         }
     }

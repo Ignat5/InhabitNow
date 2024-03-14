@@ -6,6 +6,8 @@ import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.PickTaskNumberProgressStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
@@ -63,6 +65,22 @@ class CreateTaskViewModel @Inject constructor(
         when (event) {
             is CreateTaskScreenEvent.ConfigEvent.OnConfigTaskTitleClick ->
                 onConfigTaskTitleClick()
+
+            is CreateTaskScreenEvent.ConfigEvent.OnConfigTaskNumberProgressClick ->
+                onConfigTaskNumberProgressClick()
+        }
+    }
+
+    private fun onConfigTaskNumberProgressClick() {
+        (taskWithContentState.value?.progressContent as? TaskContentModel.ProgressContent.Number)?.let { pc ->
+            setUpConfigState(
+                CreateTaskScreenConfig.PickTaskNumberProgress(
+                    stateHolder = PickTaskNumberProgressStateHolder(
+                        initProgressContent = pc,
+                        holderScope = viewModelScope
+                    )
+                )
+            )
         }
     }
 
@@ -83,7 +101,25 @@ class CreateTaskViewModel @Inject constructor(
         when (event) {
             is CreateTaskScreenEvent.ResultEvent.PickTaskTitle ->
                 onPickTaskTitleResult(event)
+
+            is CreateTaskScreenEvent.ResultEvent.PickTaskNumberProgress ->
+                onPickTaskNumberProgressResult(event)
         }
+    }
+
+    private fun onPickTaskNumberProgressResult(event: CreateTaskScreenEvent.ResultEvent.PickTaskNumberProgress) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskNumberProgressScreenResult.Confirm ->
+                    onConfirmPickTaskNumberProgressResult(result)
+
+                is PickTaskNumberProgressScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskNumberProgressResult(result: PickTaskNumberProgressScreenResult.Confirm) {
+
     }
 
     private fun onPickTaskTitleResult(event: CreateTaskScreenEvent.ResultEvent.PickTaskTitle) {
