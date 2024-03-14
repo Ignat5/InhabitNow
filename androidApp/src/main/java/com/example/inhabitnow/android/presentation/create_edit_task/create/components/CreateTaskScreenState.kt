@@ -1,12 +1,8 @@
-package com.example.inhabitnow.android.presentation.create_task.components
+package com.example.inhabitnow.android.presentation.create_edit_task.create.components
 
 import androidx.compose.runtime.Immutable
 import com.example.inhabitnow.android.presentation.base.components.state.ScreenState
-import com.example.inhabitnow.android.presentation.create_task.UITaskContent
-import com.example.inhabitnow.core.type.TaskType
-import com.example.inhabitnow.domain.model.task.TaskWithContentModel
-import com.example.inhabitnow.domain.model.task.content.TaskContentModel
-import kotlinx.datetime.LocalDate
+import com.example.inhabitnow.android.presentation.model.UITaskContent
 
 @Immutable
 data class CreateTaskScreenState(

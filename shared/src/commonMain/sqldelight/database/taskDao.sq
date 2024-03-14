@@ -90,3 +90,7 @@ INNER JOIN (
     HAVING tInner.startEpochDay = MAX(tInner.startEpochDay)
 ) tTaskContent ON tTaskContent.taskId = tTask.id
 WHERE tTask.id = :taskId;
+
+updateTaskTitleById:
+UPDATE TaskTable SET title = :title
+WHERE id = :taskId;

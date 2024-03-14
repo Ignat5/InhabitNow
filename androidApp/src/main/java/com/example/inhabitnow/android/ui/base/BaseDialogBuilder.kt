@@ -16,6 +16,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -116,15 +117,15 @@ object BaseDialogBuilder {
             title = title,
             actionButtons = actionButtons
         ) {
+            HorizontalDivider()
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                HorizontalDivider()
                 content()
-                HorizontalDivider()
             }
+            HorizontalDivider()
         }
     }
 
@@ -137,6 +138,20 @@ object BaseDialogBuilder {
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Start
         )
+    }
+
+    @Composable
+    fun ActionButton(
+        text: String,
+        enabled: Boolean = true,
+        onClick: () -> Unit
+    ) {
+        TextButton(
+            onClick = onClick,
+            enabled = enabled
+        ) {
+            Text(text = text)
+        }
     }
 
     @Composable

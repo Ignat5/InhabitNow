@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.presentation.create_task
+package com.example.inhabitnow.android.presentation.model
 
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import kotlinx.datetime.LocalDate

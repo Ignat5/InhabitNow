@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.presentation.create_task
+package com.example.inhabitnow.android.presentation.create_edit_task.create
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
@@ -31,15 +31,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
-import com.example.inhabitnow.android.presentation.create_task.components.CreateTaskScreenEvent
-import com.example.inhabitnow.android.presentation.create_task.components.CreateTaskScreenNavigation
-import com.example.inhabitnow.android.presentation.create_task.components.CreateTaskScreenState
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleDialog
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenConfig
+import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
+import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
+import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenState
+import com.example.inhabitnow.android.presentation.model.UITaskContent
 import com.example.inhabitnow.android.ui.toDayMonthYear
 import com.example.inhabitnow.android.ui.toDisplay
-import com.example.inhabitnow.core.type.TaskType
-import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
-import kotlinx.datetime.LocalDate
 
 @Composable
 fun CreateTaskScreen(onNavigation: (CreateTaskScreenNavigation) -> Unit) {
@@ -48,7 +49,12 @@ fun CreateTaskScreen(onNavigation: (CreateTaskScreenNavigation) -> Unit) {
         viewModel = viewModel,
         onNavigation = onNavigation,
         configContent = { config ->
-
+            CreateTaskScreenConfigStateless(
+                config = config,
+                onPickTaskTitleResult = {
+                    viewModel.onEvent(CreateTaskScreenEvent.ResultEvent.PickTaskTitle(it))
+                }
+            )
         }
     ) { state, onEvent ->
         CreateTaskScreenStateless(state, onEvent)
@@ -79,7 +85,9 @@ private fun CreateTaskScreenStateless(
                 run {
                     titleItem(
                         title = state.taskTitle,
-                        onClick = { /* TODO */ }
+                        onClick = {
+                            onEvent(CreateTaskScreenEvent.ConfigEvent.OnConfigTaskTitleClick)
+                        }
                     )
 
                     itemDivider()
@@ -185,6 +193,21 @@ private fun CreateTaskScreenStateless(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun CreateTaskScreenConfigStateless(
+    config: CreateTaskScreenConfig,
+    onPickTaskTitleResult: (PickTaskTitleScreenResult) -> Unit
+) {
+    when (config) {
+        is CreateTaskScreenConfig.PickTitle -> {
+            PickTaskTitleDialog(
+                stateHolder = config.stateHolder,
+                onResult = onPickTaskTitleResult
+            )
         }
     }
 }

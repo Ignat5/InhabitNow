@@ -33,4 +33,11 @@ class DefaultTaskDataSource(
         }
     }
 
+    override suspend fun updateTaskTitleById(
+        taskId: String,
+        title: String
+    ): ResultModel<Unit> = runQuery {
+        taskDao.updateTaskTitleById(taskId = taskId, title = title)
+    }
+
 }

@@ -46,4 +46,12 @@ class DefaultTaskRepository(
             )
         }
 
+    override suspend fun updateTaskTitleById(
+        taskId: String,
+        title: String
+    ): ResultModel<Unit> = taskDataSource.updateTaskTitleById(
+        taskId = taskId,
+        title = title
+    )
+
 }

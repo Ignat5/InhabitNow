@@ -15,4 +15,6 @@ interface TaskDataSource {
         allTaskContent: List<TaskContentTable>
     ): ResultModel<Unit>
 
+    suspend fun updateTaskTitleById(taskId: String, title: String): ResultModel<Unit>
+
 }
