@@ -1,11 +1,6 @@
 package com.example.inhabitnow.android.navigation.main
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -14,25 +9,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -48,20 +36,17 @@ import com.example.inhabitnow.android.presentation.main.MainViewModel
 import com.example.inhabitnow.android.presentation.main.components.MainScreenConfig
 import com.example.inhabitnow.android.presentation.main.components.MainScreenEvent
 import com.example.inhabitnow.android.presentation.main.components.MainScreenNavigation
-import com.example.inhabitnow.android.presentation.main.components.MainScreenState
 import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressType
 import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeDialog
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
-import com.example.inhabitnow.android.ui.base.BaseDialog
-import com.example.inhabitnow.android.ui.base.BaseDialogActionButtons
-import com.example.inhabitnow.android.ui.base.BaseDialogBody
-import com.example.inhabitnow.android.ui.base.BaseDialogTitle
 
 fun NavGraphBuilder.mainGraph(
     onNavigateToCreateTask: (taskId: String) -> Unit
 ) {
-    composable(route = AppNavDest.MainGraphDestination.route) {
+    composable(
+        route = AppNavDest.MainGraphDestination.route
+    ) {
         val navController = rememberNavController()
         val viewModel: MainViewModel = hiltViewModel()
         BaseScreen(

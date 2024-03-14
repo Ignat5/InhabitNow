@@ -45,7 +45,14 @@ class CreateTaskViewModel @Inject constructor(
         )
 
     override fun onEvent(event: CreateTaskScreenEvent) {
+        when (event) {
+            is CreateTaskScreenEvent.OnDismissRequest -> onDismissRequest()
+            else -> Unit
+        }
+    }
 
+    private fun onDismissRequest() {
+        setUpNavigationState(CreateTaskScreenNavigation.Back)
     }
 
     private fun provideScreenState(taskWithContentModel: TaskWithContentModel?): CreateTaskScreenState {

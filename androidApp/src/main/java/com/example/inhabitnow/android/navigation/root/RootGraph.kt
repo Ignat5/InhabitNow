@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navOptions
 import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.navigation.create_task.createTaskScreen
 import com.example.inhabitnow.android.navigation.main.mainGraph
@@ -24,7 +25,7 @@ fun RootGraph() {
             mainGraph(
                 onNavigateToCreateTask = { taskId ->
                     navController.navigate(
-                        route = AppNavDest.buildCreateTaskRoute(taskId)
+                        route = AppNavDest.buildCreateTaskRoute(taskId),
                     )
                 }
             )
