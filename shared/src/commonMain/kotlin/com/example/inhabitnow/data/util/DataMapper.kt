@@ -116,6 +116,7 @@ fun TaskProgressType.toJson(json: Json) = json.encodeToString(this)
 fun String.fromJsonTaskProgressType(json: Json) = json.decodeFromString<TaskProgressType>(this)
 
 fun TaskContentEntity.Type.toJson(json: Json) = json.encodeToString(this)
+
 fun TaskContentEntity.toJson(json: Json) = json.encodeToString<TaskContentEntity>(this)
 
 private fun String.fromJsonTaskContentEntity(json: Json): TaskContentEntity =

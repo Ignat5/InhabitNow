@@ -88,13 +88,16 @@ INNER JOIN (
     WHERE tInner.taskId = :taskId
     GROUP BY tInner.contentType
     HAVING tInner.startEpochDay = MAX(tInner.startEpochDay)
---     TODO: HAVING tInner.createdAt = MAX(tInner.createdAt)
 ) tTaskContent ON tTaskContent.taskId = tTask.id
 WHERE tTask.id = :taskId;
 
 updateTaskTitleById:
 UPDATE TaskTable SET title = :title
 WHERE id = :taskId;
+
+updateTaskContentById:
+UPDATE TaskContentTable SET content = :content
+WHERE id = :contentId;
 
 selectTaskContentByTaskId:
 SELECT * FROM TaskContentTable tTaskContent

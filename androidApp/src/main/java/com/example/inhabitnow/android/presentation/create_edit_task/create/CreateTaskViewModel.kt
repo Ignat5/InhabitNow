@@ -17,6 +17,7 @@ import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressById
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
 import com.example.inhabitnow.domain.util.DomainConst
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +32,8 @@ import javax.inject.Inject
 class CreateTaskViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val readTaskWithContentByIdUseCase: ReadTaskWithContentByIdUseCase,
-    private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase
+    private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
+    private val updateTaskProgressByIdUseCase: UpdateTaskProgressById
 ) : BaseViewModel<CreateTaskScreenEvent, CreateTaskScreenState, CreateTaskScreenNavigation, CreateTaskScreenConfig>() {
 
     private val taskId: String = checkNotNull(savedStateHandle.get<String>(AppNavDest.TASK_ID_KEY))
@@ -119,7 +121,12 @@ class CreateTaskViewModel @Inject constructor(
     }
 
     private fun onConfirmPickTaskNumberProgressResult(result: PickTaskNumberProgressScreenResult.Confirm) {
-
+        viewModelScope.launch {
+            updateTaskProgressByIdUseCase(
+                taskId = taskId,
+                progressContent = result.progressContent
+            )
+        }
     }
 
     private fun onPickTaskTitleResult(event: CreateTaskScreenEvent.ResultEvent.PickTaskTitle) {

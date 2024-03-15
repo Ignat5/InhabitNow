@@ -48,6 +48,22 @@ private fun TaskContentEntity.ProgressContent.toProgressContentModel(): TaskCont
     }
 }
 
+internal fun TaskContentModel.ProgressContent.toProgressContentEntity(): TaskContentEntity.ProgressContent {
+    return when (this) {
+        is TaskContentModel.ProgressContent.YesNo -> TaskContentEntity.ProgressContent.YesNo
+        is TaskContentModel.ProgressContent.Number -> TaskContentEntity.ProgressContent.Number(
+            limitType = this.limitType,
+            limitNumber = this.limitNumber,
+            limitUnit = this.limitUnit
+        )
+
+        is TaskContentModel.ProgressContent.Time -> TaskContentEntity.ProgressContent.Time(
+            limitType = this.limitType,
+            limitTime = this.limitTime
+        )
+    }
+}
+
 private fun TaskContentEntity.FrequencyContent.toFrequencyContentModel(): TaskContentModel.FrequencyContent {
     return when (this) {
         is TaskContentEntity.FrequencyContent.OneDay -> TaskContentModel.FrequencyContent.OneDay

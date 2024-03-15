@@ -15,7 +15,14 @@ interface TaskDataSource {
         allTaskContent: List<TaskContentTable>
     ): ResultModel<Unit>
 
+    suspend fun insertTaskContent(taskContentTable: TaskContentTable): ResultModel<Unit>
+
     suspend fun updateTaskTitleById(taskId: String, title: String): ResultModel<Unit>
+
+    suspend fun updateTaskContentById(
+        contentId: String,
+        content: String
+    ): ResultModel<Unit>
 
     suspend fun getTaskContentByTaskId(
         taskId: String,

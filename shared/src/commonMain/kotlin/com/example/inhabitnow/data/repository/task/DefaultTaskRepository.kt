@@ -58,6 +58,17 @@ class DefaultTaskRepository(
         title = title
     )
 
+    override suspend fun updateTaskProgressContentById(
+        contentId: String,
+        progressContent: TaskContentEntity.ProgressContent
+    ): ResultModel<Unit> = taskDataSource.updateTaskContentById(
+        contentId = contentId,
+        content = progressContent.toJson(json)
+    )
+
+    override suspend fun saveTaskProgressContent(progressContentEntity: ProgressContentEntity): ResultModel<Unit> =
+        taskDataSource.insertTaskContent(progressContentEntity.toTaskContentTable(json))
+
     override suspend fun getTaskProgressContentByTaskId(taskId: String): ProgressContentEntity? =
         withContext(defaultDispatcher) {
             taskDataSource.getTaskContentByTaskId(

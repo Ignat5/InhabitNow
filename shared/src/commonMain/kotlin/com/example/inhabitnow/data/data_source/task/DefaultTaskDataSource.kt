@@ -33,11 +33,27 @@ class DefaultTaskDataSource(
         }
     }
 
+    override suspend fun insertTaskContent(
+        taskContentTable: TaskContentTable
+    ): ResultModel<Unit> = runQuery {
+        taskDao.insertTaskContent(taskContentTable)
+    }
+
     override suspend fun updateTaskTitleById(
         taskId: String,
         title: String
     ): ResultModel<Unit> = runQuery {
         taskDao.updateTaskTitleById(taskId = taskId, title = title)
+    }
+
+    override suspend fun updateTaskContentById(
+        contentId: String,
+        content: String
+    ): ResultModel<Unit> = runQuery {
+        taskDao.updateTaskContentById(
+            contentId = contentId,
+            content = content
+        )
     }
 
     override suspend fun getTaskContentByTaskId(
