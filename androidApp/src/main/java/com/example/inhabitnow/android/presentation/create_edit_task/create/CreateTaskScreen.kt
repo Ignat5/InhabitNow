@@ -35,6 +35,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.PickTaskNumberProgressDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.PickTaskTimeProgressDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
@@ -119,7 +120,9 @@ private fun CreateTaskScreenStateless(
                         is UITaskContent.Progress.Time -> {
                             timeProgressItem(
                                 taskProgressContent = state.taskProgressContent.progressContent,
-                                onClick = { /* TODO */ }
+                                onClick = {
+                                    onEvent(CreateTaskScreenEvent.ConfigEvent.OnConfigTaskTimeProgressClick)
+                                }
                             )
                             itemDivider()
                         }
@@ -221,6 +224,17 @@ private fun CreateTaskScreenConfigStateless(
                 stateHolder = config.stateHolder,
                 onResult = {
                     onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskNumberProgress(it))
+                }
+            )
+        }
+
+        is CreateTaskScreenConfig.PickTaskTimeProgress -> {
+            PickTaskTimeProgressDialog(
+                stateHolder = config.stateHolder,
+                onResult = {
+                    onResultEvent(
+                        CreateTaskScreenEvent.ResultEvent.PickTaskTimeProgress(it)
+                    )
                 }
             )
         }

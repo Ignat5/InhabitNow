@@ -4,6 +4,7 @@ import com.example.inhabitnow.android.presentation.base.components.event.ScreenE
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.components.PickTaskTimeProgressScreenResult
 
 sealed interface CreateTaskScreenEvent : ScreenEvent {
     data object OnSaveClick : CreateTaskScreenEvent
@@ -12,6 +13,7 @@ sealed interface CreateTaskScreenEvent : ScreenEvent {
     sealed interface ConfigEvent : CreateTaskScreenEvent {
         data object OnConfigTaskTitleClick : ConfigEvent
         data object OnConfigTaskNumberProgressClick : ConfigEvent
+        data object OnConfigTaskTimeProgressClick : ConfigEvent
     }
 
     sealed interface ResultEvent : CreateTaskScreenEvent {
@@ -23,6 +25,10 @@ sealed interface CreateTaskScreenEvent : ScreenEvent {
 
         data class PickTaskNumberProgress(
             override val result: PickTaskNumberProgressScreenResult
+        ) : ResultEvent
+
+        data class PickTaskTimeProgress(
+            override val result: PickTaskTimeProgressScreenResult
         ) : ResultEvent
     }
 }

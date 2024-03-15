@@ -8,6 +8,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.PickTaskNumberProgressStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.PickTaskTimeProgressStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.components.PickTaskTimeProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
@@ -70,6 +72,22 @@ class CreateTaskViewModel @Inject constructor(
 
             is CreateTaskScreenEvent.ConfigEvent.OnConfigTaskNumberProgressClick ->
                 onConfigTaskNumberProgressClick()
+
+            is CreateTaskScreenEvent.ConfigEvent.OnConfigTaskTimeProgressClick ->
+                onConfigTaskTimeProgressClick()
+        }
+    }
+
+    private fun onConfigTaskTimeProgressClick() {
+        (taskWithContentState.value?.progressContent as? TaskContentModel.ProgressContent.Time)?.let { pc ->
+            setUpConfigState(
+                CreateTaskScreenConfig.PickTaskTimeProgress(
+                    stateHolder = PickTaskTimeProgressStateHolder(
+                        initProgressContent = pc,
+                        holderScope = provideChildScope()
+                    )
+                )
+            )
         }
     }
 
@@ -79,7 +97,7 @@ class CreateTaskViewModel @Inject constructor(
                 CreateTaskScreenConfig.PickTaskNumberProgress(
                     stateHolder = PickTaskNumberProgressStateHolder(
                         initProgressContent = pc,
-                        holderScope = viewModelScope
+                        holderScope = provideChildScope()
                     )
                 )
             )
@@ -92,7 +110,7 @@ class CreateTaskViewModel @Inject constructor(
                 CreateTaskScreenConfig.PickTitle(
                     stateHolder = PickTaskTitleStateHolder(
                         initTitle = title,
-                        holderScope = viewModelScope
+                        holderScope = provideChildScope()
                     )
                 )
             )
@@ -106,6 +124,27 @@ class CreateTaskViewModel @Inject constructor(
 
             is CreateTaskScreenEvent.ResultEvent.PickTaskNumberProgress ->
                 onPickTaskNumberProgressResult(event)
+
+            is CreateTaskScreenEvent.ResultEvent.PickTaskTimeProgress ->
+                onPickTaskTimeProgressResult(event)
+        }
+    }
+
+    private fun onPickTaskTimeProgressResult(event: CreateTaskScreenEvent.ResultEvent.PickTaskTimeProgress) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskTimeProgressScreenResult.Confirm -> onConfirmPickTaskTimeProgress(result)
+                is PickTaskTimeProgressScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskTimeProgress(result: PickTaskTimeProgressScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskProgressByIdUseCase(
+                taskId = taskId,
+                progressContent = result.progressContent
+            )
         }
     }
 
