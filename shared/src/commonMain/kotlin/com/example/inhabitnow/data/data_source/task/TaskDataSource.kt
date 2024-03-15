@@ -17,4 +17,9 @@ interface TaskDataSource {
 
     suspend fun updateTaskTitleById(taskId: String, title: String): ResultModel<Unit>
 
+    suspend fun getTaskContentByTaskId(
+        taskId: String,
+        taskContentType: String
+    ): TaskContentTable?
+
 }

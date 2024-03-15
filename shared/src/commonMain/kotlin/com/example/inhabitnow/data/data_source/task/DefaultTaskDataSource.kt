@@ -40,4 +40,14 @@ class DefaultTaskDataSource(
         taskDao.updateTaskTitleById(taskId = taskId, title = title)
     }
 
+    override suspend fun getTaskContentByTaskId(
+        taskId: String,
+        taskContentType: String
+    ): TaskContentTable? = getOneOrNull {
+        taskDao.selectTaskContentByTaskId(
+            taskId = taskId,
+            taskContentType = taskContentType
+        )
+    }
+
 }

@@ -22,6 +22,17 @@ abstract class BaseDataSource(
             .asFlow()
             .mapToList(ioDispatcher)
 
+    protected suspend fun <T : Any> getOneOrNull(query: () -> Query<T>): T? =
+        try {
+            withContext(ioDispatcher) {
+                query()
+                    .executeAsOneOrNull()
+            }
+        } catch (e: Exception) {
+            null
+        }
+
+
     protected suspend fun <T : Any> runQuery(query: () -> T): ResultModel<T> =
         try {
             withContext(ioDispatcher) {

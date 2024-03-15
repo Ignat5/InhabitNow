@@ -3,6 +3,10 @@ package com.example.inhabitnow.data.repository.task
 import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.data.data_source.task.TaskDataSource
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
+import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
+import com.example.inhabitnow.data.model.task.content.TaskContentEntity
+import com.example.inhabitnow.data.util.toBaseTaskContentEntity
+import com.example.inhabitnow.data.util.toJson
 import com.example.inhabitnow.data.util.toTaskContentTable
 import com.example.inhabitnow.data.util.toTaskTable
 import com.example.inhabitnow.data.util.toTaskWithContentEntity
@@ -53,5 +57,15 @@ class DefaultTaskRepository(
         taskId = taskId,
         title = title
     )
+
+    override suspend fun getTaskProgressContentByTaskId(taskId: String): ProgressContentEntity? =
+        withContext(defaultDispatcher) {
+            taskDataSource.getTaskContentByTaskId(
+                taskId = taskId,
+                taskContentType = TaskContentEntity.Type.Progress.toJson(json)
+            )?.let { taskContentTable ->
+                taskContentTable.toBaseTaskContentEntity(json) as? ProgressContentEntity
+            }
+        }
 
 }

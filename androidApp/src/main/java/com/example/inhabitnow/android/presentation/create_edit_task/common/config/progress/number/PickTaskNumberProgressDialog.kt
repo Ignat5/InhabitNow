@@ -73,33 +73,33 @@ private fun PickTaskNumberProgressDialogStateless(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-                BaseInputBuilder.BaseOutlinedInputDropdown(
-                    allOptions = ProgressLimitType.entries,
-                    currentOption = state.limitType,
-                    optionText = { it.toDisplay() },
-                    onOptionClick = {
-                        onEvent(PickTaskNumberProgressScreenEvent.OnPickLimitType(it))
-                    },
-                    modifier = Modifier.fillMaxWidth()
+            BaseInputBuilder.BaseOutlinedInputDropdown(
+                allOptions = ProgressLimitType.entries,
+                currentOption = state.limitType,
+                optionText = { it.toDisplay() },
+                onOptionClick = {
+                    onEvent(PickTaskNumberProgressScreenEvent.OnPickLimitType(it))
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            BaseTextFiledBuilder.BaseOutlinedTextField(
+                value = state.limitNumber,
+                onValueChange = {
+                    onEvent(PickTaskNumberProgressScreenEvent.OnInputUpdateLimitNumber(it))
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text(text = "Goal")
+                },
+                singleLine = true,
+                keyboardActions = KeyboardActions {
+                    focusManager.moveFocus(FocusDirection.Next)
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
                 )
-                BaseTextFiledBuilder.BaseOutlinedTextField(
-                    value = state.limitNumber,
-                    onValueChange = {
-                        onEvent(PickTaskNumberProgressScreenEvent.OnInputUpdateLimitNumber(it))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = {
-                        Text(text = "Goal")
-                    },
-                    singleLine = true,
-                    keyboardActions = KeyboardActions {
-                        focusManager.moveFocus(FocusDirection.Next)
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
-                    )
-                )
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -113,6 +113,9 @@ private fun PickTaskNumberProgressDialogStateless(
                     modifier = Modifier.weight(1f),
                     label = {
                         Text(text = "Unit")
+                    },
+                    keyboardActions = KeyboardActions {
+                        focusManager.clearFocus()
                     },
                     singleLine = true
                 )

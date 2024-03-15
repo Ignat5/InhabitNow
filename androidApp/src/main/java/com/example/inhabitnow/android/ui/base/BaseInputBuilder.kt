@@ -1,8 +1,10 @@
 package com.example.inhabitnow.android.ui.base
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -26,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import com.example.inhabitnow.android.R
 import kotlin.enums.EnumEntries
@@ -44,6 +48,7 @@ object BaseInputBuilder {
         var isDropDownExpanded by remember {
             mutableStateOf(false)
         }
+        val focusManager = LocalFocusManager.current
         ExposedDropdownMenuBox(
             expanded = isDropDownExpanded,
             onExpandedChange = {
@@ -54,14 +59,12 @@ object BaseInputBuilder {
             OutlinedTextField(
                 value = optionText(currentOption),
                 onValueChange = {},
-                modifier = Modifier.menuAnchor(),
+                modifier = Modifier
+                    .menuAnchor(),
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDropDownExpanded)
                 },
                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                label = {
-                    Text(text = "")
-                },
                 readOnly = true,
                 singleLine = true
             )
@@ -83,6 +86,12 @@ object BaseInputBuilder {
                         }
                     )
                 }
+            }
+        }
+
+        LaunchedEffect(isDropDownExpanded) {
+            if (!isDropDownExpanded) {
+                focusManager.clearFocus(true)
             }
         }
     }
