@@ -67,7 +67,6 @@ private fun PickTaskTimeProgressDialogStateless(
             confirmButton = {
                 BaseDialogBuilder.ActionButton(
                     text = "Confirm",
-                    enabled = state.canConfirm,
                     onClick = {
                         onEvent(PickTaskTimeProgressScreenEvent.OnConfirmClick)
                     }
@@ -102,20 +101,20 @@ private fun PickTaskTimeProgressDialogStateless(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 BaseTimeInput(
-                    inputHours = state.limitHours,
-                    inputMinutes = state.limitMinutes,
-                    onInputValueHoursUpdate = {
+                    hours = state.limitHours,
+                    minutes = state.limitMinutes,
+                    onInputUpdateHours = {
                         onEvent(PickTaskTimeProgressScreenEvent.OnInputUpdateHours(it))
                     },
-                    onInputValueMinutesUpdate = {
+                    onInputUpdateMinutes = {
                         onEvent(PickTaskTimeProgressScreenEvent.OnInputUpdateMinutes(it))
                     },
                     modifier = Modifier.weight(1f)
                 )
                 Text(
                     text = "a day",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

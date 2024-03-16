@@ -23,10 +23,10 @@ class PickTaskTimeProgressStateHolder(
     private val inputLimitTypeState = MutableStateFlow(initProgressContent.limitType)
 
     private val inputLimitHoursState =
-        MutableStateFlow(initProgressContent.limitTime.hour.toString())
+        MutableStateFlow(initProgressContent.limitTime.hour)
 
     private val inputLimitMinutesState =
-        MutableStateFlow(initProgressContent.limitTime.minute.toString())
+        MutableStateFlow(initProgressContent.limitTime.minute)
 
     override val uiScreenState: StateFlow<PickTaskTimeProgressScreenState> =
         combine(
@@ -73,20 +73,17 @@ class PickTaskTimeProgressStateHolder(
     }
 
     private fun onConfirmClick() {
-        if (uiScreenState.value.canConfirm) {
-            val limitTime = LocalTime(
-                hour = inputLimitHoursState.value.toIntOrNull() ?: return,
-                minute = inputLimitMinutesState.value.toIntOrNull() ?: return
-            )
-            setUpResult(
-                PickTaskTimeProgressScreenResult.Confirm(
-                    progressContent = TaskContentModel.ProgressContent.Time(
-                        limitType = inputLimitTypeState.value,
-                        limitTime = limitTime
+        setUpResult(
+            PickTaskTimeProgressScreenResult.Confirm(
+                progressContent = TaskContentModel.ProgressContent.Time(
+                    limitType = inputLimitTypeState.value,
+                    limitTime = LocalTime(
+                        hour = inputLimitHoursState.value,
+                        minute = inputLimitMinutesState.value
                     )
                 )
             )
-        }
+        )
     }
 
     private fun onPickLimitType(event: PickTaskTimeProgressScreenEvent.OnPickLimitType) {
@@ -94,48 +91,23 @@ class PickTaskTimeProgressStateHolder(
     }
 
     private fun onInputUpdateHours(event: PickTaskTimeProgressScreenEvent.OnInputUpdateHours) {
-        val value = event.value
-        if (value.isEmpty() || isValidHours(value)) {
-            inputLimitHoursState.update { value }
-        }
+        inputLimitHoursState.update { event.value }
     }
 
     private fun onInputUpdateMinutes(event: PickTaskTimeProgressScreenEvent.OnInputUpdateMinutes) {
-        val value = event.value
-        if (value.isEmpty() || isValidMinutes(value)) {
-            inputLimitMinutesState.update { value }
-        }
+        inputLimitMinutesState.update { event.value }
     }
 
     private fun provideScreenState(
         limitType: ProgressLimitType,
-        limitHours: String,
-        limitMinutes: String
+        limitHours: Int,
+        limitMinutes: Int
     ): PickTaskTimeProgressScreenState {
         return PickTaskTimeProgressScreenState(
             limitType = limitType,
             limitHours = limitHours,
             limitMinutes = limitMinutes,
-            canConfirm = isValidHours(limitHours) && isValidMinutes(limitMinutes)
         )
-    }
-
-    private fun isValidHours(value: String) =
-        validateDigitsCount(value) && value.toIntOrNull()
-            ?.let { it in MIN_HOURS..MAX_HOURS } ?: false
-
-    private fun isValidMinutes(value: String) =
-        validateDigitsCount(value) && value.toIntOrNull()
-            ?.let { it in MIN_MINUTES..MAX_MINUTES } ?: false
-
-    private fun validateDigitsCount(value: String) = value.length <= MAX_DIGITS
-
-    companion object {
-        private const val MIN_HOURS = 0
-        private const val MAX_HOURS = 23
-        private const val MIN_MINUTES = 0
-        private const val MAX_MINUTES = 59
-        private const val MAX_DIGITS = 2
     }
 
 }

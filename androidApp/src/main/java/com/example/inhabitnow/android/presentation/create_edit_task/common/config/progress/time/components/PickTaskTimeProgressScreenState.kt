@@ -7,7 +7,6 @@ import com.example.inhabitnow.core.type.ProgressLimitType
 @Immutable
 data class PickTaskTimeProgressScreenState(
     val limitType: ProgressLimitType,
-    val limitHours: String,
-    val limitMinutes: String,
-    val canConfirm: Boolean
+    val limitHours: Int,
+    val limitMinutes: Int,
 ) : ScreenState

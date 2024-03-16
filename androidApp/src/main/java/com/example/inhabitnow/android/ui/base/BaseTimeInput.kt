@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialogDefaults
@@ -121,28 +122,41 @@ fun BaseTimeInput(
 ) {
     val initHours = remember { hours }
     val initMinutes = remember { minutes }
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        TimeInputField(
-            inputType = TimeInputType.Hours,
-            initIndex = initHours,
-            onCurrentIndexChange = onInputUpdateHours,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = ":",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        TimeInputField(
-            inputType = TimeInputType.Minutes,
-            initIndex = initMinutes,
-            onCurrentIndexChange = onInputUpdateMinutes,
-            modifier = Modifier.weight(1f)
-        )
+    Box(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            TimeInputField(
+                inputType = TimeInputType.Hours,
+                initIndex = initHours,
+                onCurrentIndexChange = onInputUpdateHours,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = ":",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            TimeInputField(
+                inputType = TimeInputType.Minutes,
+                initIndex = initMinutes,
+                onCurrentIndexChange = onInputUpdateMinutes,
+                modifier = Modifier.weight(1f)
+            )
+        }
+//        Box(
+//            modifier = Modifier
+//                .align(Alignment.Center)
+//                .fillMaxWidth()
+//                .height(TextFieldDefaults.MinHeight)
+//                .border(
+//                    width = TextFieldDefaults.UnfocusedIndicatorThickness,
+//                    color = MaterialTheme.colorScheme.outline,
+//                    shape = RoundedCornerShape(25)
+//                )
+//        )
     }
 }
 
@@ -172,7 +186,7 @@ private fun TimeInputField(
             .border(
                 width = TextFieldDefaults.UnfocusedIndicatorThickness,
                 color = MaterialTheme.colorScheme.outline,
-                shape = TextFieldDefaults.shape
+                shape = RoundedCornerShape(15)
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -207,12 +221,9 @@ private fun TimeInputField(
         }
     }
 
-    LaunchedEffect(Unit) {
-        snapshotFlow { lazyListState.firstVisibleItemIndex }
-            .distinctUntilChanged()
-            .collect { index ->
-                onCurrentIndexChange(index)
-            }
+    LaunchedEffect(lazyListState.isScrollInProgress) {
+        if (!lazyListState.isScrollInProgress) {
+            onCurrentIndexChange(lazyListState.firstVisibleItemIndex)
+        }
     }
-
 }

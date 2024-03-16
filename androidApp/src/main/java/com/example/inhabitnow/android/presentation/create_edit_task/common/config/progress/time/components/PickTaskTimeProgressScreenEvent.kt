@@ -5,8 +5,8 @@ import com.example.inhabitnow.core.type.ProgressLimitType
 
 sealed interface PickTaskTimeProgressScreenEvent : ScreenEvent {
     data class OnPickLimitType(val limitType: ProgressLimitType) : PickTaskTimeProgressScreenEvent
-    data class OnInputUpdateHours(val value: String) : PickTaskTimeProgressScreenEvent
-    data class OnInputUpdateMinutes(val value: String) : PickTaskTimeProgressScreenEvent
+    data class OnInputUpdateHours(val value: Int) : PickTaskTimeProgressScreenEvent
+    data class OnInputUpdateMinutes(val value: Int) : PickTaskTimeProgressScreenEvent
 
     data object OnConfirmClick : PickTaskTimeProgressScreenEvent
     data object OnDismissRequest : PickTaskTimeProgressScreenEvent
