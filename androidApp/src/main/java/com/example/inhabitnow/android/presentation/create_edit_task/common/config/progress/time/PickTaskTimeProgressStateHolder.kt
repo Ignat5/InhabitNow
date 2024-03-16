@@ -26,7 +26,7 @@ class PickTaskTimeProgressStateHolder(
         MutableStateFlow(initProgressContent.limitTime.hour.toString())
 
     private val inputLimitMinutesState =
-        MutableStateFlow(initProgressContent.limitTime.hour.toString())
+        MutableStateFlow(initProgressContent.limitTime.minute.toString())
 
     override val uiScreenState: StateFlow<PickTaskTimeProgressScreenState> =
         combine(
