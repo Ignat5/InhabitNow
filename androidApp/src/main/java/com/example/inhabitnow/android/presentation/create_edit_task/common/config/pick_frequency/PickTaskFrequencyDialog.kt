@@ -73,7 +73,7 @@ private fun PickTaskFrequencyDialogStateless(
                     text = "Confirm",
                     enabled = state.canConfirm,
                     onClick = {
-
+                        onEvent(PickTaskFrequencyScreenEvent.OnConfirmClick)
                     }
                 )
             },

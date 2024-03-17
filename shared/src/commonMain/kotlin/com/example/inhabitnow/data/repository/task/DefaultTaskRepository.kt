@@ -1,14 +1,18 @@
 package com.example.inhabitnow.data.repository.task
 
 import com.example.inhabitnow.core.model.ResultModel
+import com.example.inhabitnow.core.util.randomUUID
 import com.example.inhabitnow.data.data_source.task.TaskDataSource
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
+import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
 import com.example.inhabitnow.data.model.task.content.BaseTaskContentEntity
 import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import com.example.inhabitnow.data.util.toBaseTaskContentEntity
+import com.example.inhabitnow.data.util.toEpochDay
 import com.example.inhabitnow.data.util.toJson
+import com.example.inhabitnow.data.util.toLocalDate
 import com.example.inhabitnow.data.util.toTaskContentTable
 import com.example.inhabitnow.data.util.toTaskTable
 import com.example.inhabitnow.data.util.toTaskWithContentEntity
@@ -61,53 +65,51 @@ class DefaultTaskRepository(
         title = title
     )
 
-    override suspend fun updateTaskProgressContentById(
-        contentId: String,
-        progressContent: TaskContentEntity.ProgressContent
-    ): ResultModel<Unit> = taskDataSource.updateTaskContentById(
-        contentId = contentId,
-        content = progressContent.toJson(json)
+    override suspend fun saveTaskProgressContent(
+        taskId: String,
+        targetDate: LocalDate,
+        content: TaskContentEntity.ProgressContent
+    ): ResultModel<Unit> = saveTaskContent(
+        taskId = taskId,
+        targetDate = targetDate,
+        content = content
+    )
+
+    override suspend fun saveTaskFrequencyContent(
+        taskId: String,
+        targetDate: LocalDate,
+        content: TaskContentEntity.FrequencyContent
+    ): ResultModel<Unit> = saveTaskContent(
+        taskId = taskId,
+        targetDate = targetDate,
+        content = content
     )
 
     private suspend fun saveTaskContent(
         taskId: String,
-        date: LocalDate,
-        content: BaseTaskContentEntity
-    ) {
-
+        targetDate: LocalDate,
+        content: TaskContentEntity
+    ): ResultModel<Unit> = withContext(defaultDispatcher) {
+        val contentType = when (content) {
+            is TaskContentEntity.ProgressContent -> TaskContentEntity.Type.Progress
+            is TaskContentEntity.FrequencyContent -> TaskContentEntity.Type.Frequency
+            is TaskContentEntity.ArchiveContent -> TaskContentEntity.Type.Archive
+        }
+        taskDataSource.getTaskContentByTaskId(
+            taskId = taskId,
+            taskContentType = contentType.toJson(json)
+        )?.let { taskContentTable ->
+            val targetDateEpochDay = targetDate.toEpochDay()
+            val isNew = targetDateEpochDay > taskContentTable.startEpochDay
+            val contentId = if (isNew) randomUUID() else taskContentTable.id
+            taskDataSource.insertTaskContent(
+                taskContentTable.copy(
+                    id = contentId,
+                    content = content.toJson(json),
+                    startEpochDay = targetDateEpochDay
+                )
+            )
+        } ?: ResultModel.Error(IllegalStateException())
     }
-
-    override suspend fun saveTaskProgressContent(progressContentEntity: ProgressContentEntity): ResultModel<Unit> =
-        saveBaseTaskContent(progressContentEntity)
-
-    override suspend fun getTaskProgressContentByTaskId(taskId: String): ProgressContentEntity? =
-        withContext(defaultDispatcher) {
-            getBaseTaskContentByTaskId(
-                taskId = taskId,
-                contentType = TaskContentEntity.Type.Progress
-            ) as? ProgressContentEntity
-        }
-
-    override suspend fun saveTaskFrequencyContent(frequencyContentEntity: FrequencyContentEntity): ResultModel<Unit> =
-        saveBaseTaskContent(frequencyContentEntity)
-
-    override suspend fun getTaskFrequencyContentByTaskId(taskId: String): FrequencyContentEntity? =
-        withContext(defaultDispatcher) {
-            getBaseTaskContentByTaskId(
-                taskId = taskId,
-                contentType = TaskContentEntity.Type.Frequency
-            ) as? FrequencyContentEntity
-        }
-
-    private suspend fun saveBaseTaskContent(contentEntity: BaseTaskContentEntity) =
-        taskDataSource.insertTaskContent(contentEntity.toTaskContentTable(json))
-
-    private suspend fun getBaseTaskContentByTaskId(
-        taskId: String,
-        contentType: TaskContentEntity.Type
-    ): BaseTaskContentEntity? = taskDataSource.getTaskContentByTaskId(
-        taskId = taskId,
-        taskContentType = contentType.toJson(json)
-    )?.toBaseTaskContentEntity(json)
 
 }

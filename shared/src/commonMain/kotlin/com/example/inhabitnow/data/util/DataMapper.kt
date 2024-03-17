@@ -251,8 +251,8 @@ private fun List<TaskContentTable>.toBaseTaskContentEntity(
 
 /** other **/
 
-private fun LocalDate.toEpochDay() = this.toEpochDays().toLong()
-private fun Long.toLocalDate() = LocalDate.fromEpochDays(this.toInt())
+internal fun LocalDate.toEpochDay() = this.toEpochDays().toLong()
+internal fun Long.toLocalDate() = LocalDate.fromEpochDays(this.toInt())
 
 /** query mappings  **/
 fun SelectTaskWithContentById.toTaskTable(): TaskTable {

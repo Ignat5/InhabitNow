@@ -6,6 +6,7 @@ import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
 
 interface TaskRepository {
     fun readTaskWithContentById(taskId: String): Flow<TaskWithContentEntity?>
@@ -14,12 +15,14 @@ interface TaskRepository {
         taskId: String,
         title: String
     ): ResultModel<Unit>
-    suspend fun updateTaskProgressContentById(
-        contentId: String,
-        progressContent: TaskContentEntity.ProgressContent
+    suspend fun saveTaskProgressContent(
+        taskId: String,
+        targetDate: LocalDate,
+        content: TaskContentEntity.ProgressContent
     ): ResultModel<Unit>
-    suspend fun saveTaskProgressContent(progressContentEntity: ProgressContentEntity): ResultModel<Unit>
-    suspend fun getTaskProgressContentByTaskId(taskId: String): ProgressContentEntity?
-    suspend fun saveTaskFrequencyContent(frequencyContentEntity: FrequencyContentEntity): ResultModel<Unit>
-    suspend fun getTaskFrequencyContentByTaskId(taskId: String): FrequencyContentEntity?
+    suspend fun saveTaskFrequencyContent(
+        taskId: String,
+        targetDate: LocalDate,
+        content: TaskContentEntity.FrequencyContent
+    ): ResultModel<Unit>
 }
