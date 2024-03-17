@@ -23,7 +23,7 @@ import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
-import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressById
+import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
 import com.example.inhabitnow.domain.util.DomainConst
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,7 +39,7 @@ class CreateTaskViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val readTaskWithContentByIdUseCase: ReadTaskWithContentByIdUseCase,
     private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
-    private val updateTaskProgressByIdUseCase: UpdateTaskProgressById
+    private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase
 ) : BaseViewModel<CreateTaskScreenEvent, CreateTaskScreenState, CreateTaskScreenNavigation, CreateTaskScreenConfig>() {
 
     private val taskId: String = checkNotNull(savedStateHandle.get<String>(AppNavDest.TASK_ID_KEY))

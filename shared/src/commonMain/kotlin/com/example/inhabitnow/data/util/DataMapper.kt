@@ -59,7 +59,7 @@ fun TaskTable.toTaskEntity(json: Json) = TaskEntity(
     deletedAt = this.deletedAt
 )
 
-fun <T : TaskContentEntity> BaseTaskContentEntity<T>.toTaskContentTable(json: Json) =
+fun BaseTaskContentEntity.toTaskContentTable(json: Json) =
     TaskContentTable(
         id = id,
         taskId = taskId,
@@ -73,7 +73,7 @@ fun <T : TaskContentEntity> BaseTaskContentEntity<T>.toTaskContentTable(json: Js
         createdAt = createdAt
     )
 
-fun TaskContentTable.toBaseTaskContentEntity(json: Json): BaseTaskContentEntity<*>? = try {
+fun TaskContentTable.toBaseTaskContentEntity(json: Json): BaseTaskContentEntity? = try {
     when (val decodedContent = content.fromJsonTaskContentEntity(json)) {
         is TaskContentEntity.ProgressContent -> {
             ProgressContentEntity(
@@ -242,7 +242,7 @@ suspend fun TaskTable.toTaskWithContentEntity(
 private fun List<TaskContentTable>.toBaseTaskContentEntity(
     contentType: TaskContentEntity.Type,
     json: Json
-): BaseTaskContentEntity<*>? = this.let { allTaskContent ->
+): BaseTaskContentEntity? = this.let { allTaskContent ->
     val encodedContentType = contentType.toJson(json)
     allTaskContent
         .find { it.contentType == encodedContentType }

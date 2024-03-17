@@ -74,6 +74,16 @@ private fun TaskContentEntity.FrequencyContent.toFrequencyContentModel(): TaskCo
     }
 }
 
+internal fun TaskContentModel.FrequencyContent.toFrequencyContentEntity(): TaskContentEntity.FrequencyContent {
+    return when (this) {
+        is TaskContentModel.FrequencyContent.OneDay -> TaskContentEntity.FrequencyContent.OneDay
+        is TaskContentModel.FrequencyContent.EveryDay -> TaskContentEntity.FrequencyContent.EveryDay
+        is TaskContentModel.FrequencyContent.DaysOfWeek -> TaskContentEntity.FrequencyContent.DaysOfWeek(
+            this.daysOfWeek
+        )
+    }
+}
+
 private fun TaskContentEntity.ArchiveContent.toArchiveContentModel(): TaskContentModel.ArchiveContent {
     return TaskContentModel.ArchiveContent(this.isArchived)
 }

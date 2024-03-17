@@ -2,6 +2,7 @@ package com.example.inhabitnow.data.repository.task
 
 import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
+import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import kotlinx.coroutines.flow.Flow
@@ -19,4 +20,6 @@ interface TaskRepository {
     ): ResultModel<Unit>
     suspend fun saveTaskProgressContent(progressContentEntity: ProgressContentEntity): ResultModel<Unit>
     suspend fun getTaskProgressContentByTaskId(taskId: String): ProgressContentEntity?
+    suspend fun saveTaskFrequencyContent(frequencyContentEntity: FrequencyContentEntity): ResultModel<Unit>
+    suspend fun getTaskFrequencyContentByTaskId(taskId: String): FrequencyContentEntity?
 }

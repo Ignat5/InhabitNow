@@ -6,8 +6,8 @@ import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.Defau
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.DefaultSaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
-import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.DefaultUpdateTaskProgressById
-import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressById
+import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.DefaultUpdateTaskProgressByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.DefaultUpdateTaskTitleByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
 import dagger.Module
@@ -55,8 +55,8 @@ object TaskDomainModule {
     fun provideUpdateTaskProgressByIdUseCase(
         taskRepository: TaskRepository,
         @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher
-    ): UpdateTaskProgressById {
-        return DefaultUpdateTaskProgressById(
+    ): UpdateTaskProgressByIdUseCase {
+        return DefaultUpdateTaskProgressByIdUseCase(
             taskRepository = taskRepository,
             defaultDispatcher = defaultDispatcher
         )
