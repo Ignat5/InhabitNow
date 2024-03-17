@@ -2,8 +2,10 @@ package com.example.inhabitnow.android.presentation.create_edit_task.create
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
@@ -18,7 +20,9 @@ import com.example.inhabitnow.android.presentation.create_edit_task.create.compo
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenState
 import com.example.inhabitnow.android.presentation.model.UITaskContent
 import com.example.inhabitnow.android.ui.toFrequencyContent
+import com.example.inhabitnow.android.ui.toUIDateContent
 import com.example.inhabitnow.android.ui.toUIFrequencyContent
+import com.example.inhabitnow.android.ui.toUIProgressContent
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
@@ -28,11 +32,13 @@ import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateT
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
 import com.example.inhabitnow.domain.util.DomainConst
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,7 +47,8 @@ class CreateTaskViewModel @Inject constructor(
     private val readTaskWithContentByIdUseCase: ReadTaskWithContentByIdUseCase,
     private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
     private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
-    private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase
+    private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
+    @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<CreateTaskScreenEvent, CreateTaskScreenState, CreateTaskScreenNavigation, CreateTaskScreenConfig>() {
 
     private val taskId: String = checkNotNull(savedStateHandle.get<String>(AppNavDest.TASK_ID_KEY))
@@ -55,35 +62,40 @@ class CreateTaskViewModel @Inject constructor(
 
     override val uiScreenState: StateFlow<CreateTaskScreenState> =
         taskWithContentState.map { taskWithContent ->
-            provideScreenState(taskWithContent)
+            CreateTaskScreenState(
+                allTaskConfigItems = provideTaskConfigItems(taskWithContent),
+                canSave = taskWithContent?.task?.title?.isNotBlank() == true
+            )
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000L),
-            provideScreenState(taskWithContentState.value)
+            CreateTaskScreenState(
+                allTaskConfigItems = emptyList(),
+                canSave = false
+            )
         )
 
     override fun onEvent(event: CreateTaskScreenEvent) {
         when (event) {
-            is CreateTaskScreenEvent.ConfigEvent -> onConfigEvent(event)
+            is CreateTaskScreenEvent.OnItemTaskConfigClick -> onItemTaskConfigClick(event)
             is CreateTaskScreenEvent.ResultEvent -> onResultEvent(event)
             is CreateTaskScreenEvent.OnDismissRequest -> onDismissRequest()
             else -> Unit
         }
     }
 
-    private fun onConfigEvent(event: CreateTaskScreenEvent.ConfigEvent) {
-        when (event) {
-            is CreateTaskScreenEvent.ConfigEvent.OnConfigTaskTitleClick ->
-                onConfigTaskTitleClick()
+    private fun onItemTaskConfigClick(event: CreateTaskScreenEvent.OnItemTaskConfigClick) {
+        when (event.item) {
+            is ItemTaskConfig.Title -> onConfigTaskTitleClick()
+            is ItemTaskConfig.Progress -> {
+                when (event.item) {
+                    is ItemTaskConfig.Progress.Number -> onConfigTaskNumberProgressClick()
+                    is ItemTaskConfig.Progress.Time -> onConfigTaskTimeProgressClick()
+                }
+            }
+            is ItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
 
-            is CreateTaskScreenEvent.ConfigEvent.OnConfigTaskNumberProgressClick ->
-                onConfigTaskNumberProgressClick()
-
-            is CreateTaskScreenEvent.ConfigEvent.OnConfigTaskTimeProgressClick ->
-                onConfigTaskTimeProgressClick()
-
-            is CreateTaskScreenEvent.ConfigEvent.OnConfigTaskFrequencyClick ->
-                onConfigTaskFrequencyClick()
+            else -> Unit
         }
     }
 
@@ -233,46 +245,54 @@ class CreateTaskViewModel @Inject constructor(
         setUpNavigationState(CreateTaskScreenNavigation.Back)
     }
 
-    private fun provideScreenState(taskWithContentModel: TaskWithContentModel?): CreateTaskScreenState {
-        return CreateTaskScreenState(
-            taskTitle = taskWithContentModel?.task?.title ?: DomainConst.DEFAULT_TASK_TITLE,
-            taskDescription = taskWithContentModel?.task?.description
-                ?: DomainConst.DEFAULT_TASK_DESCRIPTION,
-            taskPriority = taskWithContentModel?.task?.priority
-                ?: DomainConst.DEFAULT_PRIORITY.toString(),
-            taskProgressContent = taskWithContentModel?.progressContent?.toUIProgressContent(),
-            taskFrequencyContent = taskWithContentModel?.frequencyContent?.toUIFrequencyContent(),
-            taskDateContent = taskWithContentModel?.let {
-                when (taskWithContentModel.task.type) {
-                    TaskType.SingleTask -> UITaskContent.Date.OneDay(taskWithContentModel.task.startDate)
-                    TaskType.RecurringTask, TaskType.Habit -> UITaskContent.Date.Period(
-                        startDate = taskWithContentModel.task.startDate,
-                        endDate = taskWithContentModel.task.endDate
-                    )
-                }
-            },
-            taskRemindersCount = 0,
-            taskTagCount = 0,
-            canSave = taskWithContentModel?.task?.title?.isNotBlank() == true
-        )
-    }
+    private suspend fun provideTaskConfigItems(taskWithContentModel: TaskWithContentModel?): List<ItemTaskConfig> =
+        withContext(defaultDispatcher) {
+            if (taskWithContentModel != null) {
+                mutableListOf<ItemTaskConfig>().apply {
+                    add(ItemTaskConfig.Title(taskWithContentModel.task.title))
+                    add(ItemTaskConfig.Description(taskWithContentModel.task.description))
+                    when (val pc = taskWithContentModel.progressContent.toUIProgressContent()) {
+                        is UITaskContent.Progress.Number -> {
+                            add(
+                                ItemTaskConfig.Progress.Number(pc)
+                            )
+                        }
 
-    private fun TaskContentModel.ProgressContent.toUIProgressContent(): UITaskContent.Progress? {
-        return when (this) {
-            is TaskContentModel.ProgressContent.Number -> UITaskContent.Progress.Number(this)
-            is TaskContentModel.ProgressContent.Time -> UITaskContent.Progress.Time(this)
-            else -> null
+                        is UITaskContent.Progress.Time -> {
+                            add(
+                                ItemTaskConfig.Progress.Time(pc)
+                            )
+                        }
+
+                        else -> Unit
+                    }
+
+                    when (val fc = taskWithContentModel.frequencyContent.toUIFrequencyContent()) {
+                        is UITaskContent.Frequency -> {
+                            add(
+                                ItemTaskConfig.Frequency(fc)
+                            )
+                        }
+
+                        else -> Unit
+                    }
+
+                    when (val dc = taskWithContentModel.task.toUIDateContent()) {
+                        is UITaskContent.Date.OneDay -> add(
+                            ItemTaskConfig.Date.OneDayDate(dc.date)
+                        )
+
+                        is UITaskContent.Date.Period -> {
+                            add(ItemTaskConfig.Date.StartDate(dc.startDate))
+                            add(ItemTaskConfig.Date.EndDate(dc.endDate))
+                        }
+                    }
+
+                    add(ItemTaskConfig.Reminders(0))
+                    add(ItemTaskConfig.Tags(0))
+                    add(ItemTaskConfig.Priority(taskWithContentModel.task.priority))
+
+                }.sortedBy { it.key.ordinal }
+            } else emptyList()
         }
-    }
-
-//    private fun TaskContentModel.FrequencyContent.toUIFrequencyContent(): UITaskContent.Frequency? {
-//        return when (this) {
-//            is TaskContentModel.FrequencyContent.EveryDay -> UITaskContent.Frequency.EveryDay(this)
-//            is TaskContentModel.FrequencyContent.DaysOfWeek ->
-//                UITaskContent.Frequency.DaysOfWeek(this)
-//
-//            else -> null
-//        }
-//    }
-
 }

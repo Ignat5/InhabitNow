@@ -16,10 +16,12 @@ import com.example.inhabitnow.data.util.toLocalDate
 import com.example.inhabitnow.data.util.toTaskContentTable
 import com.example.inhabitnow.data.util.toTaskTable
 import com.example.inhabitnow.data.util.toTaskWithContentEntity
+import database.TaskContentTable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 
@@ -101,14 +103,23 @@ class DefaultTaskRepository(
         )?.let { taskContentTable ->
             val targetDateEpochDay = targetDate.toEpochDay()
             val isNew = targetDateEpochDay > taskContentTable.startEpochDay
-            val contentId = if (isNew) randomUUID() else taskContentTable.id
-            taskDataSource.insertTaskContent(
-                taskContentTable.copy(
-                    id = contentId,
-                    content = content.toJson(json),
-                    startEpochDay = targetDateEpochDay
+            if (isNew) {
+                taskDataSource.insertTaskContent(
+                    TaskContentTable(
+                        id = randomUUID(),
+                        taskId = taskContentTable.taskId,
+                        contentType = taskContentTable.contentType,
+                        content = content.toJson(json),
+                        startEpochDay = targetDateEpochDay,
+                        createdAt = Clock.System.now().toEpochMilliseconds()
+                    )
                 )
-            )
+            } else {
+                taskDataSource.updateTaskContentById(
+                    contentId = taskContentTable.id,
+                    content = content.toJson(json)
+                )
+            }
         } ?: ResultModel.Error(IllegalStateException())
     }
 

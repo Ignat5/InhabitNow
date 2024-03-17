@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -26,11 +27,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressDialog
@@ -83,128 +86,260 @@ private fun CreateTaskScreenStateless(
                 .fillMaxSize()
                 .padding(it)
         ) {
+            val lastIndex = remember(state.allTaskConfigItems) {
+                state.allTaskConfigItems.lastIndex
+            }
+            val onItemClick = remember {
+                val callback: (item: ItemTaskConfig) -> Unit = { item ->
+                    onEvent(CreateTaskScreenEvent.OnItemTaskConfigClick(item))
+                }
+                callback
+            }
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                run {
-                    titleItem(
-                        title = state.taskTitle,
-                        onClick = {
-                            onEvent(CreateTaskScreenEvent.ConfigEvent.OnConfigTaskTitleClick)
+                itemsIndexed(
+                    items = state.allTaskConfigItems,
+                    key = { _, item -> item.key.ordinal },
+                    contentType = { _, item -> item.contentType.ordinal }
+                ) { index, item ->
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        val onClick = remember {
+                            val callback: () -> Unit = { onItemClick(item) }
+                            callback
                         }
-                    )
+                        when (item) {
+                            is ItemTaskConfig.Title -> {
+                                ItemTitleConfig(
+                                    item = item,
+                                    onClick = onClick
+                                )
+                            }
 
-                    itemDivider()
-                }
+                            is ItemTaskConfig.Description -> {
+                                ItemDescriptionConfig(
+                                    item = item,
+                                    onClick = onClick
+                                )
+                            }
 
-                run {
-                    descriptionItem(
-                        description = state.taskDescription,
-                        onClick = { /* TODO */ }
-                    )
+                            is ItemTaskConfig.Progress -> {
+                                ItemProgressConfig(
+                                    item = item,
+                                    onClick = onClick
+                                )
+                            }
 
-                    itemDivider()
-                }
+                            is ItemTaskConfig.Frequency -> {
+                                ItemFrequencyConfig(
+                                    item = item,
+                                    onClick = onClick
+                                )
+                            }
 
-                run {
-                    when (state.taskProgressContent) {
-                        is UITaskContent.Progress.Number -> {
-                            numberProgressItem(
-                                taskProgressContent = state.taskProgressContent.progressContent,
-                                onClick = {
-                                    onEvent(CreateTaskScreenEvent.ConfigEvent.OnConfigTaskNumberProgressClick)
+                            is ItemTaskConfig.Date -> {
+                                when (item) {
+                                    is ItemTaskConfig.Date.OneDayDate -> {
+                                        ItemOneDayDateConfig(
+                                            item = item,
+                                            onClick = onClick
+                                        )
+                                    }
+
+                                    is ItemTaskConfig.Date.StartDate -> {
+                                        ItemStartDateConfig(
+                                            item = item,
+                                            onClick = onClick
+                                        )
+                                    }
+
+                                    is ItemTaskConfig.Date.EndDate -> {
+                                        ItemEndDateConfig(
+                                            item = item,
+                                            onClick = onClick
+                                        )
+                                    }
                                 }
-                            )
-                            itemDivider()
-                        }
+                            }
 
-                        is UITaskContent.Progress.Time -> {
-                            timeProgressItem(
-                                taskProgressContent = state.taskProgressContent.progressContent,
-                                onClick = {
-                                    onEvent(CreateTaskScreenEvent.ConfigEvent.OnConfigTaskTimeProgressClick)
-                                }
-                            )
-                            itemDivider()
-                        }
+                            is ItemTaskConfig.Reminders -> {
+                                ItemRemindersConfig(
+                                    item = item,
+                                    onClick = onClick
+                                )
+                            }
 
-                        else -> Unit
+                            is ItemTaskConfig.Tags -> {
+                                ItemTagsConfig(
+                                    item = item,
+                                    onClick = onClick
+                                )
+                            }
+
+                            is ItemTaskConfig.Priority -> {
+                                ItemPriorityConfig(
+                                    item = item,
+                                    onClick = onClick
+                                )
+                            }
+                        }
+                        if (index != lastIndex) {
+                            HorizontalDivider()
+                        }
                     }
-
-                }
-
-                run {
-                    when (state.taskFrequencyContent) {
-                        is UITaskContent.Frequency.EveryDay -> {
-                            frequencyItem(
-                                frequencyContent = state.taskFrequencyContent,
-                                onClick = {
-                                    onEvent(CreateTaskScreenEvent.ConfigEvent.OnConfigTaskFrequencyClick)
-                                }
-                            )
-                            itemDivider()
-                        }
-
-                        is UITaskContent.Frequency.DaysOfWeek -> {
-                            frequencyItem(
-                                frequencyContent = state.taskFrequencyContent,
-                                onClick = {
-                                    onEvent(CreateTaskScreenEvent.ConfigEvent.OnConfigTaskFrequencyClick)
-                                }
-                            )
-                            itemDivider()
-                        }
-
-                        else -> Unit
-                    }
-                }
-
-                run {
-                    when (state.taskDateContent) {
-                        is UITaskContent.Date.OneDay -> {
-                            dateItem(
-                                dateContent = state.taskDateContent,
-                                onClick = {}
-                            )
-                            itemDivider()
-                        }
-
-                        is UITaskContent.Date.Period -> {
-                            dateItem(
-                                dateContent = state.taskDateContent,
-                                onStartDateClick = {},
-                                onEndDateClick = {}
-                            )
-                            itemDivider()
-                        }
-
-                        else -> Unit
-                    }
-                }
-
-                run {
-                    timeAndRemindersItem(
-                        reminderCount = state.taskRemindersCount,
-                        onClick = {}
-                    )
-                    itemDivider()
-                }
-
-                run {
-                    tagsItem(
-                        tagCount = state.taskTagCount,
-                        onClick = {}
-                    )
-                    itemDivider()
-                }
-
-                run {
-                    priorityItem(
-                        priority = state.taskPriority,
-                        onClick = {}
-                    )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ItemTitleConfig(
+    item: ItemTaskConfig.Title,
+    onClick: () -> Unit
+) {
+    BasicItemConfig(
+        iconResId = R.drawable.ic_edit,
+        titleText = "Activity name",
+        dataText = item.title,
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun ItemDescriptionConfig(
+    item: ItemTaskConfig.Description,
+    onClick: () -> Unit
+) {
+    BasicItemConfig(
+        iconResId = R.drawable.ic_description,
+        titleText = "Description",
+        dataText = item.description,
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun ItemProgressConfig(
+    item: ItemTaskConfig.Progress,
+    onClick: () -> Unit
+) {
+    val dataText = remember(item) {
+        when (item) {
+            is ItemTaskConfig.Progress.Number -> item.uiProgressContent.toDisplay()
+            is ItemTaskConfig.Progress.Time -> item.uiProgressContent.toDisplay()
+        }
+    }
+    BasicItemConfig(
+        iconResId = R.drawable.ic_goal,
+        titleText = "Daily goal",
+        dataText = dataText,
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun ItemFrequencyConfig(
+    item: ItemTaskConfig.Frequency,
+    onClick: () -> Unit
+) {
+    val dataText = remember(item) {
+        when (val fc = item.uiFrequencyContent) {
+            is UITaskContent.Frequency.EveryDay -> fc.toDisplay()
+            is UITaskContent.Frequency.DaysOfWeek -> fc.toDisplay()
+        }
+    }
+    BasicItemConfig(
+        iconResId = R.drawable.ic_frequency,
+        titleText = "Frequency",
+        dataText = dataText,
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun ItemOneDayDateConfig(
+    item: ItemTaskConfig.Date.OneDayDate,
+    onClick: () -> Unit
+) {
+    val dataText = remember(item) {
+        item.date.toDayMonthYear()
+    }
+    BasicItemConfig(
+        iconResId = R.drawable.ic_start_date,
+        titleText = "Date",
+        dataText = dataText,
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun ItemStartDateConfig(
+    item: ItemTaskConfig.Date.StartDate,
+    onClick: () -> Unit
+) {
+    val dataText = remember(item) {
+        item.date.toDayMonthYear()
+    }
+    BasicItemConfig(
+        iconResId = R.drawable.ic_start_date,
+        titleText = "Start date",
+        dataText = dataText,
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun ItemEndDateConfig(
+    item: ItemTaskConfig.Date.EndDate,
+    onClick: () -> Unit
+) {
+    val dataText = remember(item) {
+        item.date?.toDayMonthYear() ?: ""
+    }
+    BasicItemConfig(
+        iconResId = R.drawable.ic_end_date,
+        titleText = "End date",
+        dataText = dataText,
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun ItemRemindersConfig(
+    item: ItemTaskConfig.Reminders,
+    onClick: () -> Unit
+) {
+    BasicItemConfig(
+        iconResId = R.drawable.ic_notification,
+        titleText = "Time and reminders",
+        dataText = "${item.count}",
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun ItemTagsConfig(
+    item: ItemTaskConfig.Tags,
+    onClick: () -> Unit
+) {
+    BasicItemConfig(
+        iconResId = R.drawable.ic_tag,
+        titleText = "Tags",
+        dataText = "${item.count}",
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun ItemPriorityConfig(
+    item: ItemTaskConfig.Priority,
+    onClick: () -> Unit
+) {
+    BasicItemConfig(
+        iconResId = R.drawable.ic_priority,
+        titleText = "Priority",
+        dataText = item.priority,
+        onClick = onClick
+    )
 }
 
 @Composable
@@ -253,211 +388,8 @@ private fun CreateTaskScreenConfigStateless(
     }
 }
 
-private fun LazyListScope.titleItem(
-    title: String,
-    onClick: () -> Unit
-) {
-    item(
-        key = ConfigItemType.Title,
-        contentType = ConfigContentType.Standard
-    ) {
-        StandardItemConfig(
-            iconResId = R.drawable.ic_edit,
-            titleText = "Activity name",
-            dataText = title,
-            onClick = onClick
-        )
-    }
-}
-
-private fun LazyListScope.descriptionItem(
-    description: String,
-    onClick: () -> Unit
-) {
-    item(
-        key = ConfigItemType.Description,
-        contentType = ConfigContentType.Standard
-    ) {
-        StandardItemConfig(
-            iconResId = R.drawable.ic_description,
-            titleText = "Description",
-            dataText = description,
-            onClick = onClick
-        )
-    }
-}
-
-private fun LazyListScope.numberProgressItem(
-    taskProgressContent: TaskContentModel.ProgressContent.Number,
-    onClick: () -> Unit
-) {
-    item(
-        key = ConfigItemType.DailyGoal,
-        contentType = ConfigContentType.Standard
-    ) {
-        val dataText = remember(taskProgressContent) {
-            taskProgressContent.toDisplay()
-        }
-        StandardItemConfig(
-            iconResId = R.drawable.ic_goal,
-            titleText = "Daily goal",
-            dataText = dataText,
-            onClick = onClick
-        )
-    }
-}
-
-private fun LazyListScope.timeProgressItem(
-    taskProgressContent: TaskContentModel.ProgressContent.Time,
-    onClick: () -> Unit
-) {
-    item(
-        key = ConfigItemType.DailyGoal,
-        contentType = ConfigContentType.Standard
-    ) {
-        val dataText = remember(taskProgressContent) {
-            taskProgressContent.toDisplay()
-        }
-        StandardItemConfig(
-            iconResId = R.drawable.ic_goal,
-            titleText = "Daily goal",
-            dataText = dataText,
-            onClick = onClick
-        )
-    }
-}
-
-private fun LazyListScope.frequencyItem(
-    frequencyContent: UITaskContent.Frequency.EveryDay,
-    onClick: () -> Unit
-) {
-    item {
-        StandardItemConfig(
-            iconResId = R.drawable.ic_frequency,
-            titleText = "Frequency",
-            dataText = frequencyContent.toDisplay(),
-            onClick = onClick
-        )
-    }
-}
-
-private fun LazyListScope.frequencyItem(
-    frequencyContent: UITaskContent.Frequency.DaysOfWeek,
-    onClick: () -> Unit
-) {
-    item {
-        val dataText = remember(frequencyContent) {
-            frequencyContent.toDisplay()
-        }
-        StandardItemConfig(
-            iconResId = R.drawable.ic_frequency,
-            titleText = "Frequency",
-            dataText = dataText,
-            onClick = onClick
-        )
-    }
-}
-
-private fun LazyListScope.dateItem(
-    dateContent: UITaskContent.Date.OneDay,
-    onClick: () -> Unit
-) {
-    item(
-        key = ConfigItemType.Date,
-        contentType = ConfigContentType.Standard
-    ) {
-        StandardItemConfig(
-            iconResId = R.drawable.ic_start_date,
-            titleText = "Date",
-            dataText = dateContent.date.toDayMonthYear(),
-            onClick = onClick
-        )
-    }
-}
-
-private fun LazyListScope.dateItem(
-    dateContent: UITaskContent.Date.Period,
-    onStartDateClick: () -> Unit,
-    onEndDateClick: () -> Unit
-) {
-    item(
-        key = ConfigItemType.StartDate,
-        contentType = ConfigContentType.Standard
-    ) {
-        StandardItemConfig(
-            iconResId = R.drawable.ic_start_date,
-            titleText = "Start date",
-            dataText = dateContent.startDate.toDayMonthYear(),
-            onClick = onStartDateClick
-        )
-    }
-    itemDivider()
-    item(
-        key = ConfigItemType.EndDate,
-        contentType = ConfigContentType.Switch
-    ) {
-        StandardItemConfig(
-            iconResId = R.drawable.ic_end_date,
-            titleText = "End date",
-            dataText = dateContent.endDate?.toDayMonthYear() ?: " --- ",
-            onClick = onEndDateClick
-        )
-    }
-}
-
-private fun LazyListScope.timeAndRemindersItem(
-    reminderCount: Int,
-    onClick: () -> Unit
-) {
-    item(
-        key = ConfigItemType.TimeAndReminders,
-        contentType = ConfigContentType.Standard
-    ) {
-        StandardItemConfig(
-            iconResId = R.drawable.ic_notification,
-            titleText = "Time and reminders",
-            dataText = "$reminderCount",
-            onClick = onClick
-        )
-    }
-}
-
-private fun LazyListScope.tagsItem(
-    tagCount: Int,
-    onClick: () -> Unit
-) {
-    item(
-        key = ConfigItemType.Tags,
-        contentType = ConfigContentType.Standard
-    ) {
-        StandardItemConfig(
-            iconResId = R.drawable.ic_tag,
-            titleText = "Tags",
-            dataText = "$tagCount",
-            onClick = onClick
-        )
-    }
-}
-
-private fun LazyListScope.priorityItem(
-    priority: String,
-    onClick: () -> Unit
-) {
-    item(
-        key = ConfigItemType.Priority,
-        contentType = ConfigContentType.Standard
-    ) {
-        StandardItemConfig(
-            iconResId = R.drawable.ic_priority,
-            titleText = "Priority",
-            dataText = priority,
-            onClick = onClick
-        )
-    }
-}
-
 @Composable
-private fun StandardItemConfig(
+private fun BasicItemConfig(
     @DrawableRes iconResId: Int,
     titleText: String,
     dataText: String,
@@ -483,44 +415,19 @@ private fun StandardItemConfig(
                 text = titleText,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
+//                modifier = Modifier.weight(1f)
             )
             Text(
                 text = dataText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.End,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
-}
-
-private fun LazyListScope.itemDivider() {
-    item(
-        key = null,
-        contentType = null
-    ) {
-        HorizontalDivider()
-    }
-}
-
-private enum class ConfigItemType {
-    Title,
-    Description,
-    DailyGoal,
-    Frequency,
-    Date,
-    StartDate,
-    EndDate,
-    TimeAndReminders,
-    Tags,
-    Priority
-}
-
-private enum class ConfigContentType {
-    Standard,
-    Switch
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

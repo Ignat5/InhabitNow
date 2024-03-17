@@ -7,12 +7,12 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
-fun TaskContentModel.ProgressContent.Time.toDisplay(): String {
+fun UITaskContent.Progress.Time.toDisplay(): String {
     val prefix = "${this.limitType.toDisplay()} ${this.limitTime.toHourMinute()}"
     return "$prefix a day"
 }
 
-fun TaskContentModel.ProgressContent.Number.toDisplay(): String {
+fun UITaskContent.Progress.Number.toDisplay(): String {
     val prefix = "${this.limitType.toDisplay()} ${this.limitNumber}".let {
         if (this.limitUnit.isNotBlank()) "$it ${this.limitUnit}"
         else it
@@ -26,23 +26,13 @@ fun ProgressLimitType.toDisplay() = when (this) {
     ProgressLimitType.NoMoreThan -> "No more than"
 }
 
-fun TaskContentModel.FrequencyContent.DaysOfWeek.toDisplay(): String {
-    var result: String = ""
-    val daysOfWeek = this.daysOfWeek.toList().sortedBy { it.ordinal }
-    daysOfWeek.forEachIndexed { index, dayOfWeek ->
-        result += dayOfWeek.toDisplay()
-        if (index != daysOfWeek.lastIndex) result += ", "
-    }
-    return result
-}
-
 fun UITaskContent.Frequency.EveryDay.toDisplay() = "Every day"
 
 fun UITaskContent.Frequency.DaysOfWeek.toDisplay(): String {
     var result: String = ""
     val daysOfWeek = this.daysOfWeek.toList().sortedBy { it.ordinal }
     daysOfWeek.forEachIndexed { index, dayOfWeek ->
-        result += dayOfWeek.toDisplay()
+        result += dayOfWeek.toDisplay().take(3)
         if (index != daysOfWeek.lastIndex) result += ", "
     }
     return result

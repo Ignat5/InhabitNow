@@ -1,19 +1,23 @@
 package com.example.inhabitnow.android.presentation.model
 
+import com.example.inhabitnow.core.type.ProgressLimitType
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 sealed interface UITaskContent {
     sealed interface Progress : UITaskContent {
-        val progressContent: TaskContentModel.ProgressContent
 
         data class Number(
-            override val progressContent: TaskContentModel.ProgressContent.Number
+            val limitType: ProgressLimitType,
+            val limitNumber: String,
+            val limitUnit: String
         ) : Progress
 
         data class Time(
-            override val progressContent: TaskContentModel.ProgressContent.Time
+            val limitType: ProgressLimitType,
+            val limitTime: LocalTime
         ) : Progress
     }
 

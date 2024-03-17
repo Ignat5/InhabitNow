@@ -4,10 +4,7 @@ import com.example.inhabitnow.android.presentation.base.state_holder.BaseResultS
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenState
-import com.example.inhabitnow.android.presentation.model.SelectableDayOfWeek
 import com.example.inhabitnow.android.presentation.model.UITaskContent
-import com.example.inhabitnow.android.ui.toUIFrequencyContent
-import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
