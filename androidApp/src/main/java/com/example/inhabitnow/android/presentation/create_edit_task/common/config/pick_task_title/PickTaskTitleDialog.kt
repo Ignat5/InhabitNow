@@ -3,7 +3,11 @@ package com.example.inhabitnow.android.presentation.create_edit_task.common.conf
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
@@ -33,31 +37,37 @@ private fun PickTaskTitleDialogStateless(
         onDismissRequest = { onEvent(PickTaskTitleScreenEvent.OnDismissRequest) },
         actionButtons = BaseDialogBuilder.ActionButtons(
             confirmButton = {
-                BaseDialogBuilder.ActionButton(
+                BaseDialogBuilder.BaseActionButton(
                     text = "Confirm",
                     enabled = state.canConfirm,
                     onClick = { onEvent(PickTaskTitleScreenEvent.OnConfirmClick) }
                 )
             },
             dismissButton = {
-                BaseDialogBuilder.ActionButton(
+                BaseDialogBuilder.BaseActionButton(
                     text = "Cancel",
                     onClick = { onEvent(PickTaskTitleScreenEvent.OnDismissRequest) }
                 )
             }
         )
     ) {
+        val focusRequester = remember { FocusRequester() }
         BaseTextFiledBuilder.BaseOutlinedTextField(
             value = state.inputTitle,
             onValueChange = {
                 onEvent(PickTaskTitleScreenEvent.OnInputUpdate(it))
             },
-            modifier = Modifier.fillMaxWidth(),
-            isInitFocused = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
             singleLine = true,
             label = {
                 Text(text = "name")
-            },
+            }
         )
+
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
     }
 }

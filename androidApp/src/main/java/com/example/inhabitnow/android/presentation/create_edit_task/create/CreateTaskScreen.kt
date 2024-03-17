@@ -31,11 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleDialog
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.PickTaskNumberProgressDialog
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenResult
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.PickTaskTimeProgressDialog
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressDialog
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
@@ -136,16 +135,20 @@ private fun CreateTaskScreenStateless(
                     when (state.taskFrequencyContent) {
                         is UITaskContent.Frequency.EveryDay -> {
                             frequencyItem(
-                                frequencyContent = state.taskFrequencyContent.frequencyContent,
-                                onClick = {}
+                                frequencyContent = state.taskFrequencyContent,
+                                onClick = {
+                                    onEvent(CreateTaskScreenEvent.ConfigEvent.OnConfigTaskFrequencyClick)
+                                }
                             )
                             itemDivider()
                         }
 
                         is UITaskContent.Frequency.DaysOfWeek -> {
                             frequencyItem(
-                                frequencyContent = state.taskFrequencyContent.frequencyContent,
-                                onClick = {}
+                                frequencyContent = state.taskFrequencyContent,
+                                onClick = {
+                                    onEvent(CreateTaskScreenEvent.ConfigEvent.OnConfigTaskFrequencyClick)
+                                }
                             )
                             itemDivider()
                         }
@@ -238,6 +241,15 @@ private fun CreateTaskScreenConfigStateless(
                 }
             )
         }
+
+        is CreateTaskScreenConfig.PickTaskFrequency -> {
+            PickTaskFrequencyDialog(
+                stateHolder = config.stateHolder,
+                onResult = {
+                    onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskFrequency(it))
+                }
+            )
+        }
     }
 }
 
@@ -316,24 +328,21 @@ private fun LazyListScope.timeProgressItem(
 }
 
 private fun LazyListScope.frequencyItem(
-    frequencyContent: TaskContentModel.FrequencyContent.EveryDay,
+    frequencyContent: UITaskContent.Frequency.EveryDay,
     onClick: () -> Unit
 ) {
     item {
-        val dataText = remember(frequencyContent) {
-            frequencyContent.toDisplay()
-        }
         StandardItemConfig(
             iconResId = R.drawable.ic_frequency,
             titleText = "Frequency",
-            dataText = dataText,
+            dataText = frequencyContent.toDisplay(),
             onClick = onClick
         )
     }
 }
 
 private fun LazyListScope.frequencyItem(
-    frequencyContent: TaskContentModel.FrequencyContent.DaysOfWeek,
+    frequencyContent: UITaskContent.Frequency.DaysOfWeek,
     onClick: () -> Unit
 ) {
     item {

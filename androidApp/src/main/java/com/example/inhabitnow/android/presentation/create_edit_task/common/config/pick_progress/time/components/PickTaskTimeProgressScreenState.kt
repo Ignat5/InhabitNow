@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.components
+package com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components
 
 import androidx.compose.runtime.Immutable
 import com.example.inhabitnow.android.presentation.base.components.state.ScreenState

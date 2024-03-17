@@ -1,9 +1,9 @@
-package com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number
+package com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number
 
 import com.example.inhabitnow.android.presentation.base.state_holder.BaseResultStateHolder
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenEvent
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenResult
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenState
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenEvent
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenState
 import com.example.inhabitnow.core.type.ProgressLimitType
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import kotlinx.coroutines.CoroutineScope
@@ -27,6 +27,10 @@ class PickTaskNumberProgressStateHolder(
 
     private val inputLimitUnitState =
         MutableStateFlow<String>(initProgressContent.limitUnit)
+
+    private val limitNumberValidator: (value: String) -> Boolean = { value ->
+        value.isEmpty() || validateNumber(value)
+    }
 
     override val uiScreenState: StateFlow<PickTaskNumberProgressScreenState> =
         combine(
@@ -74,11 +78,7 @@ class PickTaskNumberProgressStateHolder(
     }
 
     private fun onInputUpdateLimitNumber(event: PickTaskNumberProgressScreenEvent.OnInputUpdateLimitNumber) {
-        val value = event.value
-        val isValid = value.length <= MAX_CHAR_COUNT && validateNumber(value)
-        if (value.isEmpty() || isValid) {
-            inputLimitNumberState.update { event.value }
-        }
+        inputLimitNumberState.update { event.value }
     }
 
     private fun onInputUpdateLimitUnit(event: PickTaskNumberProgressScreenEvent.OnInputUpdateLimitUnit) {
@@ -111,13 +111,15 @@ class PickTaskNumberProgressStateHolder(
         return PickTaskNumberProgressScreenState(
             limitType = limitType,
             limitNumber = limitNumber,
+            limitNumberValidator = limitNumberValidator,
             limitUnit = limitUnit,
             canSave = validateNumber(limitNumber)
         )
     }
 
     private fun validateNumber(limitNumber: String) =
-        limitNumber.toDoubleOrNull()?.let { it in MIN_LIMIT_NUMBER..MAX_LIMIT_NUMBER } ?: false
+        limitNumber.length <= MAX_CHAR_COUNT && limitNumber.toDoubleOrNull()
+            ?.let { it in MIN_LIMIT_NUMBER..MAX_LIMIT_NUMBER } ?: false
 
     companion object {
         private const val MIN_LIMIT_NUMBER: Double = 0.0

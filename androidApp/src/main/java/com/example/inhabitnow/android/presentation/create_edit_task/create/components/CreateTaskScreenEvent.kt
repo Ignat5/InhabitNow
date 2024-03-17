@@ -2,9 +2,10 @@ package com.example.inhabitnow.android.presentation.create_edit_task.create.comp
 
 import com.example.inhabitnow.android.presentation.base.components.event.ScreenEvent
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenResult
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.components.PickTaskTimeProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components.PickTaskTimeProgressScreenResult
 
 sealed interface CreateTaskScreenEvent : ScreenEvent {
     data object OnSaveClick : CreateTaskScreenEvent
@@ -14,6 +15,7 @@ sealed interface CreateTaskScreenEvent : ScreenEvent {
         data object OnConfigTaskTitleClick : ConfigEvent
         data object OnConfigTaskNumberProgressClick : ConfigEvent
         data object OnConfigTaskTimeProgressClick : ConfigEvent
+        data object OnConfigTaskFrequencyClick : ConfigEvent
     }
 
     sealed interface ResultEvent : CreateTaskScreenEvent {
@@ -29,6 +31,10 @@ sealed interface CreateTaskScreenEvent : ScreenEvent {
 
         data class PickTaskTimeProgress(
             override val result: PickTaskTimeProgressScreenResult
+        ) : ResultEvent
+
+        data class PickTaskFrequency(
+            override val result: PickTaskFrequencyScreenResult
         ) : ResultEvent
     }
 }

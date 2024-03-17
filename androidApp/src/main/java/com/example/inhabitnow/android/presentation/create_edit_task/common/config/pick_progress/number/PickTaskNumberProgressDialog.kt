@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number
+package com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,9 +18,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenEvent
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenResult
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.number.components.PickTaskNumberProgressScreenState
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenEvent
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenState
 import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
 import com.example.inhabitnow.android.ui.base.BaseInputBuilder
 import com.example.inhabitnow.android.ui.base.BaseTextFiledBuilder
@@ -50,7 +50,7 @@ private fun PickTaskNumberProgressDialogStateless(
         },
         actionButtons = BaseDialogBuilder.ActionButtons(
             confirmButton = {
-                BaseDialogBuilder.ActionButton(
+                BaseDialogBuilder.BaseActionButton(
                     text = "Confirm",
                     enabled = state.canSave,
                     onClick = {
@@ -59,7 +59,7 @@ private fun PickTaskNumberProgressDialogStateless(
                 )
             },
             dismissButton = {
-                BaseDialogBuilder.ActionButton(
+                BaseDialogBuilder.BaseActionButton(
                     text = "Cancel",
                     onClick = {
                         onEvent(PickTaskNumberProgressScreenEvent.OnDismissRequest)
@@ -87,6 +87,7 @@ private fun PickTaskNumberProgressDialogStateless(
                 onValueChange = {
                     onEvent(PickTaskNumberProgressScreenEvent.OnInputUpdateLimitNumber(it))
                 },
+                valueValidator = state.limitNumberValidator,
                 modifier = Modifier.fillMaxWidth(),
                 label = {
                     Text(text = "Goal")

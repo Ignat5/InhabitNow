@@ -1,9 +1,9 @@
-package com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time
+package com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time
 
 import com.example.inhabitnow.android.presentation.base.state_holder.BaseResultStateHolder
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.components.PickTaskTimeProgressScreenEvent
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.components.PickTaskTimeProgressScreenResult
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.components.PickTaskTimeProgressScreenState
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components.PickTaskTimeProgressScreenEvent
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components.PickTaskTimeProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components.PickTaskTimeProgressScreenState
 import com.example.inhabitnow.core.type.ProgressLimitType
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import kotlinx.coroutines.CoroutineScope

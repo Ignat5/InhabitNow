@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.presentation.create_edit_task.common.config.progress.time.components
+package com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components
 
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel

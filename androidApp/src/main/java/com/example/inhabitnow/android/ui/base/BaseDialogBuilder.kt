@@ -1,14 +1,19 @@
 package com.example.inhabitnow.android.ui.base
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +33,7 @@ import androidx.compose.ui.window.DialogProperties
 object BaseDialogBuilder {
 
     private val DialogPadding = PaddingValues(all = 24.dp)
+    private const val DEFAULT_STATIC_DIALOG_SCREEN_FRACTION = 0.5f
 
     data class ActionButtons(
         val confirmButton: @Composable () -> Unit,
@@ -91,27 +97,19 @@ object BaseDialogBuilder {
     }
 
     @Composable
-    fun BaseScrollableDialog(
+    fun BaseStaticDialog(
         onDismissRequest: () -> Unit,
         modifier: Modifier = Modifier,
+        screenFraction: Float = DEFAULT_STATIC_DIALOG_SCREEN_FRACTION,
         properties: DialogProperties = DialogProperties(),
         title: (@Composable () -> Unit)? = null,
         actionButtons: ActionButtons? = null,
         content: @Composable ColumnScope.() -> Unit
     ) {
-        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-        val isPortrait = screenHeight >= screenWidth
         BaseDialog(
             onDismissRequest = onDismissRequest,
             modifier = modifier.then(
-                if (isPortrait) {
-                    Modifier.height(screenHeight / 2)
-                } else {
-                    Modifier
-                        .height(screenHeight)
-                        .padding(vertical = 16.dp)
-                }
+                Modifier.fillMaxHeight(screenFraction)
             ),
             properties = properties,
             title = title,
@@ -141,7 +139,7 @@ object BaseDialogBuilder {
     }
 
     @Composable
-    fun ActionButton(
+    fun BaseActionButton(
         text: String,
         enabled: Boolean = true,
         onClick: () -> Unit

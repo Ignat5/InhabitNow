@@ -1,6 +1,7 @@
 package com.example.inhabitnow.android.presentation.model
 
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 sealed interface UITaskContent {
@@ -16,16 +17,12 @@ sealed interface UITaskContent {
         ) : Progress
     }
 
-    sealed interface Frequency : UITaskContent {
-        val frequencyContent: TaskContentModel.FrequencyContent
+    sealed class Frequency(val type: Type) : UITaskContent {
+        enum class Type { EveryDay, DaysOfWeek }
 
-        data class EveryDay(
-            override val frequencyContent: TaskContentModel.FrequencyContent.EveryDay
-        ) : Frequency
+        data object EveryDay : Frequency(Type.EveryDay)
 
-        data class DaysOfWeek(
-            override val frequencyContent: TaskContentModel.FrequencyContent.DaysOfWeek
-        ) : Frequency
+        data class DaysOfWeek(val daysOfWeek: Set<DayOfWeek>) : Frequency(Type.DaysOfWeek)
     }
 
     sealed interface Date : UITaskContent {
