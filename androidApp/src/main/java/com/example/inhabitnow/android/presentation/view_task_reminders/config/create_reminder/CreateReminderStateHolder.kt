@@ -69,7 +69,13 @@ class CreateReminderStateHolder(
     }
 
     private fun onPickReminderTimeClick() {
-
+        baseConfigState.update {
+            BaseConfigState.Config(
+                CreateReminderScreenConfig.PickTime(
+                    time = inputTimeState.value
+                )
+            )
+        }
     }
 
     private fun onPickReminderType(event: CreateReminderScreenEvent.OnPickReminderType) {

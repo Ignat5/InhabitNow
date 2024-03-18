@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -21,16 +22,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.example.inhabitnow.android.presentation.base.components.config.BaseConfigState
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.model.UIReminderContent
 import com.example.inhabitnow.android.presentation.model.UITaskContent
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.components.CreateReminderScreenEvent
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.components.CreateReminderScreenResult
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.components.CreateReminderScreenState
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.config.CreateReminderScreenConfig
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.config.pick_time.PickTimeDialog
 import com.example.inhabitnow.android.ui.base.BaseDaysOfWeekInput
 import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
 import com.example.inhabitnow.android.ui.base.BaseInputBuilder
 import com.example.inhabitnow.android.ui.base.BaseItemOptionBuilder
+import com.example.inhabitnow.android.ui.base.BaseTimeInput
+import com.example.inhabitnow.android.ui.base.BaseTimePicker
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
 import com.example.inhabitnow.core.type.ReminderType
@@ -81,31 +87,6 @@ private fun CreateReminderDialogStateless(
                 .fillMaxWidth(),
             contentPadding = PaddingValues(vertical = 16.dp),
         ) {
-            item(
-                key = ScreenItemKey.Time.name,
-                contentType = ScreenItemKey.Time.name
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    BaseInputBuilder.BaseOutlinedInputBox(
-                        onClick = { onEvent(CreateReminderScreenEvent.OnPickReminderTimeClick) },
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = state.time.toHourMinute(),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
 
             item(
                 key = ScreenItemKey.Type.name,
@@ -121,6 +102,68 @@ private fun CreateReminderDialogStateless(
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+
+            item {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+            item(
+                key = ScreenItemKey.Time.name,
+                contentType = ScreenItemKey.Time.name
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    val initHours = remember { state.time.hour }
+                    val initMinutes = remember { state.time.minute }
+
+                    BaseTimePicker(
+                        initHours = initHours,
+                        initMinutes = initMinutes,
+                        onHoursChanged = {},
+                        onMinutesChanged = {},
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+//                    BaseTimeInput(
+//                        hours = initHours,
+//                        minutes = initMinutes,
+//                        onInputUpdateHours = {},
+//                        onInputUpdateMinutes = {} ,
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+
+
+//                    BaseInputBuilder.BaseOutlinedInputBox(
+//                        onClick = { onEvent(CreateReminderScreenEvent.OnPickReminderTimeClick) },
+//                    ) {
+//                        Row(
+//                            modifier = Modifier.fillMaxWidth(),
+//                            verticalAlignment = Alignment.CenterVertically,
+//                            horizontalArrangement = Arrangement.Center
+//                        ) {
+//                            Text(
+//                                text = state.time.toHourMinute(),
+//                                style = MaterialTheme.typography.bodyLarge,
+//                                color = MaterialTheme.colorScheme.onSurface,
+//                                modifier = Modifier.fillMaxWidth(),
+//                                textAlign = TextAlign.Center
+//                            )
+//                        }
+//                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+
+            item {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
@@ -168,6 +211,24 @@ private fun CreateReminderDialogStateless(
                 }
             }
         }
+
+        when (val baseConfig = state.baseConfig) {
+            is BaseConfigState.Idle -> Unit
+            is BaseConfigState.Config -> {
+                when (val config = baseConfig.config) {
+                    is CreateReminderScreenConfig.PickTime -> {
+                        PickTimeDialog(
+                            initHours = config.time.hour,
+                            initMinutes = config.time.minute,
+                            onResult = {
+
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
     }
 }
 
