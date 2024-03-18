@@ -33,9 +33,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.model.UIResultModel
+import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenConfig
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenEvent
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenNavigation
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenState
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.CreateReminderDialog
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
 import com.example.inhabitnow.android.ui.toIconResId
@@ -50,7 +52,12 @@ fun ViewTaskRemindersScreen(
         viewModel = viewModel,
         onNavigation = onNavigate,
         configContent = { config ->
-
+            ScreenConfigStateless(
+                config = config,
+                onResult = { result ->
+                    viewModel.onEvent(result)
+                }
+            )
         }
     ) { state, onEvent ->
         ViewTaskRemindersScreenStateless(state, onEvent)
@@ -129,6 +136,25 @@ private fun ViewTaskRemindersScreenStateless(
 //                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ScreenConfigStateless(
+    config: ViewTaskRemindersScreenConfig,
+    onResult: (ViewTaskRemindersScreenEvent.ResultEvent) -> Unit
+) {
+    when (config) {
+        is ViewTaskRemindersScreenConfig.CreateReminder -> {
+            CreateReminderDialog(
+                stateHolder = config.stateHolder,
+                onResult = {
+                    onResult(
+                        ViewTaskRemindersScreenEvent.ResultEvent.CreateReminder(it)
+                    )
+                }
+            )
         }
     }
 }

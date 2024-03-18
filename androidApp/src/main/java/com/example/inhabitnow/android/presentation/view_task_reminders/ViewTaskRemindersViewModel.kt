@@ -9,6 +9,7 @@ import com.example.inhabitnow.android.presentation.view_task_reminders.component
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenEvent
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenNavigation
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenState
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.CreateReminderStateHolder
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -48,10 +49,24 @@ class ViewTaskRemindersViewModel @Inject constructor(
 
     override fun onEvent(event: ViewTaskRemindersScreenEvent) {
         when (event) {
+            is ViewTaskRemindersScreenEvent.ResultEvent -> onResultEvent(event)
             is ViewTaskRemindersScreenEvent.OnReminderClick -> onReminderClick(event)
             is ViewTaskRemindersScreenEvent.OnCreateReminderClick -> onCreateReminderClick()
             is ViewTaskRemindersScreenEvent.OnDeleteReminderClick -> onDeleteReminderClick(event)
             is ViewTaskRemindersScreenEvent.OnBackClick -> onBackClick()
+        }
+    }
+
+    private fun onResultEvent(event: ViewTaskRemindersScreenEvent.ResultEvent) {
+        when (event) {
+            is ViewTaskRemindersScreenEvent.ResultEvent.CreateReminder ->
+                onCreateReminderResultEvent(event)
+        }
+    }
+
+    private fun onCreateReminderResultEvent(event: ViewTaskRemindersScreenEvent.ResultEvent.CreateReminder) {
+        onIdleToAction {
+
         }
     }
 
@@ -60,7 +75,13 @@ class ViewTaskRemindersViewModel @Inject constructor(
     }
 
     private fun onCreateReminderClick() {
-
+        setUpConfigState(
+            ViewTaskRemindersScreenConfig.CreateReminder(
+                stateHolder = CreateReminderStateHolder(
+                    holderScope = provideChildScope()
+                )
+            )
+        )
     }
 
     private fun onDeleteReminderClick(event: ViewTaskRemindersScreenEvent.OnDeleteReminderClick) {

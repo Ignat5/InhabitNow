@@ -40,7 +40,9 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenState
 import com.example.inhabitnow.android.presentation.model.UITaskContent
+import com.example.inhabitnow.android.ui.base.BaseDaysOfWeekInput
 import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
+import com.example.inhabitnow.android.ui.base.BaseItemOptionBuilder
 import com.example.inhabitnow.android.ui.toDisplay
 import kotlinx.datetime.DayOfWeek
 
@@ -128,7 +130,7 @@ private fun PickTaskFrequencyDialogStateless(
                             if (isSelected) {
                                 (state.uiFrequencyContent as? UITaskContent.Frequency.DaysOfWeek)?.let { fc ->
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    DaysOfWeekRow(
+                                    BaseDaysOfWeekInput(
                                         selectedDaysOfWeek = fc.daysOfWeek,
                                         onDayOfWeekClick = {
                                             onEvent(PickTaskFrequencyScreenEvent.OnDayOfWeekClick(it))
@@ -150,84 +152,89 @@ private fun ItemFrequency(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .clickable { onClick() }
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            RadioButton(selected = isSelected, onClick = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
+    BaseItemOptionBuilder.BaseItemRadioButton(
+        titleText = title,
+        isSelected = isSelected,
+        onClick = onClick
+    )
+//    Box(
+//        modifier = Modifier
+//            .clickable { onClick() }
+//    ) {
+//        Row(
+//            verticalAlignment = Alignment.CenterVertically,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(8.dp)
+//        ) {
+//            RadioButton(selected = isSelected, onClick = null)
+//            Spacer(modifier = Modifier.width(8.dp))
+//            Text(
+//                text = title,
+//                style = MaterialTheme.typography.titleMedium,
+//                color = MaterialTheme.colorScheme.onSurface,
+//                modifier = Modifier.weight(1f)
+//            )
+//        }
+//    }
 }
 
-@Composable
-private fun DaysOfWeekRow(
-    selectedDaysOfWeek: Set<DayOfWeek>,
-    onDayOfWeekClick: (DayOfWeek) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val allDaysOfWeek = remember { DayOfWeek.entries }
-
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(allDaysOfWeek.size),
-        modifier = modifier.height(48.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        items(allDaysOfWeek) { item ->
-            val isSelected = remember(selectedDaysOfWeek) {
-                item in selectedDaysOfWeek
-            }
-            ItemDayOfWeek(
-                dayOfWeek = item,
-                isSelected = isSelected,
-                onClick = {
-                    onDayOfWeekClick(item)
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
-}
-
-@Composable
-private fun ItemDayOfWeek(
-    dayOfWeek: DayOfWeek,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val letter = remember(dayOfWeek) {
-        dayOfWeek.toDisplay().take(1)
-    }
-    Box(
-        modifier = modifier
-            .clip(MaterialTheme.shapes.small)
-            .background(
-                if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.surfaceVariant
-            )
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = letter,
-            style = MaterialTheme.typography.labelLarge,
-            color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-    }
-}
+//@Composable
+//private fun DaysOfWeekRow(
+//    selectedDaysOfWeek: Set<DayOfWeek>,
+//    onDayOfWeekClick: (DayOfWeek) -> Unit,
+//    modifier: Modifier = Modifier
+//) {
+//    val allDaysOfWeek = remember { DayOfWeek.entries }
+//
+//    LazyVerticalGrid(
+//        columns = GridCells.Fixed(allDaysOfWeek.size),
+//        modifier = modifier.height(48.dp),
+//        verticalArrangement = Arrangement.Center,
+//        horizontalArrangement = Arrangement.spacedBy(4.dp)
+//    ) {
+//        items(allDaysOfWeek) { item ->
+//            val isSelected = remember(selectedDaysOfWeek) {
+//                item in selectedDaysOfWeek
+//            }
+//            ItemDayOfWeek(
+//                dayOfWeek = item,
+//                isSelected = isSelected,
+//                onClick = {
+//                    onDayOfWeekClick(item)
+//                },
+//                modifier = Modifier.fillMaxSize()
+//            )
+//        }
+//    }
+//}
+//
+//@Composable
+//private fun ItemDayOfWeek(
+//    dayOfWeek: DayOfWeek,
+//    isSelected: Boolean,
+//    onClick: () -> Unit,
+//    modifier: Modifier = Modifier
+//) {
+//    val letter = remember(dayOfWeek) {
+//        dayOfWeek.toDisplay().take(1)
+//    }
+//    Box(
+//        modifier = modifier
+//            .clip(MaterialTheme.shapes.small)
+//            .background(
+//                if (isSelected) MaterialTheme.colorScheme.primary
+//                else MaterialTheme.colorScheme.surfaceVariant
+//            )
+//            .clickable { onClick() },
+//        contentAlignment = Alignment.Center
+//    ) {
+//        Text(
+//            text = letter,
+//            style = MaterialTheme.typography.labelLarge,
+//            color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+//            else MaterialTheme.colorScheme.onSurfaceVariant,
+//            modifier = Modifier.padding(vertical = 8.dp)
+//        )
+//    }
+//}

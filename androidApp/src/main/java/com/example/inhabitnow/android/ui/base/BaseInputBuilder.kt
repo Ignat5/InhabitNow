@@ -15,6 +15,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -97,9 +98,9 @@ object BaseInputBuilder {
     }
 
     @Composable
-    fun BaseOutlinedInput(
-        modifier: Modifier = Modifier,
+    fun BaseOutlinedInputBox(
         onClick: () -> Unit,
+        modifier: Modifier = Modifier,
         content: @Composable () -> Unit
     ) {
         Box(
@@ -107,9 +108,9 @@ object BaseInputBuilder {
                 .clickable { onClick() }
                 .heightIn(min = TextFieldDefaults.MinHeight)
                 .border(
-                    width = TextFieldDefaults.UnfocusedIndicatorThickness,
+                    width = OutlinedTextFieldDefaults.UnfocusedBorderThickness,
                     color = MaterialTheme.colorScheme.outline,
-                    shape = TextFieldDefaults.shape
+                    shape = OutlinedTextFieldDefaults.shape
                 ),
             contentAlignment = Alignment.Center
         ) {

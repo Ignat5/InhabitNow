@@ -47,6 +47,11 @@ fun ReminderContentModel.ScheduleContent.toDisplay() = when (this) {
     is ReminderContentModel.ScheduleContent.DaysOfWeek -> this.toDisplay()
 }
 
+fun ReminderType.toDisplay() = when (this) {
+    ReminderType.NoReminder -> "No reminder"
+    ReminderType.Notification -> "Notification"
+}
+
 fun Collection<DayOfWeek>.toDisplay(): String {
     var result: String = ""
     val daysOfWeek = this.toList().sortedBy { it.ordinal }
