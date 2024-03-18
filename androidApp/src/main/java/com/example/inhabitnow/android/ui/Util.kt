@@ -1,7 +1,11 @@
 package com.example.inhabitnow.android.ui
 
+import androidx.annotation.DrawableRes
+import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.model.UITaskContent
 import com.example.inhabitnow.core.type.ProgressLimitType
+import com.example.inhabitnow.core.type.ReminderType
+import com.example.inhabitnow.domain.model.reminder.content.ReminderContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -29,11 +33,26 @@ fun ProgressLimitType.toDisplay() = when (this) {
 fun UITaskContent.Frequency.EveryDay.toDisplay() = "Every day"
 
 fun UITaskContent.Frequency.DaysOfWeek.toDisplay(): String {
+    return this.daysOfWeek.toDisplay()
+}
+
+fun ReminderContentModel.ScheduleContent.EveryDay.toDisplay(): String = "Every day"
+
+fun ReminderContentModel.ScheduleContent.DaysOfWeek.toDisplay(): String {
+    return this.daysOfWeek.toDisplay()
+}
+
+fun ReminderContentModel.ScheduleContent.toDisplay() = when (this) {
+    is ReminderContentModel.ScheduleContent.EveryDay -> this.toDisplay()
+    is ReminderContentModel.ScheduleContent.DaysOfWeek -> this.toDisplay()
+}
+
+fun Collection<DayOfWeek>.toDisplay(): String {
     var result: String = ""
-    val daysOfWeek = this.daysOfWeek.toList().sortedBy { it.ordinal }
+    val daysOfWeek = this.toList().sortedBy { it.ordinal }
     daysOfWeek.forEachIndexed { index, dayOfWeek ->
         result += dayOfWeek.toDisplay().take(3)
-        if (index != daysOfWeek.lastIndex) result += ", "
+        if (index != daysOfWeek.lastIndex) result += " | "
     }
     return result
 }
@@ -63,4 +82,9 @@ fun LocalDate.toDayMonthYear(): String {
 
 private fun Int.insertZeroIfRequired(): String = this.let { number ->
     if (number <= 9) "0$number" else "$number"
+}
+
+fun ReminderType.toIconResId(): Int = when (this) {
+    ReminderType.NoReminder -> R.drawable.ic_notification
+    ReminderType.Notification -> R.drawable.ic_notification_off
 }

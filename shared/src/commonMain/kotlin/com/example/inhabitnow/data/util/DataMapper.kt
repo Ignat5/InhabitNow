@@ -126,7 +126,7 @@ private fun String.fromJsonContentType(json: Json) =
     json.decodeFromString<TaskContentEntity.Type>(this)
 
 /** reminder **/
-fun ReminderTable.toReminderModel(json: Json) = ReminderEntity(
+fun ReminderTable.toReminderEntity(json: Json) = ReminderEntity(
     id = this.id,
     taskId = this.taskId,
     type = this.type.fromJsonReminderType(json),

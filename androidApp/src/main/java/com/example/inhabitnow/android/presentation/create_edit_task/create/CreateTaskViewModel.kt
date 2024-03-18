@@ -93,10 +93,16 @@ class CreateTaskViewModel @Inject constructor(
                     is ItemTaskConfig.Progress.Time -> onConfigTaskTimeProgressClick()
                 }
             }
+
             is ItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
+            is ItemTaskConfig.Reminders -> onConfigTaskRemindersClick()
 
             else -> Unit
         }
+    }
+
+    private fun onConfigTaskRemindersClick() {
+        setUpNavigationState(CreateTaskScreenNavigation.ViewReminders(taskId))
     }
 
     private fun onConfigTaskFrequencyClick() {
