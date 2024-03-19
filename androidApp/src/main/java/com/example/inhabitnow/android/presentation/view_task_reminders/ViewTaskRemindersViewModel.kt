@@ -10,11 +10,12 @@ import com.example.inhabitnow.android.presentation.view_task_reminders.component
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenNavigation
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenState
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.confirm_delete_reminder.ConfirmDeleteReminderScreenResult
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.CreateReminderStateHolder
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.components.CreateReminderScreenResult
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.create.CreateReminderStateHolder
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.create.components.CreateReminderScreenResult
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.EditReminderStateHolder
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.components.EditReminderScreenResult
 import com.example.inhabitnow.android.ui.toScheduleContent
-import com.example.inhabitnow.core.model.ResultModelWithException
-import com.example.inhabitnow.domain.model.exceptions.SaveReminderException
+import com.example.inhabitnow.android.ui.toUIScheduleContent
 import com.example.inhabitnow.domain.use_case.reminder.delete_reminder_by_id.DeleteReminderByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.SaveReminderUseCase
@@ -75,7 +76,23 @@ class ViewTaskRemindersViewModel @Inject constructor(
             is ViewTaskRemindersScreenEvent.ResultEvent.ConfirmDeleteReminder ->
                 onConfirmDeleteReminderResultEvent(event)
 
+            is ViewTaskRemindersScreenEvent.ResultEvent.EditReminder ->
+                onEditReminderResultEvent(event)
+
         }
+    }
+
+    private fun onEditReminderResultEvent(event: ViewTaskRemindersScreenEvent.ResultEvent.EditReminder) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is EditReminderScreenResult.Confirm -> onConfirmEditReminder(result)
+                is EditReminderScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmEditReminder(result: EditReminderScreenResult.Confirm) {
+
     }
 
     private fun onConfirmDeleteReminderResultEvent(event: ViewTaskRemindersScreenEvent.ResultEvent.ConfirmDeleteReminder) {
@@ -114,7 +131,19 @@ class ViewTaskRemindersViewModel @Inject constructor(
     }
 
     private fun onReminderClick(event: ViewTaskRemindersScreenEvent.OnReminderClick) {
-
+        allRemindersState.value.find { it.id == event.reminderId }?.let { reminderModel ->
+            setUpConfigState(
+                ViewTaskRemindersScreenConfig.EditReminder(
+                    stateHolder = EditReminderStateHolder(
+                        reminderId = reminderModel.id,
+                        reminderTime = reminderModel.time,
+                        reminderType = reminderModel.type,
+                        reminderSchedule = reminderModel.schedule.toUIScheduleContent(),
+                        holderScope = provideChildScope()
+                    )
+                )
+            )
+        }
     }
 
     private fun onCreateReminderClick() {

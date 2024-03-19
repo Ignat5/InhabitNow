@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.components
+package com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.components
 
 import com.example.inhabitnow.android.presentation.base.components.state.ScreenState
 import com.example.inhabitnow.android.presentation.model.UIReminderContent

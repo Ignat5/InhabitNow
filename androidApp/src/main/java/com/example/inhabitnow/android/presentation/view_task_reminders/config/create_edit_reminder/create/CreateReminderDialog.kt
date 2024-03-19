@@ -1,12 +1,11 @@
-package com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder
+package com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.create
 
 import androidx.compose.runtime.Composable
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
-import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.BaseCreateEditReminderDialog
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.components.CreateReminderScreenEvent
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.components.CreateReminderScreenResult
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.components.CreateReminderScreenState
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.BaseCreateEditReminderDialog
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.create.components.CreateReminderScreenEvent
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.create.components.CreateReminderScreenResult
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.create.components.CreateReminderScreenState
 
 @Composable
 fun CreateReminderDialog(

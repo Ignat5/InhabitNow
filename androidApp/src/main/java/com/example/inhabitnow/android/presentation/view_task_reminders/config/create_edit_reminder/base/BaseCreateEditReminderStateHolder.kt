@@ -1,11 +1,11 @@
-package com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder
+package com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base
 
 import com.example.inhabitnow.android.presentation.base.components.event.ScreenEvent
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
 import com.example.inhabitnow.android.presentation.base.state_holder.BaseResultStateHolder
 import com.example.inhabitnow.android.presentation.model.UIReminderContent
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.components.BaseCreateEditReminderScreenEvent
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.components.BaseCreateEditReminderScreenState
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.components.BaseCreateEditReminderScreenEvent
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.components.BaseCreateEditReminderScreenState
 import com.example.inhabitnow.core.type.ReminderType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,19 +17,19 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalTime
 
 abstract class BaseCreateEditReminderStateHolder<SE : ScreenEvent, SS : BaseCreateEditReminderScreenState, SR : ScreenResult>(
-    time: LocalTime? = null,
-    type: ReminderType? = null,
-    schedule: UIReminderContent.Schedule? = null,
+    initTime: LocalTime? = null,
+    initType: ReminderType? = null,
+    initSchedule: UIReminderContent.Schedule? = null,
     final override val holderScope: CoroutineScope
 ) : BaseResultStateHolder<SE, SS, SR>() {
 
     abstract fun onConfirm()
     abstract fun onDismiss()
 
-    protected val inputHoursState = MutableStateFlow(time?.hour ?: defaultTime.hour)
-    protected val inputMinutesState = MutableStateFlow(time?.minute ?: defaultTime.minute)
-    protected val inputTypeState = MutableStateFlow(type ?: defaultType)
-    protected val inputScheduleState = MutableStateFlow(schedule ?: defaultSchedule)
+    protected val inputHoursState = MutableStateFlow(initTime?.hour ?: defaultTime.hour)
+    protected val inputMinutesState = MutableStateFlow(initTime?.minute ?: defaultTime.minute)
+    protected val inputTypeState = MutableStateFlow(initType ?: defaultType)
+    protected val inputScheduleState = MutableStateFlow(initSchedule ?: defaultSchedule)
 
     protected val canConfirmState = inputScheduleState.map { schedule ->
         when (schedule) {

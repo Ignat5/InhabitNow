@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder
+package com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,16 +13,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.example.inhabitnow.android.presentation.model.UIReminderContent
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.components.BaseCreateEditReminderScreenEvent
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.components.BaseCreateEditReminderScreenState
-import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.components.CreateReminderScreenState
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.components.BaseCreateEditReminderScreenEvent
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.components.BaseCreateEditReminderScreenState
 import com.example.inhabitnow.android.ui.base.BaseDaysOfWeekInput
 import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
 import com.example.inhabitnow.android.ui.base.BaseItemOptionBuilder
