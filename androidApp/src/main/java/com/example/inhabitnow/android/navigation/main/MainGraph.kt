@@ -58,14 +58,14 @@ fun NavGraphBuilder.mainGraph(
                     }
                 }
             },
-            configContent = { config ->
+            configContent = { config, onEvent ->
                 ScreenConfigContent(
                     config = config,
                     onPickTaskTypeResult = { result ->
-                        viewModel.onEvent(MainScreenEvent.ResultEvent.PickTaskType(result))
+                        onEvent(MainScreenEvent.ResultEvent.PickTaskType(result))
                     },
                     onPickTaskProgressTypeResult = { result ->
-                        viewModel.onEvent(MainScreenEvent.ResultEvent.PickTaskProgressType(result))
+                        onEvent(MainScreenEvent.ResultEvent.PickTaskProgressType(result))
                     }
                 )
             },

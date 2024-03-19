@@ -53,11 +53,11 @@ fun CreateTaskScreen(onNavigation: (CreateTaskScreenNavigation) -> Unit) {
     BaseScreen(
         viewModel = viewModel,
         onNavigation = onNavigation,
-        configContent = { config ->
+        configContent = { config, onEvent ->
             CreateTaskScreenConfigStateless(
                 config = config,
                 onResultEvent = { resultEvent ->
-                    viewModel.onEvent(resultEvent)
+                    onEvent(resultEvent)
                 }
             )
         }

@@ -54,12 +54,10 @@ fun ViewTaskRemindersScreen(
     BaseScreen(
         viewModel = viewModel,
         onNavigation = onNavigate,
-        configContent = { config ->
+        configContent = { config, onEvent ->
             ScreenConfigStateless(
                 config = config,
-                onResult = { result ->
-                    viewModel.onEvent(result)
-                }
+                onResult = { result -> onEvent(result) }
             )
         }
     ) { state, onEvent ->
@@ -250,28 +248,6 @@ private fun CreateReminderButton(
             )
         }
     }
-//    OutlinedButton(
-//        onClick = onClick,
-//        modifier = modifier
-//    ) {
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.Center
-//        ) {
-//            Icon(
-//                painter = painterResource(id = R.drawable.ic_add),
-//                tint = MaterialTheme.colorScheme.primary,
-//                contentDescription = null
-//            )
-//            Spacer(modifier = Modifier.width(8.dp))
-//            Text(
-//                text = "Add",
-//                style = MaterialTheme.typography.labelLarge,
-//                color = MaterialTheme.colorScheme.primary
-//            )
-//        }
-//    }
 }
 
 @Composable
