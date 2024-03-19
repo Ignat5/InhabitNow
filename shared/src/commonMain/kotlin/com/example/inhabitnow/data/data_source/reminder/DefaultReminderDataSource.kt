@@ -18,6 +18,10 @@ class DefaultReminderDataSource(
         reminderDao.selectRemindersByTaskId(taskId)
     }
 
+    override fun readRemindersCountByTaskId(taskId: String): Flow<Long> = readQuery {
+        reminderDao.selectRemindersCountByTaskId(taskId)
+    }
+
     override suspend fun insertReminder(reminderTable: ReminderTable): ResultModel<Unit> =
         runQuery {
             reminderDao.insertReminder(reminderTable)

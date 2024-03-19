@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface ReminderDataSource {
     fun readRemindersByTaskId(taskId: String): Flow<List<ReminderTable>>
+    fun readRemindersCountByTaskId(taskId: String): Flow<Long>
     suspend fun insertReminder(reminderTable: ReminderTable): ResultModel<Unit>
     suspend fun updateReminderById(
         reminderId: String,

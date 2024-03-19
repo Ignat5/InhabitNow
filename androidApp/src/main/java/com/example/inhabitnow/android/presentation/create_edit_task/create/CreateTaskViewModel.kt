@@ -27,6 +27,7 @@ import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
+import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
@@ -35,6 +36,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -45,6 +47,7 @@ import javax.inject.Inject
 class CreateTaskViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val readTaskWithContentByIdUseCase: ReadTaskWithContentByIdUseCase,
+    private val readRemindersCountByTaskIdUseCase: ReadRemindersCountByTaskIdUseCase,
     private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
     private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
     private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
@@ -60,10 +63,23 @@ class CreateTaskViewModel @Inject constructor(
             null
         )
 
+    private val taskRemindersCountState = readRemindersCountByTaskIdUseCase(taskId)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            0
+        )
+
     override val uiScreenState: StateFlow<CreateTaskScreenState> =
-        taskWithContentState.map { taskWithContent ->
+        combine(
+            taskWithContentState,
+            taskRemindersCountState
+        ) { taskWithContent, taskRemindersCount ->
             CreateTaskScreenState(
-                allTaskConfigItems = provideTaskConfigItems(taskWithContent),
+                allTaskConfigItems = provideTaskConfigItems(
+                    taskWithContentModel = taskWithContent,
+                    taskRemindersCount = taskRemindersCount
+                ),
                 canSave = taskWithContent?.task?.title?.isNotBlank() == true
             )
         }.stateIn(
@@ -251,7 +267,10 @@ class CreateTaskViewModel @Inject constructor(
         setUpNavigationState(CreateTaskScreenNavigation.Back)
     }
 
-    private suspend fun provideTaskConfigItems(taskWithContentModel: TaskWithContentModel?): List<ItemTaskConfig> =
+    private suspend fun provideTaskConfigItems(
+        taskWithContentModel: TaskWithContentModel?,
+        taskRemindersCount: Int
+    ): List<ItemTaskConfig> =
         withContext(defaultDispatcher) {
             if (taskWithContentModel != null) {
                 mutableListOf<ItemTaskConfig>().apply {
@@ -294,7 +313,7 @@ class CreateTaskViewModel @Inject constructor(
                         }
                     }
 
-                    add(ItemTaskConfig.Reminders(0))
+                    add(ItemTaskConfig.Reminders(taskRemindersCount))
                     add(ItemTaskConfig.Tags(0))
                     add(ItemTaskConfig.Priority(taskWithContentModel.task.priority))
 

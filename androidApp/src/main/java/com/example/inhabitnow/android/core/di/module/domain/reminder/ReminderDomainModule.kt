@@ -6,6 +6,8 @@ import com.example.inhabitnow.domain.use_case.reminder.delete_reminder_by_id.Def
 import com.example.inhabitnow.domain.use_case.reminder.delete_reminder_by_id.DeleteReminderByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.DefaultReadRemindersByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
+import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.DefaultReadRemindersCountByTaskIdUseCase
+import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.DefaultSaveReminderUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.SaveReminderUseCase
 import com.example.inhabitnow.domain.use_case.reminder.update_reminder.DefaultUpdateReminderByIdUseCase
@@ -67,6 +69,13 @@ object ReminderDomainModule {
             defaultDispatcher = defaultDispatcher,
             externalScope = externalScope
         )
+    }
+
+    @Provides
+    fun provideReadRemindersCountByTaskIdUseCase(
+        reminderRepository: ReminderRepository
+    ): ReadRemindersCountByTaskIdUseCase {
+        return DefaultReadRemindersCountByTaskIdUseCase(reminderRepository = reminderRepository)
     }
 
 }
