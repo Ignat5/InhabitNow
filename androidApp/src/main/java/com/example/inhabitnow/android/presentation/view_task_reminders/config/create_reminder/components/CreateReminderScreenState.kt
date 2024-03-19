@@ -10,9 +10,9 @@ import kotlinx.datetime.LocalTime
 
 @Immutable
 data class CreateReminderScreenState(
-    val time: LocalTime,
+    val hours: Int,
+    val minutes: Int,
     val type: ReminderType,
     val schedule: UIReminderContent.Schedule,
-    val baseConfig: BaseConfigState<CreateReminderScreenConfig>,
     val canConfirm: Boolean
 ) : ScreenState

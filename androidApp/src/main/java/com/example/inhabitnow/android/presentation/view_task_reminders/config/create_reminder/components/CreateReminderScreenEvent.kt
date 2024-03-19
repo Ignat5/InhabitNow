@@ -6,7 +6,8 @@ import com.example.inhabitnow.core.type.ReminderType
 import kotlinx.datetime.DayOfWeek
 
 sealed interface CreateReminderScreenEvent : ScreenEvent {
-    data object OnPickReminderTimeClick : CreateReminderScreenEvent
+    data class OnHoursValueUpdate(val hours: Int) : CreateReminderScreenEvent
+    data class OnMinutesValueUpdate(val minutes: Int) : CreateReminderScreenEvent
     data class OnPickReminderType(val type: ReminderType) : CreateReminderScreenEvent
     data class OnReminderScheduleTypeClick(
         val type: UIReminderContent.Schedule.Type

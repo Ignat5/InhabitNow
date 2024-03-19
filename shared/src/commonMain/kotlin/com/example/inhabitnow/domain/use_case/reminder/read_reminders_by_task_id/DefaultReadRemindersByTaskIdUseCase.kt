@@ -17,7 +17,9 @@ class DefaultReadRemindersByTaskIdUseCase(
         reminderRepository.readRemindersByTaskId(taskId).map { allReminders ->
             if (allReminders.isNotEmpty()) {
                 withContext(defaultDispatcher) {
-                    allReminders.map { it.toReminderModel() }
+                    allReminders
+                        .map { it.toReminderModel() }
+                        .sortedBy { it.time }
                 }
             } else emptyList()
         }

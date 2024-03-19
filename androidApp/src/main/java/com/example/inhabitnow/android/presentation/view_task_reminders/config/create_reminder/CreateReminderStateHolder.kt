@@ -25,40 +25,45 @@ class CreateReminderStateHolder(
     override val holderScope: CoroutineScope
 ) : BaseResultStateHolder<CreateReminderScreenEvent, CreateReminderScreenState, CreateReminderScreenResult>() {
 
-    private val inputTimeState = MutableStateFlow(time ?: defaultTime)
+    private val inputHoursState = MutableStateFlow(time?.hour ?: defaultTime.hour)
+    private val inputMinutesState = MutableStateFlow(time?.minute ?: defaultTime.minute)
     private val inputTypeState = MutableStateFlow(type ?: defaultType)
     private val inputScheduleState = MutableStateFlow(schedule ?: defaultSchedule)
 
-    private val baseConfigState =
-        MutableStateFlow<BaseConfigState<CreateReminderScreenConfig>>(BaseConfigState.Idle)
-
     override val uiScreenState: StateFlow<CreateReminderScreenState> =
         combine(
-            inputTimeState, inputTypeState, inputScheduleState, baseConfigState
-        ) { inputTime, inputType, inputSchedule, baseConfig ->
+            inputHoursState, inputMinutesState, inputTypeState, inputScheduleState
+        ) { inputHours, inputMinutes, inputType, inputSchedule ->
             CreateReminderScreenState(
-                time = inputTime,
+                hours = inputHours,
+                minutes = inputMinutes,
                 type = inputType,
                 schedule = inputSchedule,
-                baseConfig = baseConfig,
                 canConfirm = checkIfCanConfirm(inputSchedule)
             )
         }.stateIn(
             holderScope,
             SharingStarted.WhileSubscribed(5000L),
             CreateReminderScreenState(
-                time = inputTimeState.value,
+                hours = inputHoursState.value,
+                minutes = inputMinutesState.value,
                 type = inputTypeState.value,
                 schedule = inputScheduleState.value,
-                baseConfig = baseConfigState.value,
                 canConfirm = checkIfCanConfirm(inputScheduleState.value)
             )
         )
 
     override fun onEvent(event: CreateReminderScreenEvent) {
         when (event) {
-            is CreateReminderScreenEvent.OnPickReminderTimeClick -> onPickReminderTimeClick()
-            is CreateReminderScreenEvent.OnPickReminderType -> onPickReminderType(event)
+            is CreateReminderScreenEvent.OnHoursValueUpdate ->
+                onHoursValueUpdate(event)
+
+            is CreateReminderScreenEvent.OnMinutesValueUpdate ->
+                onMinutesValueUpdate(event)
+
+            is CreateReminderScreenEvent.OnPickReminderType ->
+                onPickReminderType(event)
+
             is CreateReminderScreenEvent.OnReminderScheduleTypeClick ->
                 onReminderScheduleTypeClick(event)
 
@@ -68,14 +73,12 @@ class CreateReminderStateHolder(
         }
     }
 
-    private fun onPickReminderTimeClick() {
-        baseConfigState.update {
-            BaseConfigState.Config(
-                CreateReminderScreenConfig.PickTime(
-                    time = inputTimeState.value
-                )
-            )
-        }
+    private fun onHoursValueUpdate(event: CreateReminderScreenEvent.OnHoursValueUpdate) {
+        inputHoursState.update { event.hours }
+    }
+
+    private fun onMinutesValueUpdate(event: CreateReminderScreenEvent.OnMinutesValueUpdate) {
+        inputMinutesState.update { event.minutes }
     }
 
     private fun onPickReminderType(event: CreateReminderScreenEvent.OnPickReminderType) {
@@ -117,7 +120,10 @@ class CreateReminderStateHolder(
         if (uiScreenState.value.canConfirm) {
             setUpResult(
                 CreateReminderScreenResult.Confirm(
-                    time = inputTimeState.value,
+                    time = LocalTime(
+                        hour = inputHoursState.value,
+                        minute = inputMinutesState.value
+                    ),
                     type = inputTypeState.value,
                     uiScheduleContent = inputScheduleState.value
                 )

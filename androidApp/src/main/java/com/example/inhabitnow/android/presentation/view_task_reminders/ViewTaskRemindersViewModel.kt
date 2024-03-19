@@ -10,18 +10,25 @@ import com.example.inhabitnow.android.presentation.view_task_reminders.component
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenNavigation
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenState
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.CreateReminderStateHolder
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.components.CreateReminderScreenResult
+import com.example.inhabitnow.android.ui.toScheduleContent
+import com.example.inhabitnow.core.model.ResultModelWithException
+import com.example.inhabitnow.domain.model.exceptions.SaveReminderException
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
+import com.example.inhabitnow.domain.use_case.reminder.save_reminder.SaveReminderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ViewTaskRemindersViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val readRemindersByTaskIdUseCase: ReadRemindersByTaskIdUseCase
+    private val readRemindersByTaskIdUseCase: ReadRemindersByTaskIdUseCase,
+    private val saveReminderUseCase: SaveReminderUseCase
 ) : BaseViewModel<ViewTaskRemindersScreenEvent, ViewTaskRemindersScreenState, ViewTaskRemindersScreenNavigation, ViewTaskRemindersScreenConfig>() {
 
     private val taskId: String = checkNotNull(savedStateHandle.get<String>(AppNavDest.TASK_ID_KEY))
@@ -66,7 +73,21 @@ class ViewTaskRemindersViewModel @Inject constructor(
 
     private fun onCreateReminderResultEvent(event: ViewTaskRemindersScreenEvent.ResultEvent.CreateReminder) {
         onIdleToAction {
+            when (val result = event.result) {
+                is CreateReminderScreenResult.Confirm -> onConfirmCreateReminder(result)
+                is CreateReminderScreenResult.Dismiss -> Unit
+            }
+        }
+    }
 
+    private fun onConfirmCreateReminder(result: CreateReminderScreenResult.Confirm) {
+        viewModelScope.launch {
+            saveReminderUseCase(
+                taskId = taskId,
+                reminderType = result.type,
+                reminderTime = result.time,
+                reminderSchedule = result.uiScheduleContent.toScheduleContent()
+            )
         }
     }
 

@@ -129,14 +129,18 @@ private fun CreateReminderDialogStateless(
                 key = ScreenItemKey.Time.name,
                 contentType = ScreenItemKey.Time.name
             ) {
-                val initHours = remember { state.time.hour }
-                val initMinutes = remember { state.time.minute }
+                val initHours = remember { state.hours }
+                val initMinutes = remember { state.minutes }
 
                 BaseTimePicker(
                     initHours = initHours,
                     initMinutes = initMinutes,
-                    onHoursChanged = {},
-                    onMinutesChanged = {},
+                    onHoursChanged = {
+                        onEvent(CreateReminderScreenEvent.OnHoursValueUpdate(it))
+                    },
+                    onMinutesChanged = {
+                        onEvent(CreateReminderScreenEvent.OnMinutesValueUpdate(it))
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }

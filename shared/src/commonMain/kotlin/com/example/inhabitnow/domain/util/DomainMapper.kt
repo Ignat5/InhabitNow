@@ -113,6 +113,14 @@ private fun ReminderContentEntity.ScheduleContent.toScheduleModel() =
         )
     }
 
+internal fun ReminderContentModel.ScheduleContent.toScheduleModel() =
+    when (this) {
+        is ReminderContentModel.ScheduleContent.EveryDay -> ReminderContentEntity.ScheduleContent.EveryDay
+        is ReminderContentModel.ScheduleContent.DaysOfWeek -> ReminderContentEntity.ScheduleContent.DaysOfWeek(
+            this.daysOfWeek
+        )
+    }
+
 
 
 

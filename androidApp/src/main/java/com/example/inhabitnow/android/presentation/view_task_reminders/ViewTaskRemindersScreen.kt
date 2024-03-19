@@ -1,6 +1,7 @@
 package com.example.inhabitnow.android.presentation.view_task_reminders
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,6 +65,7 @@ fun ViewTaskRemindersScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ViewTaskRemindersScreenStateless(
     state: ViewTaskRemindersScreenState,
@@ -81,16 +83,14 @@ private fun ViewTaskRemindersScreenStateless(
                 .padding(it)
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxWidth()
             ) {
                 when (state.allRemindersResultModel) {
                     is UIResultModel.Loading, is UIResultModel.Data -> {
                         items(
                             items = state.allRemindersResultModel.data ?: emptyList(),
                             key = { item -> item.id },
-                            contentType = { ScreenItemKey.Reminder.ordinal }
+                            contentType = { ScreenItemKey.Reminder.name }
                         ) { item ->
                             ItemReminder(
                                 item = item,
@@ -99,7 +99,8 @@ private fun ViewTaskRemindersScreenStateless(
                                 },
                                 onDeleteClick = {
                                     onEvent(ViewTaskRemindersScreenEvent.OnDeleteReminderClick(item.id))
-                                }
+                                },
+                                modifier = Modifier.animateItemPlacement()
                             )
                         }
                     }
@@ -110,7 +111,9 @@ private fun ViewTaskRemindersScreenStateless(
                             contentType = ScreenItemKey.NoRemindersMessage.ordinal
                         ) {
                             NoRemindersMessage(
-                                modifier = Modifier.padding(16.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
                             )
                         }
                     }
@@ -124,17 +127,8 @@ private fun ViewTaskRemindersScreenStateless(
                         onClick = {
                             onEvent(ViewTaskRemindersScreenEvent.OnCreateReminderClick)
                         },
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier.padding(16.dp)
                     )
-//                    Column(modifier = Modifier.fillMaxWidth()) {
-//                        Spacer(modifier = Modifier.height(16.dp))
-//                        CreateReminderButton(
-//                            onClick = {
-//                                onEvent(ViewTaskRemindersScreenEvent.OnCreateReminderClick)
-//                            },
-//                            modifier = Modifier.padding(horizontal = 16.dp)
-//                        )
-//                    }
                 }
             }
         }
@@ -164,15 +158,18 @@ private fun ScreenConfigStateless(
 private fun ItemReminder(
     item: ReminderModel,
     onClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() }
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {

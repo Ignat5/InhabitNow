@@ -4,5 +4,4 @@ import com.example.inhabitnow.android.presentation.base.components.config.Screen
 import kotlinx.datetime.LocalTime
 
 sealed interface CreateReminderScreenConfig : ScreenConfig {
-    data class PickTime(val time: LocalTime) : CreateReminderScreenConfig
 }
