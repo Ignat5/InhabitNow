@@ -90,6 +90,6 @@ private fun Int.insertZeroIfRequired(): String = this.let { number ->
 }
 
 fun ReminderType.toIconResId(): Int = when (this) {
-    ReminderType.NoReminder -> R.drawable.ic_notification
-    ReminderType.Notification -> R.drawable.ic_notification_off
+    ReminderType.NoReminder -> R.drawable.ic_notification_off
+    ReminderType.Notification -> R.drawable.ic_notification
 }

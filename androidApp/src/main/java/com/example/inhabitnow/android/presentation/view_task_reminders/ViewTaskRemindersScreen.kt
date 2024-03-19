@@ -82,7 +82,8 @@ private fun ViewTaskRemindersScreenStateless(
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 when (state.allRemindersResultModel) {
                     is UIResultModel.Loading, is UIResultModel.Data -> {

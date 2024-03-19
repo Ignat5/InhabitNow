@@ -19,7 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -78,12 +80,9 @@ private fun TimeUnitLazyColumn(
         val initIndex = remember { seed + initValue }
         val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = initIndex)
         val flingBehavior = rememberSnapFlingBehavior(lazyListState = lazyListState)
-        val currentItemIndex = remember(lazyListState.isScrollInProgress) {
-            lazyListState.firstVisibleItemIndex + 1
+        var currentItemIndex by remember {
+            mutableIntStateOf(lazyListState.firstVisibleItemIndex + 1)
         }
-//        val currentItemIndex by remember {
-//            derivedStateOf { lazyListState.firstVisibleItemIndex + 1 }
-//        }
         LazyColumn(
             state = lazyListState,
             flingBehavior = flingBehavior,
@@ -116,6 +115,12 @@ private fun TimeUnitLazyColumn(
                     shape = MaterialTheme.shapes.small
                 )
         )
+
+        LaunchedEffect(lazyListState.isScrollInProgress) {
+            if (!lazyListState.isScrollInProgress) {
+                currentItemIndex = lazyListState.firstVisibleItemIndex + 1
+            }
+        }
 
         LaunchedEffect(currentItemIndex) {
             onValueChanged(currentItemIndex % timeUnitType.base)
