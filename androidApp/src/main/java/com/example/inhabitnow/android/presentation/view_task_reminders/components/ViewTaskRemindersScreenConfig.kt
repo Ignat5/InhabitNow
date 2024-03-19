@@ -7,4 +7,8 @@ sealed interface ViewTaskRemindersScreenConfig : ScreenConfig {
     data class CreateReminder(
         val stateHolder: CreateReminderStateHolder
     ) : ViewTaskRemindersScreenConfig
+
+    data class ConfirmDeleteReminder(
+        val reminderId: String
+    ) : ViewTaskRemindersScreenConfig
 }

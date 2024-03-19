@@ -2,6 +2,8 @@ package com.example.inhabitnow.android.core.di.module.domain.reminder
 
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.data.repository.reminder.ReminderRepository
+import com.example.inhabitnow.domain.use_case.reminder.delete_reminder_by_id.DefaultDeleteReminderByIdUseCase
+import com.example.inhabitnow.domain.use_case.reminder.delete_reminder_by_id.DeleteReminderByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.DefaultReadRemindersByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.DefaultSaveReminderUseCase
@@ -37,6 +39,17 @@ object ReminderDomainModule {
         return DefaultSaveReminderUseCase(
             reminderRepository = reminderRepository,
             defaultDispatcher = defaultDispatcher,
+            externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideDeleteReminderByIdUseCase(
+        reminderRepository: ReminderRepository,
+        externalScope: CoroutineScope
+    ): DeleteReminderByIdUseCase {
+        return DefaultDeleteReminderByIdUseCase(
+            reminderRepository = reminderRepository,
             externalScope = externalScope
         )
     }

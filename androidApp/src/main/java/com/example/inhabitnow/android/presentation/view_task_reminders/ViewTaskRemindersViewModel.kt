@@ -9,11 +9,13 @@ import com.example.inhabitnow.android.presentation.view_task_reminders.component
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenEvent
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenNavigation
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenState
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.confirm_delete_reminder.ConfirmDeleteReminderScreenResult
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.CreateReminderStateHolder
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.components.CreateReminderScreenResult
 import com.example.inhabitnow.android.ui.toScheduleContent
 import com.example.inhabitnow.core.model.ResultModelWithException
 import com.example.inhabitnow.domain.model.exceptions.SaveReminderException
+import com.example.inhabitnow.domain.use_case.reminder.delete_reminder_by_id.DeleteReminderByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.SaveReminderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +30,8 @@ import javax.inject.Inject
 class ViewTaskRemindersViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val readRemindersByTaskIdUseCase: ReadRemindersByTaskIdUseCase,
-    private val saveReminderUseCase: SaveReminderUseCase
+    private val saveReminderUseCase: SaveReminderUseCase,
+    private val deleteReminderByIdUseCase: DeleteReminderByIdUseCase
 ) : BaseViewModel<ViewTaskRemindersScreenEvent, ViewTaskRemindersScreenState, ViewTaskRemindersScreenNavigation, ViewTaskRemindersScreenConfig>() {
 
     private val taskId: String = checkNotNull(savedStateHandle.get<String>(AppNavDest.TASK_ID_KEY))
@@ -68,6 +71,25 @@ class ViewTaskRemindersViewModel @Inject constructor(
         when (event) {
             is ViewTaskRemindersScreenEvent.ResultEvent.CreateReminder ->
                 onCreateReminderResultEvent(event)
+
+            is ViewTaskRemindersScreenEvent.ResultEvent.ConfirmDeleteReminder ->
+                onConfirmDeleteReminderResultEvent(event)
+
+        }
+    }
+
+    private fun onConfirmDeleteReminderResultEvent(event: ViewTaskRemindersScreenEvent.ResultEvent.ConfirmDeleteReminder) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is ConfirmDeleteReminderScreenResult.Confirm -> onConfirmDeleteReminder(result)
+                is ConfirmDeleteReminderScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmDeleteReminder(result: ConfirmDeleteReminderScreenResult.Confirm) {
+        viewModelScope.launch {
+            deleteReminderByIdUseCase(result.reminderId)
         }
     }
 
@@ -106,7 +128,7 @@ class ViewTaskRemindersViewModel @Inject constructor(
     }
 
     private fun onDeleteReminderClick(event: ViewTaskRemindersScreenEvent.OnDeleteReminderClick) {
-
+        setUpConfigState(ViewTaskRemindersScreenConfig.ConfirmDeleteReminder(event.reminderId))
     }
 
     private fun onBackClick() {

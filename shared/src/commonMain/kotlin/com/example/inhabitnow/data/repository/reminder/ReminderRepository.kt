@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface ReminderRepository {
     fun readRemindersByTaskId(taskId: String): Flow<List<ReminderEntity>>
     suspend fun saveReminder(reminderEntity: ReminderEntity): ResultModel<Unit>
+    suspend fun deleteReminderById(reminderId: String): ResultModel<Unit>
 }

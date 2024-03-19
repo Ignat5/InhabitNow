@@ -31,4 +31,7 @@ class DefaultReminderRepository(
             reminderDataSource.insertReminder(reminderEntity.toReminderTable(json))
         }
 
+    override suspend fun deleteReminderById(reminderId: String): ResultModel<Unit> =
+        reminderDataSource.deleteReminderById(reminderId)
+
 }

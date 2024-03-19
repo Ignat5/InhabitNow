@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import com.example.inhabitnow.android.presentation.view_task_reminders.component
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenEvent
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenNavigation
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenState
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.confirm_delete_reminder.ConfirmDeleteReminderDialog
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_reminder.CreateReminderDialog
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
@@ -151,6 +153,15 @@ private fun ScreenConfigStateless(
                 }
             )
         }
+
+        is ViewTaskRemindersScreenConfig.ConfirmDeleteReminder -> {
+            ConfirmDeleteReminderDialog(
+                reminderId = config.reminderId,
+                onResult = {
+                    onResult(ViewTaskRemindersScreenEvent.ResultEvent.ConfirmDeleteReminder(it))
+                }
+            )
+        }
     }
 }
 
@@ -216,12 +227,13 @@ private fun CreateReminderButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    OutlinedButton(
+    TextButton(
         onClick = onClick,
         modifier = modifier
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -232,12 +244,34 @@ private fun CreateReminderButton(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Add",
+                text = "New reminder",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
         }
     }
+//    OutlinedButton(
+//        onClick = onClick,
+//        modifier = modifier
+//    ) {
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.Center
+//        ) {
+//            Icon(
+//                painter = painterResource(id = R.drawable.ic_add),
+//                tint = MaterialTheme.colorScheme.primary,
+//                contentDescription = null
+//            )
+//            Spacer(modifier = Modifier.width(8.dp))
+//            Text(
+//                text = "Add",
+//                style = MaterialTheme.typography.labelLarge,
+//                color = MaterialTheme.colorScheme.primary
+//            )
+//        }
+//    }
 }
 
 @Composable
