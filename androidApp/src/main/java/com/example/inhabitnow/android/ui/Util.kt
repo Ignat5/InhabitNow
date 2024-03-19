@@ -36,7 +36,7 @@ fun UITaskContent.Frequency.DaysOfWeek.toDisplay(): String {
     return this.daysOfWeek.toDisplay()
 }
 
-fun ReminderContentModel.ScheduleContent.EveryDay.toDisplay(): String = "Every day"
+fun ReminderContentModel.ScheduleContent.EveryDay.toDisplay(): String = "Always enabled"
 
 fun ReminderContentModel.ScheduleContent.DaysOfWeek.toDisplay(): String {
     return this.daysOfWeek.toDisplay()

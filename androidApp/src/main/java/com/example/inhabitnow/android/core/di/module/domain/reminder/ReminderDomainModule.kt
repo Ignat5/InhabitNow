@@ -8,6 +8,8 @@ import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.DefaultSaveReminderUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.SaveReminderUseCase
+import com.example.inhabitnow.domain.use_case.reminder.update_reminder.DefaultUpdateReminderByIdUseCase
+import com.example.inhabitnow.domain.use_case.reminder.update_reminder.UpdateReminderByIdUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -50,6 +52,19 @@ object ReminderDomainModule {
     ): DeleteReminderByIdUseCase {
         return DefaultDeleteReminderByIdUseCase(
             reminderRepository = reminderRepository,
+            externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideUpdateReminderByIdUseCase(
+        reminderRepository: ReminderRepository,
+        @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher,
+        externalScope: CoroutineScope
+    ): UpdateReminderByIdUseCase {
+        return DefaultUpdateReminderByIdUseCase(
+            reminderRepository = reminderRepository,
+            defaultDispatcher = defaultDispatcher,
             externalScope = externalScope
         )
     }

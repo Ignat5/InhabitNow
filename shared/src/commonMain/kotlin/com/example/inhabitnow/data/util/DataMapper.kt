@@ -144,19 +144,19 @@ fun ReminderEntity.toReminderTable(json: Json) = ReminderTable(
     createdAt = this.createdAt
 )
 
-private fun ReminderContentEntity.ScheduleContent.toJson(json: Json) =
+internal fun ReminderContentEntity.ScheduleContent.toJson(json: Json) =
     json.encodeToString<ReminderContentEntity.ScheduleContent>(this)
 
 private fun String.fromJsonScheduleContent(json: Json) =
     json.decodeFromString<ReminderContentEntity.ScheduleContent>(this)
 
-private fun LocalTime.toJson(json: Json) =
+internal fun LocalTime.toJson(json: Json) =
     json.encodeToString<LocalTime>(this)
 
 private fun String.fromJsonTime(json: Json) =
     json.decodeFromString<LocalTime>(this)
 
-private fun ReminderType.toJson(json: Json) =
+internal fun ReminderType.toJson(json: Json) =
     json.encodeToString(this)
 
 private fun String.fromJsonReminderType(json: Json) =

@@ -7,6 +7,13 @@ insertReminder:
 INSERT OR REPLACE INTO ReminderTable
 VALUES ?;
 
+updateReminderById:
+UPDATE ReminderTable SET
+time = :reminderTime,
+type = :reminderType,
+schedule = :reminderSchedule
+WHERE id = :reminderId;
+
 deleteReminderById:
 DELETE FROM ReminderTable
 WHERE id = :reminderId;

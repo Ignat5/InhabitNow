@@ -23,6 +23,20 @@ class DefaultReminderDataSource(
             reminderDao.insertReminder(reminderTable)
         }
 
+    override suspend fun updateReminderById(
+        reminderId: String,
+        reminderTime: String,
+        reminderType: String,
+        reminderSchedule: String
+    ): ResultModel<Unit> = runQuery {
+        reminderDao.updateReminderById(
+            reminderId = reminderId,
+            reminderTime = reminderTime,
+            reminderType = reminderType,
+            reminderSchedule = reminderSchedule
+        )
+    }
+
     override suspend fun deleteReminderById(reminderId: String): ResultModel<Unit> = runQuery {
         reminderDao.deleteReminderById(reminderId)
     }

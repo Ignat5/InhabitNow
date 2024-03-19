@@ -39,6 +39,7 @@ import com.example.inhabitnow.android.presentation.view_task_reminders.component
 import com.example.inhabitnow.android.presentation.view_task_reminders.components.ViewTaskRemindersScreenState
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.confirm_delete_reminder.ConfirmDeleteReminderDialog
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.create.CreateReminderDialog
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.EditReminderDialog
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
 import com.example.inhabitnow.android.ui.toIconResId
@@ -146,6 +147,15 @@ private fun ScreenConfigStateless(
                     onResult(
                         ViewTaskRemindersScreenEvent.ResultEvent.CreateReminder(it)
                     )
+                }
+            )
+        }
+
+        is ViewTaskRemindersScreenConfig.EditReminder -> {
+            EditReminderDialog(
+                stateHolder = config.stateHolder,
+                onResult = {
+                    onResult(ViewTaskRemindersScreenEvent.ResultEvent.EditReminder(it))
                 }
             )
         }

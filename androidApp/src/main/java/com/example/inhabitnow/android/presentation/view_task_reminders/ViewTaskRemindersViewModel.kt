@@ -19,6 +19,7 @@ import com.example.inhabitnow.android.ui.toUIScheduleContent
 import com.example.inhabitnow.domain.use_case.reminder.delete_reminder_by_id.DeleteReminderByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.SaveReminderUseCase
+import com.example.inhabitnow.domain.use_case.reminder.update_reminder.UpdateReminderByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +33,7 @@ class ViewTaskRemindersViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val readRemindersByTaskIdUseCase: ReadRemindersByTaskIdUseCase,
     private val saveReminderUseCase: SaveReminderUseCase,
+    private val updateReminderByIdUseCase: UpdateReminderByIdUseCase,
     private val deleteReminderByIdUseCase: DeleteReminderByIdUseCase
 ) : BaseViewModel<ViewTaskRemindersScreenEvent, ViewTaskRemindersScreenState, ViewTaskRemindersScreenNavigation, ViewTaskRemindersScreenConfig>() {
 
@@ -92,7 +94,17 @@ class ViewTaskRemindersViewModel @Inject constructor(
     }
 
     private fun onConfirmEditReminder(result: EditReminderScreenResult.Confirm) {
-
+        allRemindersState.value.find { it.id == result.reminderId }?.let { reminderModel ->
+            viewModelScope.launch {
+                updateReminderByIdUseCase(
+                    reminderModel = reminderModel.copy(
+                        type = result.reminderType,
+                        time = result.reminderTime,
+                        schedule = result.reminderSchedule.toScheduleContent()
+                    )
+                )
+            }
+        }
     }
 
     private fun onConfirmDeleteReminderResultEvent(event: ViewTaskRemindersScreenEvent.ResultEvent.ConfirmDeleteReminder) {
