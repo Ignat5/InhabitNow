@@ -133,6 +133,33 @@ object BaseDialogBuilder {
     }
 
     @Composable
+    fun BaseMessageDialog(
+        onDismissRequest: () -> Unit,
+        titleText: String,
+        messageText: String,
+        actionButtons: ActionButtons,
+        modifier: Modifier = Modifier,
+        properties: DialogProperties = DialogProperties(),
+    ) {
+        BaseDialog(
+            onDismissRequest = onDismissRequest,
+            modifier = modifier,
+            properties = properties,
+            title = {
+                BaseDialogTitle(titleText = titleText)
+            },
+            actionButtons = actionButtons
+        ) {
+            Text(
+                text = messageText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+
+    @Composable
     fun BaseDialogTitle(titleText: String) {
         Text(
             text = titleText,

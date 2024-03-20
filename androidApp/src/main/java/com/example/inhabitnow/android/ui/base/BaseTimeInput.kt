@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
@@ -46,71 +47,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
-
-@Composable
-fun BaseTimeInput(
-    inputHours: String,
-    inputMinutes: String,
-    onInputValueHoursUpdate: (String) -> Unit,
-    onInputValueMinutesUpdate: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val focusManager = LocalFocusManager.current
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        OutlinedTextField(
-            value = inputHours,
-            onValueChange = onInputValueHoursUpdate,
-            label = {
-                Text(text = "hours")
-            },
-            keyboardActions = KeyboardActions {
-                focusManager.moveFocus(FocusDirection.Next)
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal,
-                imeAction = ImeAction.Next
-            ),
-            singleLine = true,
-            modifier = Modifier
-                .weight(1f)
-        )
-        Text(
-            text = ":",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        val minutesValue = remember(inputMinutes) {
-            TextFieldValue(
-                text = inputMinutes,
-                selection = TextRange(inputMinutes.length)
-            )
-        }
-
-        OutlinedTextField(
-            value = minutesValue,
-            onValueChange = {
-                onInputValueMinutesUpdate(it.text)
-            },
-            label = {
-                Text(text = "minutes")
-            },
-            keyboardActions = KeyboardActions {
-                focusManager.clearFocus()
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal,
-                imeAction = ImeAction.Done
-            ),
-            singleLine = true,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
 
 @Composable
 fun BaseTimeInput(
@@ -184,9 +120,9 @@ private fun TimeInputField(
         modifier = modifier
             .height(targetHeight)
             .border(
-                width = TextFieldDefaults.UnfocusedIndicatorThickness,
+                width = OutlinedTextFieldDefaults.UnfocusedBorderThickness,
                 color = MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(15)
+                shape = MaterialTheme.shapes.small
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -227,3 +163,68 @@ private fun TimeInputField(
         }
     }
 }
+
+//@Composable
+//fun BaseTimeInput(
+//    inputHours: String,
+//    inputMinutes: String,
+//    onInputValueHoursUpdate: (String) -> Unit,
+//    onInputValueMinutesUpdate: (String) -> Unit,
+//    modifier: Modifier = Modifier
+//) {
+//    val focusManager = LocalFocusManager.current
+//    Row(
+//        modifier = modifier,
+//        verticalAlignment = Alignment.CenterVertically,
+//        horizontalArrangement = Arrangement.spacedBy(8.dp)
+//    ) {
+//        OutlinedTextField(
+//            value = inputHours,
+//            onValueChange = onInputValueHoursUpdate,
+//            label = {
+//                Text(text = "hours")
+//            },
+//            keyboardActions = KeyboardActions {
+//                focusManager.moveFocus(FocusDirection.Next)
+//            },
+//            keyboardOptions = KeyboardOptions(
+//                keyboardType = KeyboardType.Decimal,
+//                imeAction = ImeAction.Next
+//            ),
+//            singleLine = true,
+//            modifier = Modifier
+//                .weight(1f)
+//        )
+//        Text(
+//            text = ":",
+//            style = MaterialTheme.typography.bodyLarge,
+//            color = MaterialTheme.colorScheme.onSurface
+//        )
+//
+//        val minutesValue = remember(inputMinutes) {
+//            TextFieldValue(
+//                text = inputMinutes,
+//                selection = TextRange(inputMinutes.length)
+//            )
+//        }
+//
+//        OutlinedTextField(
+//            value = minutesValue,
+//            onValueChange = {
+//                onInputValueMinutesUpdate(it.text)
+//            },
+//            label = {
+//                Text(text = "minutes")
+//            },
+//            keyboardActions = KeyboardActions {
+//                focusManager.clearFocus()
+//            },
+//            keyboardOptions = KeyboardOptions(
+//                keyboardType = KeyboardType.Decimal,
+//                imeAction = ImeAction.Done
+//            ),
+//            singleLine = true,
+//            modifier = Modifier.weight(1f)
+//        )
+//    }
+//}
