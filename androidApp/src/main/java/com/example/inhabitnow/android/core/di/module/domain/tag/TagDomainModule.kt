@@ -2,10 +2,16 @@ package com.example.inhabitnow.android.core.di.module.domain.tag
 
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.data.repository.tag.TagRepository
+import com.example.inhabitnow.domain.use_case.tag.delete_tag.DefaultDeleteTagByIdUseCase
+import com.example.inhabitnow.domain.use_case.tag.delete_tag.DeleteTagByIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.DefaultReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.DefaultReadTagsUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
+import com.example.inhabitnow.domain.use_case.tag.save_tag.DefaultSaveTagUseCase
+import com.example.inhabitnow.domain.use_case.tag.save_tag.SaveTagUseCase
+import com.example.inhabitnow.domain.use_case.tag.update_tag_by_id.DefaultUpdateTagByIdUseCase
+import com.example.inhabitnow.domain.use_case.tag.update_tag_by_id.UpdateTagByIdUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,6 +38,33 @@ object TagDomainModule {
         tagRepository: TagRepository
     ): ReadTagIdsByTaskIdUseCase {
         return DefaultReadTagIdsByTaskIdUseCase(
+            tagRepository = tagRepository
+        )
+    }
+
+    @Provides
+    fun provideSaveTagUseCase(
+        tagRepository: TagRepository
+    ): SaveTagUseCase {
+        return DefaultSaveTagUseCase(
+            tagRepository = tagRepository
+        )
+    }
+
+    @Provides
+    fun provideUpdateTagByIdUseCase(
+        tagRepository: TagRepository
+    ): UpdateTagByIdUseCase {
+        return DefaultUpdateTagByIdUseCase(
+            tagRepository = tagRepository
+        )
+    }
+
+    @Provides
+    fun provideDeleteTagByIdUseCase(
+        tagRepository: TagRepository
+    ): DeleteTagByIdUseCase {
+        return DefaultDeleteTagByIdUseCase(
             tagRepository = tagRepository
         )
     }

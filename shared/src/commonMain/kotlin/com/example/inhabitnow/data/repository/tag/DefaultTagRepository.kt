@@ -31,4 +31,10 @@ class DefaultTagRepository(
             tagDataSource.insertTag(tagEntity.toTagTable())
         }
 
+    override suspend fun updateTagById(tagId: String, tagTitle: String): ResultModel<Unit> =
+        tagDataSource.updateTagById(tagId = tagId, tagTitle = tagTitle)
+
+    override suspend fun deleteTagById(tagId: String): ResultModel<Unit> =
+        tagDataSource.deleteTagById(tagId)
+
 }

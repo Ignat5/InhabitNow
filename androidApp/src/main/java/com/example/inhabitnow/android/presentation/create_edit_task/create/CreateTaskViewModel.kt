@@ -251,7 +251,7 @@ class CreateTaskViewModel @Inject constructor(
     }
 
     private fun onManageTags() {
-        // TODO
+        setUpNavigationState(CreateTaskScreenNavigation.ViewTags)
     }
 
     private fun onPickTaskFrequency(event: CreateTaskScreenEvent.ResultEvent.PickTaskFrequency) {

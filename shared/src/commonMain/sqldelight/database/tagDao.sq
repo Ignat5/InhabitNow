@@ -10,6 +10,15 @@ insertTag:
 INSERT OR REPLACE INTO TagTable
 VALUES ?;
 
+updateTagById:
+UPDATE TagTable SET
+title = :tagTitle
+WHERE id = :tagId;
+
+deleteTagById:
+DELETE FROM TagTable
+WHERE id = :tagId;
+
 insertTagCross:
 INSERT OR REPLACE INTO TagCrossTable
 VALUES ?;

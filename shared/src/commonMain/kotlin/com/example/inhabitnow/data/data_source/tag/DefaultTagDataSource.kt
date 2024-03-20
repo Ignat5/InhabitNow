@@ -26,4 +26,16 @@ class DefaultTagDataSource(
         tagDao.insertTag(tagTable)
     }
 
+    override suspend fun updateTagById(tagId: String, tagTitle: String): ResultModel<Unit> =
+        runQuery {
+            tagDao.updateTagById(
+                tagId = tagId,
+                tagTitle = tagTitle
+            )
+        }
+
+    override suspend fun deleteTagById(tagId: String): ResultModel<Unit> = runQuery {
+        tagDao.deleteTagById(tagId)
+    }
+
 }

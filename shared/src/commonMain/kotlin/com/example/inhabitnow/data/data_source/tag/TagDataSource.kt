@@ -8,4 +8,6 @@ interface TagDataSource {
     fun readTags(): Flow<List<TagTable>>
     fun readTagIdsByTaskId(taskId: String): Flow<List<String>>
     suspend fun insertTag(tagTable: TagTable): ResultModel<Unit>
+    suspend fun updateTagById(tagId: String, tagTitle: String): ResultModel<Unit>
+    suspend fun deleteTagById(tagId: String): ResultModel<Unit>
 }
