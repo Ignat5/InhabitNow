@@ -5,6 +5,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.PickTaskTagsStateHolder
 
 sealed interface CreateTaskScreenConfig : ScreenConfig {
     data class PickTitle(
@@ -21,5 +22,9 @@ sealed interface CreateTaskScreenConfig : ScreenConfig {
 
     data class PickTaskFrequency(
         val stateHolder: PickTaskFrequencyStateHolder
+    ) : CreateTaskScreenConfig
+
+    data class PickTaskTags(
+        val stateHolder: PickTaskTagsStateHolder
     ) : CreateTaskScreenConfig
 }

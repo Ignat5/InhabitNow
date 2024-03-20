@@ -14,6 +14,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components.PickTaskTimeProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.PickTaskTagsStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.components.PickTaskTagsScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
@@ -141,9 +143,22 @@ class CreateTaskViewModel @Inject constructor(
 
             is ItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
             is ItemTaskConfig.Reminders -> onConfigTaskRemindersClick()
+            is ItemTaskConfig.Tags -> onConfigTaskTagsClick()
 
             else -> Unit
         }
+    }
+
+    private fun onConfigTaskTagsClick() {
+        setUpConfigState(
+            CreateTaskScreenConfig.PickTaskTags(
+                stateHolder = PickTaskTagsStateHolder(
+                    allTags = allTagsState.value,
+                    initSelectedTagIds = taskTagIdsState.value.toSet(),
+                    holderScope = provideChildScope()
+                )
+            )
+        )
     }
 
     private fun onConfigTaskRemindersClick() {
@@ -215,7 +230,28 @@ class CreateTaskViewModel @Inject constructor(
 
             is CreateTaskScreenEvent.ResultEvent.PickTaskFrequency ->
                 onPickTaskFrequency(event)
+
+            is CreateTaskScreenEvent.ResultEvent.PickTaskTags ->
+                onPickTaskTagsResultEvent(event)
         }
+    }
+
+    private fun onPickTaskTagsResultEvent(event: CreateTaskScreenEvent.ResultEvent.PickTaskTags) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskTagsScreenResult.Confirm -> onConfirmTaskTags(result)
+                is PickTaskTagsScreenResult.ManageTags -> onManageTags()
+                is PickTaskTagsScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmTaskTags(result: PickTaskTagsScreenResult.Confirm) {
+        // TODO
+    }
+
+    private fun onManageTags() {
+        // TODO
     }
 
     private fun onPickTaskFrequency(event: CreateTaskScreenEvent.ResultEvent.PickTaskFrequency) {
