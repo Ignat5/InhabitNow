@@ -2,9 +2,11 @@ package com.example.inhabitnow.android.presentation.create_edit_task.create
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -395,6 +398,63 @@ private fun BasicItemConfig(
     dataText: String,
     onClick: () -> Unit
 ) {
+    BaseItemConfigContainer(
+        iconResId = iconResId,
+        titleText = titleText,
+        dataContent = {
+            Text(
+                text = dataText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.End,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun NumberItemConfig(
+    @DrawableRes iconResId: Int,
+    titleText: String,
+    dataText: String,
+    onClick: () -> Unit
+) {
+    BaseItemConfigContainer(
+        iconResId = iconResId,
+        titleText = titleText,
+        dataContent = {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.small
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = dataText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)
+                )
+            }
+        },
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun BaseItemConfigContainer(
+    @DrawableRes iconResId: Int,
+    titleText: String,
+    dataContent: @Composable BoxScope.() -> Unit,
+    onClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .clickable { onClick() }
@@ -415,17 +475,10 @@ private fun BasicItemConfig(
                 text = titleText,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-//                modifier = Modifier.weight(1f)
             )
-            Text(
-                text = dataText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.End,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Box(modifier = Modifier.weight(1f)) {
+                dataContent()
+            }
         }
     }
 }
