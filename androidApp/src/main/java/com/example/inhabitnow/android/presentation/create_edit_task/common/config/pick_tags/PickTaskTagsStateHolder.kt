@@ -5,6 +5,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.components.PickTaskTagsScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.components.PickTaskTagsScreenState
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.model.SelectableTagModel
+import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.domain.model.tag.TagModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,13 +39,15 @@ class PickTaskTagsStateHolder(
     override val uiScreenState: StateFlow<PickTaskTagsScreenState> =
         allSelectableTagsState.map { allSelectableTags ->
             PickTaskTagsScreenState(
-                allSelectableTags = allSelectableTags
+                allSelectableTagsResultModel = if (allSelectableTags.isEmpty()) UIResultModel.NoData
+                else UIResultModel.Data(allSelectableTags)
             )
         }.stateIn(
             holderScope,
             SharingStarted.WhileSubscribed(5000L),
             PickTaskTagsScreenState(
-                allSelectableTags = allSelectableTagsState.value
+                allSelectableTagsResultModel = if (allTags.isEmpty()) UIResultModel.NoData
+                else UIResultModel.Loading(allSelectableTagsState.value)
             )
         )
 

@@ -41,6 +41,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressDialog
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.PickTaskTagsDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
@@ -385,6 +386,15 @@ private fun CreateTaskScreenConfigStateless(
                 stateHolder = config.stateHolder,
                 onResult = {
                     onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskFrequency(it))
+                }
+            )
+        }
+
+        is CreateTaskScreenConfig.PickTaskTags -> {
+            PickTaskTagsDialog(
+                stateHolder = config.stateHolder,
+                onResult = {
+                    onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskTags(it))
                 }
             )
         }
