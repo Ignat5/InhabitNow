@@ -1,5 +1,6 @@
 package com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -39,6 +40,7 @@ fun PickTaskTagsDialog(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PickTaskTagsDialogStateless(
     state: PickTaskTagsScreenState,
@@ -106,7 +108,8 @@ private fun PickTaskTagsDialogStateless(
                                 isSelected = isSelected,
                                 onClick = {
                                     onEvent(PickTaskTagsScreenEvent.OnTagClick(item.tagModel.id))
-                                }
+                                },
+                                modifier = Modifier.animateItemPlacement()
                             )
                         }
                     }
@@ -134,11 +137,13 @@ private fun PickTaskTagsDialogStateless(
 private fun ItemTag(
     tagModel: TagModel,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     BaseItemOptionBuilder.BaseItemCheckbox(
         titleText = tagModel.title,
         isSelected = isSelected,
-        onClick = onClick
+        onClick = onClick,
+        modifier = modifier
     )
 }

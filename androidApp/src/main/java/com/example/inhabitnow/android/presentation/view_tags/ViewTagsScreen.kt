@@ -35,7 +35,9 @@ import com.example.inhabitnow.android.presentation.view_tags.components.ViewTags
 import com.example.inhabitnow.android.presentation.view_tags.components.ViewTagsScreenEvent
 import com.example.inhabitnow.android.presentation.view_tags.components.ViewTagsScreenNavigation
 import com.example.inhabitnow.android.presentation.view_tags.components.ViewTagsScreenState
+import com.example.inhabitnow.android.presentation.view_tags.config.confirm_delete.ConfirmDeleteTagDialog
 import com.example.inhabitnow.android.presentation.view_tags.config.create_edit_tag.create.CreateTagDialog
+import com.example.inhabitnow.android.presentation.view_tags.config.create_edit_tag.edit.EditTagDialog
 import com.example.inhabitnow.domain.model.tag.TagModel
 
 @Composable
@@ -135,6 +137,20 @@ private fun ScreenConfigStateless(
                 onResult = {
                     onEvent(ViewTagsScreenEvent.ResultEvent.CreateTag(it))
                 }
+            )
+        }
+
+        is ViewTagsScreenConfig.EditTag -> {
+            EditTagDialog(
+                stateHolder = config.stateHolder,
+                onResult = { onEvent(ViewTagsScreenEvent.ResultEvent.EditTag(it)) }
+            )
+        }
+
+        is ViewTagsScreenConfig.ConfirmDeleteTag -> {
+            ConfirmDeleteTagDialog(
+                tagId = config.tagId,
+                onResult = { onEvent(ViewTagsScreenEvent.ResultEvent.ConfirmDeleteTag(it)) }
             )
         }
     }
