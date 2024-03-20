@@ -187,7 +187,7 @@ private fun String.fromJsonRecordEntry(json: Json) =
     json.decodeFromString<RecordContentEntity.Entry>(this)
 
 /** tag model **/
-fun TagTable.toTagModel() = TagEntity(
+fun TagTable.toTagEntity() = TagEntity(
     id = id,
     title = title,
     createdAt = createdAt

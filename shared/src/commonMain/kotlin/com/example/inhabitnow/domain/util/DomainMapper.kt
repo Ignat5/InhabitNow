@@ -2,12 +2,14 @@ package com.example.inhabitnow.domain.util
 
 import com.example.inhabitnow.data.model.reminder.ReminderEntity
 import com.example.inhabitnow.data.model.reminder.content.ReminderContentEntity
+import com.example.inhabitnow.data.model.tag.TagEntity
 import com.example.inhabitnow.data.model.task.TaskEntity
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
 import com.example.inhabitnow.domain.model.reminder.content.ReminderContentModel
+import com.example.inhabitnow.domain.model.tag.TagModel
 import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
@@ -120,6 +122,13 @@ internal fun ReminderContentModel.ScheduleContent.toScheduleModel() =
             this.daysOfWeek
         )
     }
+
+// tag
+internal fun TagEntity.toTagModel() = TagModel(
+    id = id,
+    title = title,
+    createdAt = createdAt
+)
 
 
 

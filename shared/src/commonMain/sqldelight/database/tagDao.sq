@@ -1,3 +1,11 @@
+
+selectTags:
+SELECT * FROM TagTable;
+
+selectTagIdsByTaskId:
+SELECT tCross.tagId FROM TagCrossTable tCross
+WHERE tCross.taskId = :taskId;
+
 insertTag:
 INSERT OR REPLACE INTO TagTable
 VALUES ?;
