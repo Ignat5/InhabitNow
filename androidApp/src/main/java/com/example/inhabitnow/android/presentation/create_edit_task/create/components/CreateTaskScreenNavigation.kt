@@ -5,4 +5,5 @@ import com.example.inhabitnow.android.presentation.base.components.navigation.Sc
 interface CreateTaskScreenNavigation : ScreenNavigation {
     data object Back : CreateTaskScreenNavigation
     data class ViewReminders(val taskId: String) : CreateTaskScreenNavigation
+    data object ViewTags : CreateTaskScreenNavigation
 }

@@ -10,7 +10,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.create.compo
 
 fun NavGraphBuilder.createTaskScreen(
     onBack: () -> Unit,
-    onNavigateToViewTaskReminders: (taskId: String) -> Unit
+    onNavigateToViewTaskReminders: (taskId: String) -> Unit,
+    onNavigateToViewTags: () -> Unit
 ) {
     composable(
         route = AppNavDest.CreateTaskDestination.route,
@@ -26,6 +27,9 @@ fun NavGraphBuilder.createTaskScreen(
                     is CreateTaskScreenNavigation.Back -> onBack()
                     is CreateTaskScreenNavigation.ViewReminders -> {
                         onNavigateToViewTaskReminders(destination.taskId)
+                    }
+                    is CreateTaskScreenNavigation.ViewTags -> {
+                        onNavigateToViewTags()
                     }
                 }
             }

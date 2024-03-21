@@ -7,11 +7,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navOptions
 import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.navigation.create_task.createTaskScreen
 import com.example.inhabitnow.android.navigation.main.mainGraph
-import com.example.inhabitnow.android.navigation.view_task_reminders.viewTaskReminders
+import com.example.inhabitnow.android.navigation.view_tags.viewTagsScreen
+import com.example.inhabitnow.android.navigation.view_task_reminders.viewTaskRemindersScreen
 
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -43,9 +43,15 @@ fun RootGraph() {
                     navController.navigate(
                         route = AppNavDest.buildViewTaskRemindersRoute(taskId)
                     )
+                },
+                onNavigateToViewTags = {
+                    navController.navigate(
+                        route = AppNavDest.buildViewTagsRoute()
+                    )
                 }
             )
-            viewTaskReminders(onBack = onBack)
+            viewTaskRemindersScreen(onBack = onBack)
+            viewTagsScreen(onBack = onBack)
         }
     }
 }

@@ -1,7 +1,28 @@
+
+selectTags:
+SELECT * FROM TagTable;
+
+selectTagIdsByTaskId:
+SELECT tCross.tagId FROM TagCrossTable tCross
+WHERE tCross.taskId = :taskId;
+
 insertTag:
 INSERT OR REPLACE INTO TagTable
 VALUES ?;
 
+updateTagById:
+UPDATE TagTable SET
+title = :tagTitle
+WHERE id = :tagId;
+
+deleteTagById:
+DELETE FROM TagTable
+WHERE id = :tagId;
+
 insertTagCross:
 INSERT OR REPLACE INTO TagCrossTable
 VALUES ?;
+
+deleteTagCrossByTaskId:
+DELETE FROM TagCrossTable
+WHERE taskId = :taskId;

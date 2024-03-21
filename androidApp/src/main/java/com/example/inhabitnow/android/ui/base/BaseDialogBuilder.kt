@@ -160,12 +160,15 @@ object BaseDialogBuilder {
     }
 
     @Composable
-    fun BaseDialogTitle(titleText: String) {
+    fun BaseDialogTitle(
+        titleText: String,
+        modifier: Modifier = Modifier
+    ) {
         Text(
             text = titleText,
             color = AlertDialogDefaults.titleContentColor,
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier,
             textAlign = TextAlign.Start
         )
     }

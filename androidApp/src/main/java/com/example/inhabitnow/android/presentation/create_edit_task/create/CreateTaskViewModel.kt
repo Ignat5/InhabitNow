@@ -14,6 +14,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components.PickTaskTimeProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.PickTaskTagsStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.components.PickTaskTagsScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
@@ -28,6 +30,9 @@ import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
+import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
+import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
+import com.example.inhabitnow.domain.use_case.tag.save_tag_cross_by_task_id.SaveTagCrossByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
@@ -48,9 +53,12 @@ class CreateTaskViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val readTaskWithContentByIdUseCase: ReadTaskWithContentByIdUseCase,
     private val readRemindersCountByTaskIdUseCase: ReadRemindersCountByTaskIdUseCase,
+    private val readTagsUseCase: ReadTagsUseCase,
+    private val readTagIdsByTaskIdUseCase: ReadTagIdsByTaskIdUseCase,
     private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
     private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
     private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
+    private val saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<CreateTaskScreenEvent, CreateTaskScreenState, CreateTaskScreenNavigation, CreateTaskScreenConfig>() {
 
@@ -67,18 +75,43 @@ class CreateTaskViewModel @Inject constructor(
         .stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
-            0
+            DEFAULT_REMINDER_COUNT
+        )
+
+    private val allTagsState = readTagsUseCase()
+        .map { it.sortedBy { tag -> tag.createdAt } }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            emptyList()
+        )
+
+    private val taskTagIdsState: StateFlow<Set<String>> = readTagIdsByTaskIdUseCase(taskId)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            emptySet()
+        )
+
+    private val taskTagsCountState = taskTagIdsState
+        .map { it.size }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            DEFAULT_TAG_COUNT
         )
 
     override val uiScreenState: StateFlow<CreateTaskScreenState> =
         combine(
             taskWithContentState,
-            taskRemindersCountState
-        ) { taskWithContent, taskRemindersCount ->
+            taskRemindersCountState,
+            taskTagsCountState
+        ) { taskWithContent, taskRemindersCount, taskTagsCount ->
             CreateTaskScreenState(
                 allTaskConfigItems = provideTaskConfigItems(
                     taskWithContentModel = taskWithContent,
-                    taskRemindersCount = taskRemindersCount
+                    taskRemindersCount = taskRemindersCount,
+                    taskTagsCount = taskTagsCount
                 ),
                 canSave = taskWithContent?.task?.title?.isNotBlank() == true
             )
@@ -112,9 +145,22 @@ class CreateTaskViewModel @Inject constructor(
 
             is ItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
             is ItemTaskConfig.Reminders -> onConfigTaskRemindersClick()
+            is ItemTaskConfig.Tags -> onConfigTaskTagsClick()
 
             else -> Unit
         }
+    }
+
+    private fun onConfigTaskTagsClick() {
+        setUpConfigState(
+            CreateTaskScreenConfig.PickTaskTags(
+                stateHolder = PickTaskTagsStateHolder(
+                    allTags = allTagsState.value,
+                    initSelectedTagIds = taskTagIdsState.value,
+                    holderScope = provideChildScope()
+                )
+            )
+        )
     }
 
     private fun onConfigTaskRemindersClick() {
@@ -186,7 +232,33 @@ class CreateTaskViewModel @Inject constructor(
 
             is CreateTaskScreenEvent.ResultEvent.PickTaskFrequency ->
                 onPickTaskFrequency(event)
+
+            is CreateTaskScreenEvent.ResultEvent.PickTaskTags ->
+                onPickTaskTagsResultEvent(event)
         }
+    }
+
+    private fun onPickTaskTagsResultEvent(event: CreateTaskScreenEvent.ResultEvent.PickTaskTags) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskTagsScreenResult.Confirm -> onConfirmPickTaskTags(result)
+                is PickTaskTagsScreenResult.ManageTags -> onManageTags()
+                is PickTaskTagsScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskTags(result: PickTaskTagsScreenResult.Confirm) {
+        viewModelScope.launch {
+            saveTagCrossByTaskIdUseCase(
+                taskId = taskId,
+                allTagIds = result.tagIds
+            )
+        }
+    }
+
+    private fun onManageTags() {
+        setUpNavigationState(CreateTaskScreenNavigation.ViewTags)
     }
 
     private fun onPickTaskFrequency(event: CreateTaskScreenEvent.ResultEvent.PickTaskFrequency) {
@@ -269,7 +341,8 @@ class CreateTaskViewModel @Inject constructor(
 
     private suspend fun provideTaskConfigItems(
         taskWithContentModel: TaskWithContentModel?,
-        taskRemindersCount: Int
+        taskRemindersCount: Int,
+        taskTagsCount: Int
     ): List<ItemTaskConfig> =
         withContext(defaultDispatcher) {
             if (taskWithContentModel != null) {
@@ -314,10 +387,16 @@ class CreateTaskViewModel @Inject constructor(
                     }
 
                     add(ItemTaskConfig.Reminders(taskRemindersCount))
-                    add(ItemTaskConfig.Tags(0))
+                    add(ItemTaskConfig.Tags(taskTagsCount))
                     add(ItemTaskConfig.Priority(taskWithContentModel.task.priority))
 
                 }.sortedBy { it.key.ordinal }
             } else emptyList()
         }
+
+    companion object {
+        private const val DEFAULT_REMINDER_COUNT = 0
+        private const val DEFAULT_TAG_COUNT = 0
+    }
+
 }
