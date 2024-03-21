@@ -36,6 +36,7 @@ import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_t
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import com.example.inhabitnow.domain.use_case.tag.save_tag_cross_by_task_id.SaveTagCrossByTaskIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_date.UpdateTaskDateUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
@@ -52,6 +53,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
@@ -66,6 +68,7 @@ class CreateTaskViewModel @Inject constructor(
     private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
     private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
     private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
+    private val updateTaskDateUseCase: UpdateTaskDateUseCase,
     private val saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<CreateTaskScreenEvent, CreateTaskScreenState, CreateTaskScreenNavigation, CreateTaskScreenConfig>() {
@@ -164,19 +167,56 @@ class CreateTaskViewModel @Inject constructor(
     private fun onConfigDateClick(itemConfig: ItemTaskConfig.Date) {
         when (itemConfig) {
             is ItemTaskConfig.Date.StartDate -> onConfigStartDateClick()
-            else -> Unit
+            is ItemTaskConfig.Date.EndDate -> onConfigEndDateClick()
+            is ItemTaskConfig.Date.OneDayDate -> onConfigOneDayDate()
+        }
+    }
+
+    private fun onConfigOneDayDate() {
+        taskWithContentState.value?.task?.let { task ->
+            setUpConfigState(
+                CreateTaskScreenConfig.PickDate.OneDayDate(
+                    stateHolder = PickDateStateHolder(
+                        requestModel = PickDateRequestModel(
+                            currentDate = task.startDate,
+                            minDate = task.startDate.minus(1, DateTimeUnit.YEAR),
+                            maxDate = task.startDate.plus(1, DateTimeUnit.YEAR)
+                        ),
+                        holderScope = provideChildScope(),
+                        defaultDispatcher = defaultDispatcher
+                    )
+                )
+            )
+        }
+    }
+
+    private fun onConfigEndDateClick() {
+        taskWithContentState.value?.task?.let { task ->
+            setUpConfigState(
+                CreateTaskScreenConfig.PickDate.EndDate(
+                    stateHolder = PickDateStateHolder(
+                        requestModel = PickDateRequestModel(
+                            currentDate = task.endDate ?: task.startDate,
+                            minDate = task.startDate,
+                            maxDate = task.startDate.plus(1, DateTimeUnit.YEAR)
+                        ),
+                        holderScope = provideChildScope(),
+                        defaultDispatcher = defaultDispatcher
+                    )
+                )
+            )
         }
     }
 
     private fun onConfigStartDateClick() {
-        taskWithContentState.value?.task?.startDate?.let { startDate ->
+        taskWithContentState.value?.task?.let { task ->
             setUpConfigState(
                 CreateTaskScreenConfig.PickDate.StartDate(
                     stateHolder = PickDateStateHolder(
                         requestModel = PickDateRequestModel(
-                            currentDate = startDate,
+                            currentDate = task.startDate,
                             minDate = todayDate,
-                            maxDate = startDate.plus(1, DateTimeUnit.YEAR)
+                            maxDate = task.endDate ?: task.startDate.plus(1, DateTimeUnit.YEAR)
                         ),
                         holderScope = provideChildScope(),
                         defaultDispatcher = defaultDispatcher
@@ -279,11 +319,54 @@ class CreateTaskViewModel @Inject constructor(
     private fun onPickDateResultEvent(event: CreateTaskScreenEvent.ResultEvent.PickDate) {
         onIdleToAction {
             when (val result = event.result) {
-                is PickDateScreenResult.Confirm -> { /* TODO */
+                is PickDateScreenResult.Confirm -> {
+                    when (event) {
+                        is CreateTaskScreenEvent.ResultEvent.PickDate.StartDate ->
+                            onConfirmPickStartDate(result)
+
+                        is CreateTaskScreenEvent.ResultEvent.PickDate.EndDate ->
+                            onConfirmPickEndDate(result)
+
+                        is CreateTaskScreenEvent.ResultEvent.PickDate.OneDayDate ->
+                            onConfirmPickOneDayDate(result)
+                    }
                 }
 
                 is PickDateScreenResult.Dismiss -> Unit
             }
+        }
+    }
+
+    private fun onConfirmPickStartDate(result: PickDateScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskDateUseCase(
+                taskId = taskId,
+                requestBody = UpdateTaskDateUseCase.RequestBody.StartDate(
+                    date = result.date
+                )
+            )
+        }
+    }
+
+    private fun onConfirmPickEndDate(result: PickDateScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskDateUseCase(
+                taskId = taskId,
+                requestBody = UpdateTaskDateUseCase.RequestBody.EndDate(
+                    date = result.date
+                )
+            )
+        }
+    }
+
+    private fun onConfirmPickOneDayDate(result: PickDateScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskDateUseCase(
+                taskId = taskId,
+                requestBody = UpdateTaskDateUseCase.RequestBody.OneDayDate(
+                    date = result.date
+                )
+            )
         }
     }
 

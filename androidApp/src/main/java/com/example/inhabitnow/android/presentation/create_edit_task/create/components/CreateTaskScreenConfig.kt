@@ -35,5 +35,13 @@ sealed interface CreateTaskScreenConfig : ScreenConfig {
         data class StartDate(
             override val stateHolder: PickDateStateHolder
         ) : PickDate
+
+        data class EndDate(
+            override val stateHolder: PickDateStateHolder
+        ) : PickDate
+
+        data class OneDayDate(
+            override val stateHolder: PickDateStateHolder
+        ) : PickDate
     }
 }

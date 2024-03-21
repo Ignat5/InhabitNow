@@ -6,6 +6,8 @@ import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.Defau
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.DefaultSaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
+import com.example.inhabitnow.domain.use_case.update_task_date.DefaultUpdateTaskDateUseCase
+import com.example.inhabitnow.domain.use_case.update_task_date.UpdateTaskDateUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.DefaultUpdateTaskFrequencyByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.DefaultUpdateTaskProgressByIdUseCase
@@ -74,6 +76,17 @@ object TaskDomainModule {
         return DefaultUpdateTaskFrequencyByIdUseCase(
             taskRepository = taskRepository,
             defaultDispatcher = defaultDispatcher,
+            externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideUpdateTaskDateByIdUseCase(
+        taskRepository: TaskRepository,
+        externalScope: CoroutineScope
+    ): UpdateTaskDateUseCase {
+        return DefaultUpdateTaskDateUseCase(
+            taskRepository = taskRepository,
             externalScope = externalScope
         )
     }

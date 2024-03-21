@@ -19,6 +19,22 @@ interface TaskDataSource {
 
     suspend fun updateTaskTitleById(taskId: String, title: String): ResultModel<Unit>
 
+    suspend fun updateTaskStartDateById(
+        taskId: String,
+        taskStartEpochDay: Long
+    ): ResultModel<Unit>
+
+    suspend fun updateTaskEndDateById(
+        taskId: String,
+        taskEndEpochDay: Long
+    ): ResultModel<Unit>
+
+    suspend fun updateTaskStartEndDateById(
+        taskId: String,
+        taskStartEpochDay: Long,
+        taskEndEpochDay: Long
+    ): ResultModel<Unit>
+
     suspend fun updateTaskContentById(
         contentId: String,
         content: String

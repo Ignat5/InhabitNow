@@ -45,6 +45,14 @@ sealed interface CreateTaskScreenEvent : ScreenEvent {
             data class StartDate(
                 override val result: PickDateScreenResult
             ) : PickDate
+
+            data class EndDate(
+                override val result: PickDateScreenResult
+            ) : PickDate
+
+            data class OneDayDate(
+                override val result: PickDateScreenResult
+            ) : PickDate
         }
     }
 }

@@ -1,5 +1,10 @@
 package com.example.inhabitnow.android.ui.base
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +29,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.common.pick_date.model.UIDateItem
@@ -77,6 +83,7 @@ object BaseDatePickerBuilder {
     fun MonthGrid(
         allDaysOfMonth: List<UIDateItem>,
         currentPickedDate: LocalDate,
+        currentDate: LocalDate,
         todayDate: LocalDate,
         onDayOfMonthClick: (LocalDate) -> Unit
     ) {

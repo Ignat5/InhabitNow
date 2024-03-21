@@ -99,6 +99,23 @@ updateTaskContentById:
 UPDATE TaskContentTable SET content = :content
 WHERE id = :contentId;
 
+updateTaskStartDateById:
+UPDATE TaskTable SET
+startEpochDay = :taskStartEpochDay
+WHERE id = :taskId;
+
+updateTaskEndDateById:
+UPDATE TaskTable SET
+endEpochDay = :taskEndEpochDay
+WHERE id = :taskId;
+
+updateTaskStartEndDateById:
+UPDATE TaskTable SET
+startEpochDay = :taskStartEpochDay,
+endEpochDay = :taskEndEpochDay
+WHERE id = :taskId;
+
+
 selectTaskContentByTaskId:
 SELECT * FROM TaskContentTable tTaskContent
 WHERE tTaskContent.taskId = :taskId

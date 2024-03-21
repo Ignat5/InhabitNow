@@ -46,6 +46,38 @@ class DefaultTaskDataSource(
         taskDao.updateTaskTitleById(taskId = taskId, title = title)
     }
 
+    override suspend fun updateTaskStartDateById(
+        taskId: String,
+        taskStartEpochDay: Long
+    ): ResultModel<Unit> = runQuery {
+        taskDao.updateTaskStartDateById(
+            taskId = taskId,
+            taskStartEpochDay = taskStartEpochDay
+        )
+    }
+
+    override suspend fun updateTaskEndDateById(
+        taskId: String,
+        taskEndEpochDay: Long
+    ): ResultModel<Unit> = runQuery {
+        taskDao.updateTaskEndDateById(
+            taskId = taskId,
+            taskEndEpochDay = taskEndEpochDay
+        )
+    }
+
+    override suspend fun updateTaskStartEndDateById(
+        taskId: String,
+        taskStartEpochDay: Long,
+        taskEndEpochDay: Long
+    ): ResultModel<Unit> = runQuery {
+        taskDao.updateTaskStartEndDateById(
+            taskId = taskId,
+            taskStartEpochDay = taskStartEpochDay,
+            taskEndEpochDay = taskEndEpochDay
+        )
+    }
+
     override suspend fun updateTaskContentById(
         contentId: String,
         content: String

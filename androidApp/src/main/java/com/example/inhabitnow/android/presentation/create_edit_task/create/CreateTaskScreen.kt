@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateDialog
+import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleDialog
@@ -401,16 +402,28 @@ private fun CreateTaskScreenConfigStateless(
         }
 
         is CreateTaskScreenConfig.PickDate -> {
-            when (config) {
-                is CreateTaskScreenConfig.PickDate.StartDate -> {
-                    PickDateDialog(
-                        stateHolder = config.stateHolder,
-                        onResult = {
+            val onResult: (PickDateScreenResult) -> Unit = remember {
+                val callback: (PickDateScreenResult) -> Unit = {
+                    when (config) {
+                        is CreateTaskScreenConfig.PickDate.StartDate -> {
                             onResultEvent(CreateTaskScreenEvent.ResultEvent.PickDate.StartDate(it))
                         }
-                    )
+
+                        is CreateTaskScreenConfig.PickDate.EndDate -> {
+                            onResultEvent(CreateTaskScreenEvent.ResultEvent.PickDate.EndDate(it))
+                        }
+
+                        is CreateTaskScreenConfig.PickDate.OneDayDate -> {
+                            onResultEvent(CreateTaskScreenEvent.ResultEvent.PickDate.OneDayDate(it))
+                        }
+                    }
                 }
+                callback
             }
+            PickDateDialog(
+                stateHolder = config.stateHolder,
+                onResult = onResult
+            )
         }
     }
 }

@@ -37,7 +37,7 @@ fun TaskEntity.toTaskTable(json: Json) = TaskTable(
     title = title,
     description = description,
     startEpochDay = startDate.toEpochDay(),
-    endEpochDay = (endDate ?: DataConst.distantFutureDate).toEpochDay(),
+    endEpochDay = endDate.toEpochDay(),
     priority = priority,
     createdAt = createdAt,
     deletedAt = deletedAt
@@ -251,7 +251,7 @@ private fun List<TaskContentTable>.toBaseTaskContentEntity(
 
 /** other **/
 
-internal fun LocalDate.toEpochDay() = this.toEpochDays().toLong()
+internal fun LocalDate?.toEpochDay() = (this ?: DataConst.distantFutureDate).toEpochDays().toLong()
 internal fun Long.toLocalDate() = LocalDate.fromEpochDays(this.toInt())
 
 /** query mappings  **/

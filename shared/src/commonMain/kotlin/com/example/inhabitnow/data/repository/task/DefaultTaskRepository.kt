@@ -67,6 +67,32 @@ class DefaultTaskRepository(
         title = title
     )
 
+    override suspend fun updateTaskStartDateById(
+        taskId: String,
+        taskStartDate: LocalDate
+    ): ResultModel<Unit> = taskDataSource.updateTaskStartDateById(
+        taskId = taskId,
+        taskStartEpochDay = taskStartDate.toEpochDay()
+    )
+
+    override suspend fun updateTaskEndDateById(
+        taskId: String,
+        taskEndDate: LocalDate?
+    ): ResultModel<Unit> = taskDataSource.updateTaskEndDateById(
+        taskId = taskId,
+        taskEndEpochDay = taskEndDate.toEpochDay()
+    )
+
+    override suspend fun updateTaskStartEndDateById(
+        taskId: String,
+        taskStartDate: LocalDate,
+        taskEndDate: LocalDate
+    ): ResultModel<Unit> = taskDataSource.updateTaskStartEndDateById(
+        taskId = taskId,
+        taskStartEpochDay = taskStartDate.toEpochDay(),
+        taskEndEpochDay = taskEndDate.toEpochDay()
+    )
+
     override suspend fun saveTaskProgressContent(
         taskId: String,
         targetDate: LocalDate,
