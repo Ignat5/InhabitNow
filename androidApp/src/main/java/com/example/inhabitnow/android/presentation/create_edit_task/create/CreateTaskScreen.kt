@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -104,8 +108,8 @@ private fun CreateTaskScreenStateless(
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 itemsIndexed(
                     items = state.allTaskConfigItems,
-                    key = { _, item -> item.key.ordinal },
-                    contentType = { _, item -> item.contentType.ordinal }
+                    key = { _, item -> item.key },
+                    contentType = { _, item -> item.contentType }
                 ) { index, item ->
                     Column(modifier = Modifier.fillMaxWidth()) {
                         val onClick = remember {
@@ -160,7 +164,10 @@ private fun CreateTaskScreenStateless(
                                     is ItemTaskConfig.Date.EndDate -> {
                                         ItemEndDateConfig(
                                             item = item,
-                                            onClick = onClick
+                                            onClick = onClick,
+                                            onSwitchClick = {
+                                                onEvent(CreateTaskScreenEvent.OnEndDateSwitchClick)
+                                            }
                                         )
                                     }
                                 }
@@ -296,16 +303,22 @@ private fun ItemStartDateConfig(
 @Composable
 private fun ItemEndDateConfig(
     item: ItemTaskConfig.Date.EndDate,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onSwitchClick: () -> Unit
 ) {
     val dataText = remember(item) {
         item.date?.toDayMonthYear() ?: ""
     }
-    BasicItemConfig(
+    val isChecked = remember(item) {
+        item.date != null
+    }
+    BaseItemConfigWithSwitch(
         iconResId = R.drawable.ic_end_date,
         titleText = "End date",
         dataText = dataText,
-        onClick = onClick
+        isChecked = isChecked,
+        onClick = onClick,
+        onSwitchClick = { onSwitchClick() }
     )
 }
 
@@ -486,11 +499,50 @@ private fun NumberItemConfig(
 }
 
 @Composable
+private fun BaseItemConfigWithSwitch(
+    @DrawableRes iconResId: Int,
+    titleText: String,
+    dataText: String,
+    isChecked: Boolean,
+    onClick: () -> Unit,
+    onSwitchClick: (Boolean) -> Unit
+) {
+    BaseItemConfigContainer(
+        iconResId = iconResId,
+        titleText = titleText,
+        onClick = onClick,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        dataContent = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = dataText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.End,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Switch(
+                    checked = isChecked,
+                    onCheckedChange = onSwitchClick
+                )
+            }
+        }
+    )
+}
+
+@Composable
 private fun BaseItemConfigContainer(
     @DrawableRes iconResId: Int,
     titleText: String,
     dataContent: @Composable BoxScope.() -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    contentPadding: PaddingValues = PaddingValues(16.dp)
 ) {
     Box(
         modifier = Modifier
@@ -499,7 +551,7 @@ private fun BaseItemConfigContainer(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(contentPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {

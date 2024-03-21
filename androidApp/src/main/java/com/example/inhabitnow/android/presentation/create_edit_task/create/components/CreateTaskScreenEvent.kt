@@ -15,7 +15,7 @@ sealed interface CreateTaskScreenEvent : ScreenEvent {
     data object OnDismissRequest : CreateTaskScreenEvent
 
     data class OnItemTaskConfigClick(val item: ItemTaskConfig) : CreateTaskScreenEvent
-
+    data object OnEndDateSwitchClick : CreateTaskScreenEvent
     sealed interface ResultEvent : CreateTaskScreenEvent {
         val result: ScreenResult
 

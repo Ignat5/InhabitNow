@@ -140,8 +140,25 @@ class CreateTaskViewModel @Inject constructor(
         when (event) {
             is CreateTaskScreenEvent.OnItemTaskConfigClick -> onItemTaskConfigClick(event)
             is CreateTaskScreenEvent.ResultEvent -> onResultEvent(event)
+            is CreateTaskScreenEvent.OnEndDateSwitchClick -> onEndDateSwitchClick()
+            is CreateTaskScreenEvent.OnSaveClick -> { /* TODO */
+            }
+
             is CreateTaskScreenEvent.OnDismissRequest -> onDismissRequest()
-            else -> Unit
+        }
+    }
+
+    private fun onEndDateSwitchClick() {
+        taskWithContentState.value?.task?.let { task ->
+            viewModelScope.launch {
+                updateTaskDateUseCase(
+                    taskId = taskId,
+                    requestBody = UpdateTaskDateUseCase.RequestBody.EndDate(
+                        date = if (task.endDate != null) null
+                        else task.startDate.plus(1, DateTimeUnit.MONTH)
+                    )
+                )
+            }
         }
     }
 
