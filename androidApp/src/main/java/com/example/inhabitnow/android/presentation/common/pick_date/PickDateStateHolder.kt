@@ -26,15 +26,17 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
 class PickDateStateHolder(
-    private val request: PickDateRequestModel,
+    private val requestModel: PickDateRequestModel,
     override val holderScope: CoroutineScope,
     private val defaultDispatcher: CoroutineDispatcher
 ) : BaseResultStateHolder<PickDateScreenEvent, PickDateScreenState, PickDateScreenResult>() {
     private val todayDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    private val currentDateState = MutableStateFlow(request.currentDate.firstDayOfMonth)
-    private val currentPickedDateState = MutableStateFlow(request.currentDate)
+    private val currentDateState = MutableStateFlow(requestModel.currentDate.firstDayOfMonth)
+    private val currentPickedDateState = MutableStateFlow(requestModel.currentDate)
     private val allDaysOfMonthState = currentDateState.map { currentDate ->
-        currentDate.provideDateItems()
+        withContext(defaultDispatcher) {
+            currentDate.provideDateItems()
+        }
     }.stateIn(
         holderScope,
         SharingStarted.Eagerly,
@@ -72,16 +74,10 @@ class PickDateStateHolder(
     }
 
     private fun onDateItemClick(event: PickDateScreenEvent.OnDateItemClick) {
-        event.dateItem.let { clickedItem ->
-            if (clickedItem is UIDateItem.PickAble) {
-                currentDateState.value.let { currentDate ->
-                    currentPickedDateState.update {
-                        LocalDate(
-                            year = currentDate.year,
-                            month = currentDate.month,
-                            dayOfMonth = clickedItem.dayOfMonth
-                        )
-                    }
+        event.date.let { date ->
+            if (date in requestModel.minDate..requestModel.maxDate) {
+                currentPickedDateState.update {
+                    date
                 }
             }
         }
@@ -111,63 +107,79 @@ class PickDateStateHolder(
         setUpResult(PickDateScreenResult.Dismiss)
     }
 
-    private suspend fun LocalDate.provideDateItems(): List<UIDateItem> =
+    private fun LocalDate.provideDateItems(): List<UIDateItem> =
         this.firstDayOfMonth.let { currentDate ->
-            withContext(defaultDispatcher) {
-                val result = mutableListOf<UIDateItem>()
-                // add days of previous month (starting Monday)
-                currentDate.dayOfWeek.ordinal.let { diff ->
-                    currentDate.minus(diff, DateTimeUnit.DAY).let { startDate ->
-                        var nextDate = startDate
-                        while (nextDate < currentDate) {
-                            result.add(UIDateItem.UnPickAble.OtherMonth(nextDate.dayOfMonth))
-                            nextDate = nextDate.plus(1, DateTimeUnit.DAY)
-                        }
+            val result = mutableListOf<UIDateItem>()
+            // add days of previous month (starting Monday)
+            currentDate.dayOfWeek.ordinal.let { diff ->
+                currentDate.minus(diff, DateTimeUnit.DAY).let { startDate ->
+                    var nextDate = startDate
+                    while (nextDate < currentDate) {
+                        result.add(UIDateItem.UnPickAble.OtherMonth(nextDate))
+                        nextDate = nextDate.plus(1, DateTimeUnit.DAY)
                     }
                 }
-                // add days of current month
-                currentDate.plus(1, DateTimeUnit.MONTH).let { nextMonthDate ->
-                    currentDate.daysUntil(nextMonthDate).let { daysInMonth ->
-                        val monthRange = FIRST_DAY_OF_MONTH..daysInMonth
-                        val passMin = currentDate >= request.minDate
-                        val passMax = nextMonthDate <= request.maxDate
-                        if (passMin && passMax) {
-                            result.addAll(
-                                monthRange.map { UIDateItem.PickAble.Day(it) }
-                            )
-                        } else {
-                            val offsetEpochDay = currentDate.toEpochDays() - 1
-                            val minEpochDay = request.minDate.toEpochDays()
-                            val maxEpochDay = request.maxDate.toEpochDays()
-                            val minDiff = minEpochDay - offsetEpochDay
-                            val maxDiff = maxEpochDay - offsetEpochDay
-                            result.addAll(
-                                monthRange.map { dayOfMonth ->
-                                    (dayOfMonth !in minDiff..maxDiff).let { isLocked ->
-                                        if (isLocked) UIDateItem.UnPickAble.Locked(dayOfMonth)
-                                        else UIDateItem.PickAble.Day(dayOfMonth)
-                                    }
-//                                    (offsetEpochDay + dayOfMonth).let { nextEpochDay ->
-//                                        (nextEpochDay !in minEpochDay..maxEpochDay).let { isLocked ->
-//                                            if (isLocked) UIDateItem.UnPickAble.Locked(dayOfMonth)
-//                                            else UIDateItem.PickAble.Day(dayOfMonth)
-//                                        }
-//                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-                result
             }
+            // add days of current month
+            currentDate.plus(1, DateTimeUnit.MONTH).let { nextMonthDate ->
+                currentDate.daysUntil(nextMonthDate).let { daysInMonth ->
+                    val monthRange = FIRST_DAY_OF_MONTH..daysInMonth
+                    val passMin = currentDate >= requestModel.minDate
+                    val passMax = nextMonthDate <= requestModel.maxDate
+                    if (passMin && passMax) {
+                        result.addAll(
+                            monthRange.map { dayOfMonth ->
+                                UIDateItem.PickAble.Day(
+                                    currentDate.copy(dayOfMonth = dayOfMonth)
+                                )
+                            }
+                        )
+                    } else {
+                        result.addAll(
+                            monthRange.map { nextDayOfMonth ->
+                                currentDate.copy(dayOfMonth = nextDayOfMonth).let { nextDate ->
+                                    (nextDate !in requestModel.minDate..requestModel.maxDate).let { isLocked ->
+                                        if (isLocked) UIDateItem.UnPickAble.Locked(nextDate)
+                                        else UIDateItem.PickAble.Day(nextDate)
+                                    }
+                                }
+                            }
+                        )
+//                            val offsetEpochDay = currentDate.toEpochDays() - 1
+//                            val minEpochDay = request.minDate.toEpochDays()
+//                            val maxEpochDay = request.maxDate.toEpochDays()
+//                            val minDiff = minEpochDay - offsetEpochDay
+//                            val maxDiff = maxEpochDay - offsetEpochDay
+//                            result.addAll(
+//                                monthRange.map { dayOfMonth ->
+//                                    (dayOfMonth !in minDiff..maxDiff).let { isLocked ->
+//                                        if (isLocked) UIDateItem.UnPickAble.Locked(
+//                                            dayOfMonth
+//                                        )
+//                                        else UIDateItem.PickAble.Day(dayOfMonth)
+//                                    }
+//                                }
+//                            )
+                    }
+                }
+            }
+            result
         }
 
     private val LocalDate.firstDayOfMonth
-        get() = LocalDate(
-            year = this.year,
-            monthNumber = this.monthNumber,
-            dayOfMonth = FIRST_DAY_OF_MONTH
+        get() = this.copy(dayOfMonth = FIRST_DAY_OF_MONTH)
+
+    private fun LocalDate.copy(
+        year: Int? = null,
+        monthNumber: Int? = null,
+        dayOfMonth: Int? = null
+    ) = this.let { oldDate ->
+        LocalDate(
+            year = year ?: oldDate.year,
+            monthNumber = monthNumber ?: oldDate.monthNumber,
+            dayOfMonth = dayOfMonth ?: oldDate.dayOfMonth
         )
+    }
 
     companion object {
         private const val FIRST_DAY_OF_MONTH = 1
