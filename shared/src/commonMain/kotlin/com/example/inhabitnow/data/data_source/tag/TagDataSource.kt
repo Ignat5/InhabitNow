@@ -10,4 +10,5 @@ interface TagDataSource {
     suspend fun insertTag(tagTable: TagTable): ResultModel<Unit>
     suspend fun updateTagById(tagId: String, tagTitle: String): ResultModel<Unit>
     suspend fun deleteTagById(tagId: String): ResultModel<Unit>
+    suspend fun insertTagCrossByTaskId(taskId: String, allTagIds: List<String>): ResultModel<Unit>
 }

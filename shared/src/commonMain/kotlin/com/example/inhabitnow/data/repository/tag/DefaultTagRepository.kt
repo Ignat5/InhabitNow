@@ -23,8 +23,8 @@ class DefaultTagRepository(
         } else emptyList()
     }
 
-    override fun readTagIdsByTaskId(taskId: String): Flow<List<String>> =
-        tagDataSource.readTagIdsByTaskId(taskId)
+    override fun readTagIdsByTaskId(taskId: String): Flow<Set<String>> =
+        tagDataSource.readTagIdsByTaskId(taskId).map { it.toSet() }
 
     override suspend fun saveTag(tagEntity: TagEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {
@@ -36,5 +36,14 @@ class DefaultTagRepository(
 
     override suspend fun deleteTagById(tagId: String): ResultModel<Unit> =
         tagDataSource.deleteTagById(tagId)
+
+    override suspend fun saveTagCrossByTaskId(
+        taskId: String,
+        allTagIds: Set<String>
+    ): ResultModel<Unit> =
+        tagDataSource.insertTagCrossByTaskId(
+            taskId = taskId,
+            allTagIds = allTagIds.toList()
+        )
 
 }

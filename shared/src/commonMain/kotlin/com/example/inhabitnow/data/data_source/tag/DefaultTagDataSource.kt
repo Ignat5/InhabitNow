@@ -3,6 +3,7 @@ package com.example.inhabitnow.data.data_source.tag
 import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.data.data_source.base.BaseDataSource
 import com.example.inhabitnow.database.InhabitNowDatabase
+import database.TagCrossTable
 import database.TagTable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +37,23 @@ class DefaultTagDataSource(
 
     override suspend fun deleteTagById(tagId: String): ResultModel<Unit> = runQuery {
         tagDao.deleteTagById(tagId)
+    }
+
+    override suspend fun insertTagCrossByTaskId(
+        taskId: String,
+        allTagIds: List<String>
+    ): ResultModel<Unit> = runTransaction {
+        tagDao.apply {
+            deleteTagCrossByTaskId(taskId)
+            allTagIds.forEach { tagId ->
+                insertTagCross(
+                    TagCrossTable(
+                        taskId = taskId,
+                        tagId = tagId
+                    )
+                )
+            }
+        }
     }
 
 }

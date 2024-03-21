@@ -63,7 +63,7 @@ object BaseItemOptionBuilder {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(16.dp)
             ) {
                 Text(
                     text = titleText,

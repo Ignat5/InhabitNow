@@ -7,7 +7,7 @@ class DefaultReadTagIdsByTaskIdUseCase(
     private val tagRepository: TagRepository
 ) : ReadTagIdsByTaskIdUseCase {
 
-    override operator fun invoke(taskId: String): Flow<List<String>> =
+    override operator fun invoke(taskId: String): Flow<Set<String>> =
         tagRepository.readTagIdsByTaskId(taskId)
 
 }

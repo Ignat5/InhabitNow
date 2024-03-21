@@ -22,3 +22,7 @@ WHERE id = :tagId;
 insertTagCross:
 INSERT OR REPLACE INTO TagCrossTable
 VALUES ?;
+
+deleteTagCrossByTaskId:
+DELETE FROM TagCrossTable
+WHERE taskId = :taskId;

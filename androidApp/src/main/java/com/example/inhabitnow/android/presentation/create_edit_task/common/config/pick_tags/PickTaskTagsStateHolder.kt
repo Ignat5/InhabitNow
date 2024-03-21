@@ -44,7 +44,7 @@ class PickTaskTagsStateHolder(
             )
         }.stateIn(
             holderScope,
-            SharingStarted.WhileSubscribed(5000L),
+            SharingStarted.Eagerly,
             PickTaskTagsScreenState(
                 allSelectableTagsResultModel = if (allTags.isEmpty()) UIResultModel.NoData
                 else UIResultModel.Loading(allSelectableTagsState.value)

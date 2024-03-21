@@ -10,6 +10,8 @@ import com.example.inhabitnow.domain.use_case.tag.read_tags.DefaultReadTagsUseCa
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import com.example.inhabitnow.domain.use_case.tag.save_tag.DefaultSaveTagUseCase
 import com.example.inhabitnow.domain.use_case.tag.save_tag.SaveTagUseCase
+import com.example.inhabitnow.domain.use_case.tag.save_tag_cross_by_task_id.DefaultSaveTagCrossByTaskIdUseCase
+import com.example.inhabitnow.domain.use_case.tag.save_tag_cross_by_task_id.SaveTagCrossByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.update_tag_by_id.DefaultUpdateTagByIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.update_tag_by_id.UpdateTagByIdUseCase
 import dagger.Module
@@ -65,6 +67,15 @@ object TagDomainModule {
         tagRepository: TagRepository
     ): DeleteTagByIdUseCase {
         return DefaultDeleteTagByIdUseCase(
+            tagRepository = tagRepository
+        )
+    }
+
+    @Provides
+    fun provideSaveTagCrossByTaskId(
+        tagRepository: TagRepository
+    ): SaveTagCrossByTaskIdUseCase {
+        return DefaultSaveTagCrossByTaskIdUseCase(
             tagRepository = tagRepository
         )
     }

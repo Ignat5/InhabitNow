@@ -32,6 +32,7 @@ import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadT
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
+import com.example.inhabitnow.domain.use_case.tag.save_tag_cross_by_task_id.SaveTagCrossByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
@@ -57,6 +58,7 @@ class CreateTaskViewModel @Inject constructor(
     private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
     private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
     private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
+    private val saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<CreateTaskScreenEvent, CreateTaskScreenState, CreateTaskScreenNavigation, CreateTaskScreenConfig>() {
 
@@ -84,11 +86,11 @@ class CreateTaskViewModel @Inject constructor(
             emptyList()
         )
 
-    private val taskTagIdsState = readTagIdsByTaskIdUseCase(taskId)
+    private val taskTagIdsState: StateFlow<Set<String>> = readTagIdsByTaskIdUseCase(taskId)
         .stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
-            emptyList()
+            emptySet()
         )
 
     private val taskTagsCountState = taskTagIdsState
@@ -154,7 +156,7 @@ class CreateTaskViewModel @Inject constructor(
             CreateTaskScreenConfig.PickTaskTags(
                 stateHolder = PickTaskTagsStateHolder(
                     allTags = allTagsState.value,
-                    initSelectedTagIds = taskTagIdsState.value.toSet(),
+                    initSelectedTagIds = taskTagIdsState.value,
                     holderScope = provideChildScope()
                 )
             )
@@ -239,15 +241,20 @@ class CreateTaskViewModel @Inject constructor(
     private fun onPickTaskTagsResultEvent(event: CreateTaskScreenEvent.ResultEvent.PickTaskTags) {
         onIdleToAction {
             when (val result = event.result) {
-                is PickTaskTagsScreenResult.Confirm -> onConfirmTaskTags(result)
+                is PickTaskTagsScreenResult.Confirm -> onConfirmPickTaskTags(result)
                 is PickTaskTagsScreenResult.ManageTags -> onManageTags()
                 is PickTaskTagsScreenResult.Dismiss -> Unit
             }
         }
     }
 
-    private fun onConfirmTaskTags(result: PickTaskTagsScreenResult.Confirm) {
-        // TODO
+    private fun onConfirmPickTaskTags(result: PickTaskTagsScreenResult.Confirm) {
+        viewModelScope.launch {
+            saveTagCrossByTaskIdUseCase(
+                taskId = taskId,
+                allTagIds = result.tagIds
+            )
+        }
     }
 
     private fun onManageTags() {

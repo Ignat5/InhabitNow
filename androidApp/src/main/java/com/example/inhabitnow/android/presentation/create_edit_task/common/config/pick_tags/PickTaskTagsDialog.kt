@@ -95,7 +95,7 @@ private fun PickTaskTagsDialogStateless(
                     is UIResultModel.Loading, is UIResultModel.Data -> {
                         items(
                             items = result.data ?: emptyList(),
-                            key = { it.tagModel.id }
+                            key = { it.tagModel.id },
                         ) { item ->
                             val tagModel = remember(item.tagModel) {
                                 item.tagModel
