@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
+import com.example.inhabitnow.android.presentation.common.pick_date.PickDateDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleDialog
@@ -397,6 +398,19 @@ private fun CreateTaskScreenConfigStateless(
                     onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskTags(it))
                 }
             )
+        }
+
+        is CreateTaskScreenConfig.PickDate -> {
+            when (config) {
+                is CreateTaskScreenConfig.PickDate.StartDate -> {
+                    PickDateDialog(
+                        stateHolder = config.stateHolder,
+                        onResult = {
+                            onResultEvent(CreateTaskScreenEvent.ResultEvent.PickDate.StartDate(it))
+                        }
+                    )
+                }
+            }
         }
     }
 }

@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
+import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStateHolder
+import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
+import com.example.inhabitnow.android.presentation.common.pick_date.model.PickDateRequestModel
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
@@ -46,6 +49,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -63,6 +71,7 @@ class CreateTaskViewModel @Inject constructor(
 ) : BaseViewModel<CreateTaskScreenEvent, CreateTaskScreenState, CreateTaskScreenNavigation, CreateTaskScreenConfig>() {
 
     private val taskId: String = checkNotNull(savedStateHandle.get<String>(AppNavDest.TASK_ID_KEY))
+    private val todayDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
     private val taskWithContentState = readTaskWithContentByIdUseCase(taskId)
         .stateIn(
@@ -136,6 +145,7 @@ class CreateTaskViewModel @Inject constructor(
     private fun onItemTaskConfigClick(event: CreateTaskScreenEvent.OnItemTaskConfigClick) {
         when (event.item) {
             is ItemTaskConfig.Title -> onConfigTaskTitleClick()
+            is ItemTaskConfig.Date -> onConfigDateClick(event.item)
             is ItemTaskConfig.Progress -> {
                 when (event.item) {
                     is ItemTaskConfig.Progress.Number -> onConfigTaskNumberProgressClick()
@@ -148,6 +158,31 @@ class CreateTaskViewModel @Inject constructor(
             is ItemTaskConfig.Tags -> onConfigTaskTagsClick()
 
             else -> Unit
+        }
+    }
+
+    private fun onConfigDateClick(itemConfig: ItemTaskConfig.Date) {
+        when (itemConfig) {
+            is ItemTaskConfig.Date.StartDate -> onConfigStartDateClick()
+            else -> Unit
+        }
+    }
+
+    private fun onConfigStartDateClick() {
+        taskWithContentState.value?.task?.startDate?.let { startDate ->
+            setUpConfigState(
+                CreateTaskScreenConfig.PickDate.StartDate(
+                    stateHolder = PickDateStateHolder(
+                        requestModel = PickDateRequestModel(
+                            currentDate = startDate,
+                            minDate = todayDate,
+                            maxDate = startDate.plus(1, DateTimeUnit.YEAR)
+                        ),
+                        holderScope = provideChildScope(),
+                        defaultDispatcher = defaultDispatcher
+                    )
+                )
+            )
         }
     }
 
@@ -235,6 +270,20 @@ class CreateTaskViewModel @Inject constructor(
 
             is CreateTaskScreenEvent.ResultEvent.PickTaskTags ->
                 onPickTaskTagsResultEvent(event)
+
+            is CreateTaskScreenEvent.ResultEvent.PickDate ->
+                onPickDateResultEvent(event)
+        }
+    }
+
+    private fun onPickDateResultEvent(event: CreateTaskScreenEvent.ResultEvent.PickDate) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickDateScreenResult.Confirm -> { /* TODO */
+                }
+
+                is PickDateScreenResult.Dismiss -> Unit
+            }
         }
     }
 

@@ -76,16 +76,14 @@ object BaseDatePickerBuilder {
     @Composable
     fun MonthGrid(
         allDaysOfMonth: List<UIDateItem>,
-        currentDate: LocalDate,
         currentPickedDate: LocalDate,
         todayDate: LocalDate,
         onDayOfMonthClick: (LocalDate) -> Unit
     ) {
         val allDaysOfWeek = remember { DayOfWeek.entries }
-
         LazyVerticalGrid(
             columns = GridCells.Fixed(GRID_COLUMN_COUNT),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(
                 items = allDaysOfWeek,
@@ -96,7 +94,7 @@ object BaseDatePickerBuilder {
             }
             items(
                 items = allDaysOfMonth,
-                key = { it.date },
+                key = { it.date.toEpochDays() },
                 contentType = { ItemContentType.DayOfMonth }
             ) { item ->
                 val isPicked = remember(currentPickedDate) {
@@ -136,11 +134,13 @@ object BaseDatePickerBuilder {
         Box(
             modifier = Modifier
                 .fillMaxSize()
+//                .padding(horizontal = 2.dp)
                 .clip(MaterialTheme.shapes.extraLarge)
                 .then(
-                    if (!isShown) {
-                        Modifier.alpha(1f)
-                    } else if (isPicked) {
+                    Modifier.alpha(if (isShown) 1f else 0f)
+                )
+                .then(
+                    if (isPicked) {
                         Modifier.background(
                             color = MaterialTheme.colorScheme.primary,
                             shape = MaterialTheme.shapes.extraLarge

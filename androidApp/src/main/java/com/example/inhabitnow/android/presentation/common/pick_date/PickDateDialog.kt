@@ -70,7 +70,6 @@ private fun PickDateDialogStateless(
             Spacer(modifier = Modifier.height(8.dp))
             BaseDatePickerBuilder.MonthGrid(
                 allDaysOfMonth = state.allDaysOfMonth,
-                currentDate = state.currentDate,
                 currentPickedDate = state.currentPickedDate,
                 todayDate = state.todayDate,
                 onDayOfMonthClick = { date ->
