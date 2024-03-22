@@ -18,6 +18,7 @@ import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import database.RecordTable
 import database.ReminderTable
 import database.SelectTaskWithContentById
+import database.SelectTasksWithContentBySearchQuery
 import database.TagTable
 import database.TaskContentTable
 import database.TaskTable
@@ -271,6 +272,35 @@ fun SelectTaskWithContentById.toTaskTable(): TaskTable {
 }
 
 fun SelectTaskWithContentById.toTaskContentTable(): TaskContentTable {
+    return TaskContentTable(
+        id = taskContent_id,
+        taskId = taskContent_taskId,
+        contentType = taskContent_contentType,
+        content = taskContent_content,
+        startEpochDay = taskContent_startEpochDay,
+        createdAt = taskContent_createdAt
+    )
+}
+
+//
+
+/** query mappings  **/
+fun SelectTasksWithContentBySearchQuery.toTaskTable(): TaskTable {
+    return TaskTable(
+        id = task_id,
+        type = task_type,
+        progressType = task_progressType,
+        title = task_title,
+        description = task_description,
+        startEpochDay = task_startEpochDay,
+        endEpochDay = task_endEpochDay,
+        priority = task_priority,
+        createdAt = task_createdAt,
+        deletedAt = task_deletedAt
+    )
+}
+
+fun SelectTasksWithContentBySearchQuery.toTaskContentTable(): TaskContentTable {
     return TaskContentTable(
         id = taskContent_id,
         taskId = taskContent_taskId,

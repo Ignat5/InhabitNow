@@ -91,6 +91,35 @@ INNER JOIN (
 ) tTaskContent ON tTaskContent.taskId = tTask.id
 WHERE tTask.id = :taskId;
 
+selectTasksWithContentBySearchQuery:
+SELECT
+tTask.id task_id,
+tTask.type task_type,
+tTask.progressType task_progressType,
+tTask.title task_title,
+tTask.description task_description,
+tTask.startEpochDay task_startEpochDay,
+tTask.endEpochDay task_endEpochDay,
+tTask.priority task_priority,
+tTask.createdAt task_createdAt,
+tTask.deletedAt task_deletedAt,
+
+tTaskContent.id taskContent_id,
+tTaskContent.taskId taskContent_taskId,
+tTaskContent.contentType taskContent_contentType,
+tTaskContent.content taskContent_content,
+tTaskContent.startEpochDay taskContent_startEpochDay,
+tTaskContent.createdAt taskContent_createdAt
+
+FROM TaskTable tTask
+INNER JOIN (
+    SELECT * FROM TaskContentTable tInner
+    GROUP BY tInner.taskId, tInner.contentType
+    HAVING tInner.startEpochDay = MAX(tInner.startEpochDay)
+) tTaskContent ON tTaskContent.taskId = tTask.id
+WHERE tTask.deletedAt IS NULL AND
+tTask.title LIKE :searchQuery;
+
 updateTaskTitleById:
 UPDATE TaskTable SET title = :title
 WHERE id = :taskId;
