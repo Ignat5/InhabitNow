@@ -98,6 +98,20 @@ class DefaultTaskDataSource(
         )
     }
 
+    override suspend fun updateTaskDeletedAtById(
+        taskId: String,
+        deletedAt: Long?
+    ): ResultModel<Unit> = runQuery {
+        taskDao.updateTaskDeletedAtById(
+            taskId = taskId,
+            deletedAt = deletedAt
+        )
+    }
+
+    override suspend fun deleteTaskById(taskId: String): ResultModel<Unit> = runQuery {
+        taskDao.deleteTaskById(taskId)
+    }
+
     override suspend fun updateTaskContentById(
         contentId: String,
         content: String

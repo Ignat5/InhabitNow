@@ -4,15 +4,9 @@ import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.core.util.randomUUID
 import com.example.inhabitnow.data.data_source.task.TaskDataSource
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
-import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
-import com.example.inhabitnow.data.model.task.content.BaseTaskContentEntity
-import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
-import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
-import com.example.inhabitnow.data.util.toBaseTaskContentEntity
 import com.example.inhabitnow.data.util.toEpochDay
 import com.example.inhabitnow.data.util.toJson
-import com.example.inhabitnow.data.util.toLocalDate
 import com.example.inhabitnow.data.util.toTaskContentTable
 import com.example.inhabitnow.data.util.toTaskTable
 import com.example.inhabitnow.data.util.toTaskWithContentEntity
@@ -82,6 +76,15 @@ class DefaultTaskRepository(
         taskId = taskId,
         priority = priority
     )
+
+    override suspend fun saveTaskById(taskId: String): ResultModel<Unit> =
+        taskDataSource.updateTaskDeletedAtById(
+            taskId = taskId,
+            deletedAt = null
+        )
+
+    override suspend fun deleteTaskById(taskId: String): ResultModel<Unit> =
+        taskDataSource.deleteTaskById(taskId = taskId)
 
     override suspend fun updateTaskStartDateById(
         taskId: String,

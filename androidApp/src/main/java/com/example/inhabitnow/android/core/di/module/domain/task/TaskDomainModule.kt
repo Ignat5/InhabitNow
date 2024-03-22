@@ -2,10 +2,14 @@ package com.example.inhabitnow.android.core.di.module.domain.task
 
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.data.repository.task.TaskRepository
+import com.example.inhabitnow.domain.use_case.delete_task_by_id.DefaultDeleteTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.DefaultReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.DefaultSaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
+import com.example.inhabitnow.domain.use_case.save_task_by_id.DefaultSaveTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.save_task_by_id.SaveTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_date.DefaultUpdateTaskDateUseCase
 import com.example.inhabitnow.domain.use_case.update_task_date.UpdateTaskDateUseCase
 import com.example.inhabitnow.domain.use_case.update_task_description.DefaultUpdateTaskDescriptionByIdUseCase
@@ -110,6 +114,28 @@ object TaskDomainModule {
     ): UpdateTaskPriorityByIdUseCase {
         return DefaultUpdateTaskPriorityByIdUseCase(
             taskRepository = taskRepository
+        )
+    }
+
+    @Provides
+    fun provideSaveTaskByIdUseCase(
+        taskRepository: TaskRepository,
+        externalScope: CoroutineScope
+    ): SaveTaskByIdUseCase {
+        return DefaultSaveTaskByIdUseCase(
+            taskRepository = taskRepository,
+            externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideDeleteTaskByIdUseCase(
+        taskRepository: TaskRepository,
+        externalScope: CoroutineScope
+    ): DeleteTaskByIdUseCase {
+        return DefaultDeleteTaskByIdUseCase(
+            taskRepository = taskRepository,
+            externalScope = externalScope
         )
     }
 

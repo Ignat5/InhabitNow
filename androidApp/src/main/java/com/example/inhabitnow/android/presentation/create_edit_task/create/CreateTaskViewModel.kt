@@ -36,8 +36,10 @@ import com.example.inhabitnow.android.ui.toUIProgressContent
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
+import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
+import com.example.inhabitnow.domain.use_case.save_task_by_id.SaveTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import com.example.inhabitnow.domain.use_case.tag.save_tag_cross_by_task_id.SaveTagCrossByTaskIdUseCase
@@ -50,6 +52,8 @@ import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTask
 import com.example.inhabitnow.domain.util.DomainConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -79,7 +83,10 @@ class CreateTaskViewModel @Inject constructor(
     private val updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
     private val updateTaskPriorityByIdUseCase: UpdateTaskPriorityByIdUseCase,
     private val saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
-    @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
+    private val saveTaskByIdUseCase: SaveTaskByIdUseCase,
+    private val deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
+    private val externalScope: CoroutineScope,
+    @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher,
 ) : BaseViewModel<CreateTaskScreenEvent, CreateTaskScreenState, CreateTaskScreenNavigation, CreateTaskScreenConfig>() {
 
     private val taskId: String = checkNotNull(savedStateHandle.get<String>(AppNavDest.TASK_ID_KEY))
@@ -150,11 +157,18 @@ class CreateTaskViewModel @Inject constructor(
             is CreateTaskScreenEvent.OnItemTaskConfigClick -> onItemTaskConfigClick(event)
             is CreateTaskScreenEvent.ResultEvent -> onResultEvent(event)
             is CreateTaskScreenEvent.OnEndDateSwitchClick -> onEndDateSwitchClick()
-            is CreateTaskScreenEvent.OnSaveClick -> {
-                /* TODO */
-            }
+            is CreateTaskScreenEvent.OnSaveClick -> onSaveClick()
 
             is CreateTaskScreenEvent.OnDismissRequest -> onDismissRequest()
+        }
+    }
+
+    private fun onSaveClick() {
+        if (uiScreenState.value.canSave) {
+            viewModelScope.launch {
+                saveTaskByIdUseCase(taskId)
+                setUpNavigationState(CreateTaskScreenNavigation.Back)
+            }
         }
     }
 
@@ -644,6 +658,7 @@ class CreateTaskViewModel @Inject constructor(
     companion object {
         private const val DEFAULT_REMINDER_COUNT = 0
         private const val DEFAULT_TAG_COUNT = 0
+        private const val DEFAULT_DELETE_AFTER_DELAY = 5000L
     }
 
 }

@@ -29,6 +29,13 @@ interface TaskDataSource {
         priority: String
     ): ResultModel<Unit>
 
+    suspend fun updateTaskDeletedAtById(
+        taskId: String,
+        deletedAt: Long?
+    ): ResultModel<Unit>
+
+    suspend fun deleteTaskById(taskId: String): ResultModel<Unit>
+
     suspend fun updateTaskStartDateById(
         taskId: String,
         taskStartEpochDay: Long

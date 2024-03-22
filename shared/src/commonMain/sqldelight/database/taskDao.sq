@@ -103,6 +103,10 @@ updateTaskPriorityById:
 UPDATE TaskTable SET priority = :priority
 WHERE id = :taskId;
 
+updateTaskDeletedAtById:
+UPDATE TaskTable SET deletedAt = :deletedAt
+WHERE id = :taskId;
+
 updateTaskContentById:
 UPDATE TaskContentTable SET content = :content
 WHERE id = :contentId;
@@ -123,6 +127,9 @@ startEpochDay = :taskStartEpochDay,
 endEpochDay = :taskEndEpochDay
 WHERE id = :taskId;
 
+deleteTaskById:
+DELETE FROM TaskTable
+WHERE id = :taskId;
 
 selectTaskContentByTaskId:
 SELECT * FROM TaskContentTable tTaskContent
