@@ -65,7 +65,9 @@ class PickTaskPriorityStateHolder(
 
     private fun onConfirmClick() {
         if (canConfirmState.value) {
-            setUpResult(PickTaskPriorityScreenResult.Confirm(inputPriorityState.value))
+            inputPriorityState.value.toIntOrNull()?.toString()?.let { priority ->
+                setUpResult(PickTaskPriorityScreenResult.Confirm(priority))
+            }
         }
     }
 
@@ -74,12 +76,13 @@ class PickTaskPriorityStateHolder(
     }
 
     private fun validate(inputPriority: String): Boolean = inputPriority.toIntOrNull()?.let {
-        it in MIN_PRIORITY..MAX_PRIORITY
+        it in MIN_PRIORITY..MAX_PRIORITY && inputPriority.length <= MAX_LENGTH
     } ?: false
 
     companion object {
         private const val MIN_PRIORITY = 0
         private const val MAX_PRIORITY = 999
+        private const val MAX_LENGTH = MAX_PRIORITY.toString().length
     }
 
 }

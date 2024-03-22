@@ -13,6 +13,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_priority.PickTaskPriorityStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_priority.components.PickTaskPriorityScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressStateHolder
@@ -184,7 +186,20 @@ class CreateTaskViewModel @Inject constructor(
             is ItemTaskConfig.Reminders -> onConfigTaskRemindersClick()
             is ItemTaskConfig.Tags -> onConfigTaskTagsClick()
             is ItemTaskConfig.Description -> onConfigDescriptionClick()
-            else -> Unit
+            is ItemTaskConfig.Priority -> onConfigTaskPriorityClick()
+        }
+    }
+
+    private fun onConfigTaskPriorityClick() {
+        taskWithContentState.value?.task?.priority?.let { priority ->
+            setUpConfigState(
+                CreateTaskScreenConfig.PickTaskPriority(
+                    stateHolder = PickTaskPriorityStateHolder(
+                        initPriority = priority,
+                        holderScope = provideChildScope()
+                    )
+                )
+            )
         }
     }
 
@@ -353,6 +368,27 @@ class CreateTaskViewModel @Inject constructor(
 
             is CreateTaskScreenEvent.ResultEvent.PickTaskDescription ->
                 onPickTaskDescriptionResultEvent(event)
+
+            is CreateTaskScreenEvent.ResultEvent.PickTaskPriority ->
+                onPickTaskPriorityResultEvent(event)
+        }
+    }
+
+    private fun onPickTaskPriorityResultEvent(event: CreateTaskScreenEvent.ResultEvent.PickTaskPriority) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskPriorityScreenResult.Confirm -> onConfirmTaskPriority(result)
+                is PickTaskPriorityScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmTaskPriority(result: PickTaskPriorityScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskPriorityByIdUseCase(
+                taskId = taskId,
+                priority = result.priority
+            )
         }
     }
 

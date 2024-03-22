@@ -87,15 +87,20 @@ class PickTaskNumberProgressStateHolder(
 
     private fun onConfirmClick() {
         if (uiScreenState.value.canSave) {
-            setUpResult(
-                PickTaskNumberProgressScreenResult.Confirm(
-                    progressContent = TaskContentModel.ProgressContent.Number(
-                        limitType = inputLimitTypeState.value,
-                        limitNumber = inputLimitNumberState.value,
-                        limitUnit = inputLimitUnitState.value
+            inputLimitNumberState.value.let { inputLimitNumber ->
+                inputLimitNumber.toIntOrNull()?.toString()
+                    ?: inputLimitNumber.toDoubleOrNull()?.toString()
+            }?.let { limitNumber ->
+                setUpResult(
+                    PickTaskNumberProgressScreenResult.Confirm(
+                        progressContent = TaskContentModel.ProgressContent.Number(
+                            limitType = inputLimitTypeState.value,
+                            limitNumber = limitNumber,
+                            limitUnit = inputLimitUnitState.value
+                        )
                     )
                 )
-            )
+            }
         }
     }
 

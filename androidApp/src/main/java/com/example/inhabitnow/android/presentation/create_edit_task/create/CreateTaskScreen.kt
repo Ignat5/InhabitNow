@@ -45,6 +45,7 @@ import com.example.inhabitnow.android.presentation.common.pick_date.components.P
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyDialog
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_priority.PickTaskPriorityDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressDialog
@@ -445,6 +446,15 @@ private fun CreateTaskScreenConfigStateless(
                 stateHolder = config.stateHolder,
                 onResult = {
                     onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskDescription(it))
+                }
+            )
+        }
+
+        is CreateTaskScreenConfig.PickTaskPriority -> {
+            PickTaskPriorityDialog(
+                stateHolder = config.stateHolder,
+                onResult = {
+                    onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskPriority(it))
                 }
             )
         }
