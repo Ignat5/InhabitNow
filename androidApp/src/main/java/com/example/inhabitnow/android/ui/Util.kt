@@ -4,7 +4,9 @@ import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.model.UITaskContent
 import com.example.inhabitnow.core.type.ProgressLimitType
 import com.example.inhabitnow.core.type.ReminderType
+import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.reminder.content.ReminderContentModel
+import com.example.inhabitnow.domain.model.task.TaskModel
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -119,4 +121,21 @@ private fun Int.insertZeroIfRequired(): String = this.let { number ->
 fun ReminderType.toIconResId(): Int = when (this) {
     ReminderType.NoReminder -> R.drawable.ic_notification_off
     ReminderType.Notification -> R.drawable.ic_notification
+}
+
+fun TaskModel.toDatePeriodDisplay(): String = this.let { task ->
+    when (task.type) {
+        TaskType.SingleTask -> task.startDate.toDayMonthYear()
+        TaskType.RecurringTask, TaskType.Habit -> {
+            task.endDate?.let { endDate ->
+                "${task.startDate.toDayMonthYear()} - ${endDate.toDayMonthYear()}"
+            } ?: "starting ${task.startDate.toDayMonthYear()}"
+        }
+    }
+}
+
+fun TaskType.toDisplay() = when (this) {
+    TaskType.SingleTask -> "Task"
+    TaskType.RecurringTask -> "Recurring task"
+    TaskType.Habit -> "Habit"
 }

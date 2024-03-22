@@ -42,7 +42,8 @@ import com.example.inhabitnow.android.presentation.main.config.pick_task_type.Pi
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
 
 fun NavGraphBuilder.mainGraph(
-    onNavigateToCreateTask: (taskId: String) -> Unit
+    onNavigateToCreateTask: (taskId: String) -> Unit,
+    onNavigateToSearchTasks: () -> Unit
 ) {
     composable(
         route = AppNavDest.MainGraphDestination.route
@@ -55,6 +56,9 @@ fun NavGraphBuilder.mainGraph(
                 when (destination) {
                     is MainScreenNavigation.CreateTask -> {
                         onNavigateToCreateTask(destination.taskId)
+                    }
+                    is MainScreenNavigation.SearchTasks -> {
+                        onNavigateToSearchTasks()
                     }
                 }
             },
@@ -96,7 +100,9 @@ fun NavGraphBuilder.mainGraph(
                         ScreenAppBar(
                             titleText = titleText,
                             onMenuClick = { /*TODO*/ },
-                            onSearchClick = { /* TODO */ }
+                            onSearchClick = {
+                                onEvent(MainScreenEvent.OnSearchTasksClick)
+                            }
                         )
                     },
                     bottomBar = {
