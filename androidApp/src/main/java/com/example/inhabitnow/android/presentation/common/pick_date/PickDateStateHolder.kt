@@ -145,21 +145,6 @@ class PickDateStateHolder(
                                 }
                             }
                         )
-//                            val offsetEpochDay = currentDate.toEpochDays() - 1
-//                            val minEpochDay = request.minDate.toEpochDays()
-//                            val maxEpochDay = request.maxDate.toEpochDays()
-//                            val minDiff = minEpochDay - offsetEpochDay
-//                            val maxDiff = maxEpochDay - offsetEpochDay
-//                            result.addAll(
-//                                monthRange.map { dayOfMonth ->
-//                                    (dayOfMonth !in minDiff..maxDiff).let { isLocked ->
-//                                        if (isLocked) UIDateItem.UnPickAble.Locked(
-//                                            dayOfMonth
-//                                        )
-//                                        else UIDateItem.PickAble.Day(dayOfMonth)
-//                                    }
-//                                }
-//                            )
                     }
                 }
             }

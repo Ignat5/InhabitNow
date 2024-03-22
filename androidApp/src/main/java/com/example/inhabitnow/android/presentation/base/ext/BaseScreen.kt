@@ -61,7 +61,7 @@ inline fun <SE : ScreenEvent, SS : ScreenState, SR : ScreenResult> BaseScreen(
 ) {
     val state by stateHolder.uiScreenState.collectAsStateWithLifecycle()
     val baseResultState by stateHolder.uiScreenResult.collectAsStateWithLifecycle()
-    val onEvent = remember {
+    val onEvent = remember(stateHolder) {
         val callback: (event: SE) -> Unit = { event ->
             stateHolder.onEvent(event)
         }

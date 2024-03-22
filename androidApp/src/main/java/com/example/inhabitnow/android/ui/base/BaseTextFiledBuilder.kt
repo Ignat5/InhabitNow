@@ -34,6 +34,7 @@ object BaseTextFiledBuilder {
         label: (@Composable () -> Unit)? = null,
         supportingText: (@Composable () -> Unit)? = null,
         singleLine: Boolean = false,
+        minLines: Int = 1,
         keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
         keyboardActions: KeyboardActions = KeyboardActions.Default,
     ) {
@@ -57,6 +58,7 @@ object BaseTextFiledBuilder {
             keyboardActions = keyboardActions,
             supportingText = supportingText,
             singleLine = singleLine,
+            minLines = minLines,
             modifier = modifier
         )
 
