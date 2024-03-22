@@ -46,6 +46,26 @@ class DefaultTaskDataSource(
         taskDao.updateTaskTitleById(taskId = taskId, title = title)
     }
 
+    override suspend fun updateTaskDescriptionById(
+        taskId: String,
+        description: String
+    ): ResultModel<Unit> = runQuery {
+        taskDao.updateTaskDescriptionById(
+            taskId = taskId,
+            description = description
+        )
+    }
+
+    override suspend fun updateTaskPriorityById(
+        taskId: String,
+        priority: String
+    ): ResultModel<Unit> = runQuery {
+        taskDao.updateTaskPriorityById(
+            taskId = taskId,
+            priority = priority
+        )
+    }
+
     override suspend fun updateTaskStartDateById(
         taskId: String,
         taskStartEpochDay: Long

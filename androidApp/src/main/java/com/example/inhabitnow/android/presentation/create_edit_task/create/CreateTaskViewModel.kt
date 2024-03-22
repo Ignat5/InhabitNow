@@ -9,6 +9,8 @@ import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStat
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.common.pick_date.model.PickDateRequestModel
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
@@ -37,7 +39,9 @@ import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTa
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import com.example.inhabitnow.domain.use_case.tag.save_tag_cross_by_task_id.SaveTagCrossByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_date.UpdateTaskDateUseCase
+import com.example.inhabitnow.domain.use_case.update_task_description.UpdateTaskDescriptionByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.UpdateTaskPriorityByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
 import com.example.inhabitnow.domain.util.DomainConst
@@ -69,6 +73,8 @@ class CreateTaskViewModel @Inject constructor(
     private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
     private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
     private val updateTaskDateUseCase: UpdateTaskDateUseCase,
+    private val updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
+    private val updateTaskPriorityByIdUseCase: UpdateTaskPriorityByIdUseCase,
     private val saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<CreateTaskScreenEvent, CreateTaskScreenState, CreateTaskScreenNavigation, CreateTaskScreenConfig>() {
@@ -141,7 +147,8 @@ class CreateTaskViewModel @Inject constructor(
             is CreateTaskScreenEvent.OnItemTaskConfigClick -> onItemTaskConfigClick(event)
             is CreateTaskScreenEvent.ResultEvent -> onResultEvent(event)
             is CreateTaskScreenEvent.OnEndDateSwitchClick -> onEndDateSwitchClick()
-            is CreateTaskScreenEvent.OnSaveClick -> { /* TODO */
+            is CreateTaskScreenEvent.OnSaveClick -> {
+                /* TODO */
             }
 
             is CreateTaskScreenEvent.OnDismissRequest -> onDismissRequest()
@@ -176,8 +183,21 @@ class CreateTaskViewModel @Inject constructor(
             is ItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
             is ItemTaskConfig.Reminders -> onConfigTaskRemindersClick()
             is ItemTaskConfig.Tags -> onConfigTaskTagsClick()
-
+            is ItemTaskConfig.Description -> onConfigDescriptionClick()
             else -> Unit
+        }
+    }
+
+    private fun onConfigDescriptionClick() {
+        taskWithContentState.value?.task?.description?.let { description ->
+            setUpConfigState(
+                CreateTaskScreenConfig.PickTaskDescription(
+                    stateHolder = PickTaskDescriptionStateHolder(
+                        initDescription = description,
+                        holderScope = provideChildScope()
+                    )
+                )
+            )
         }
     }
 
@@ -330,6 +350,27 @@ class CreateTaskViewModel @Inject constructor(
 
             is CreateTaskScreenEvent.ResultEvent.PickDate ->
                 onPickDateResultEvent(event)
+
+            is CreateTaskScreenEvent.ResultEvent.PickTaskDescription ->
+                onPickTaskDescriptionResultEvent(event)
+        }
+    }
+
+    private fun onPickTaskDescriptionResultEvent(event: CreateTaskScreenEvent.ResultEvent.PickTaskDescription) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskDescriptionScreenResult.Confirm -> onConfirmPickTaskDescription(result)
+                is PickTaskDescriptionScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskDescription(result: PickTaskDescriptionScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskDescriptionByIdUseCase(
+                taskId = taskId,
+                description = result.description
+            )
         }
     }
 

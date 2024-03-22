@@ -43,6 +43,7 @@ import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateDialog
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressDialog
@@ -436,6 +437,15 @@ private fun CreateTaskScreenConfigStateless(
             PickDateDialog(
                 stateHolder = config.stateHolder,
                 onResult = onResult
+            )
+        }
+
+        is CreateTaskScreenConfig.PickTaskDescription -> {
+            PickTaskDescriptionDialog(
+                stateHolder = config.stateHolder,
+                onResult = {
+                    onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskDescription(it))
+                }
             )
         }
     }

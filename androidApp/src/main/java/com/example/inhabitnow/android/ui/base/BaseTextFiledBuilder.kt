@@ -35,6 +35,7 @@ object BaseTextFiledBuilder {
         supportingText: (@Composable () -> Unit)? = null,
         singleLine: Boolean = false,
         minLines: Int = 1,
+        maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
         keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
         keyboardActions: KeyboardActions = KeyboardActions.Default,
     ) {
@@ -59,6 +60,7 @@ object BaseTextFiledBuilder {
             supportingText = supportingText,
             singleLine = singleLine,
             minLines = minLines,
+            maxLines = maxLines,
             modifier = modifier
         )
 

@@ -8,8 +8,12 @@ import com.example.inhabitnow.domain.use_case.save_default_task.DefaultSaveDefau
 import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.update_task_date.DefaultUpdateTaskDateUseCase
 import com.example.inhabitnow.domain.use_case.update_task_date.UpdateTaskDateUseCase
+import com.example.inhabitnow.domain.use_case.update_task_description.DefaultUpdateTaskDescriptionByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_description.UpdateTaskDescriptionByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.DefaultUpdateTaskFrequencyByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.DefaultUpdateTaskPriorityByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.UpdateTaskPriorityByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.DefaultUpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.DefaultUpdateTaskTitleByIdUseCase
@@ -88,6 +92,24 @@ object TaskDomainModule {
         return DefaultUpdateTaskDateUseCase(
             taskRepository = taskRepository,
             externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideUpdateTaskDescriptionByIdUseCase(
+        taskRepository: TaskRepository
+    ): UpdateTaskDescriptionByIdUseCase {
+        return DefaultUpdateTaskDescriptionByIdUseCase(
+            taskRepository = taskRepository
+        )
+    }
+
+    @Provides
+    fun provideUpdateTaskPriorityByIdUseCase(
+        taskRepository: TaskRepository
+    ): UpdateTaskPriorityByIdUseCase {
+        return DefaultUpdateTaskPriorityByIdUseCase(
+            taskRepository = taskRepository
         )
     }
 

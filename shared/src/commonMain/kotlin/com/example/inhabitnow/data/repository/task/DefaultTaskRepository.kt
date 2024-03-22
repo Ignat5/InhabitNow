@@ -67,6 +67,22 @@ class DefaultTaskRepository(
         title = title
     )
 
+    override suspend fun updateTaskDescriptionById(
+        taskId: String,
+        description: String
+    ): ResultModel<Unit> = taskDataSource.updateTaskDescriptionById(
+        taskId = taskId,
+        description = description
+    )
+
+    override suspend fun updateTaskPriorityById(
+        taskId: String,
+        priority: String
+    ): ResultModel<Unit> = taskDataSource.updateTaskPriorityById(
+        taskId = taskId,
+        priority = priority
+    )
+
     override suspend fun updateTaskStartDateById(
         taskId: String,
         taskStartDate: LocalDate

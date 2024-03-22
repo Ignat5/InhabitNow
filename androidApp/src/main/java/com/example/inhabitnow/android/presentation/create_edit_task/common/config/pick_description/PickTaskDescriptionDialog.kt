@@ -59,6 +59,7 @@ private fun PickTaskDescriptionDialogStateless(
                 .fillMaxWidth()
                 .focusRequester(focusRequester),
             minLines = 2,
+            maxLines = 8,
             label = {
                 Text(text = "description")
             }

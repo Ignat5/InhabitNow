@@ -95,6 +95,14 @@ updateTaskTitleById:
 UPDATE TaskTable SET title = :title
 WHERE id = :taskId;
 
+updateTaskDescriptionById:
+UPDATE TaskTable SET description = :description
+WHERE id = :taskId;
+
+updateTaskPriorityById:
+UPDATE TaskTable SET priority = :priority
+WHERE id = :taskId;
+
 updateTaskContentById:
 UPDATE TaskContentTable SET content = :content
 WHERE id = :contentId;
