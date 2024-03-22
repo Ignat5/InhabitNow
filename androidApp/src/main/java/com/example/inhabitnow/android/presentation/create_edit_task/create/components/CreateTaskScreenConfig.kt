@@ -54,4 +54,6 @@ sealed interface CreateTaskScreenConfig : ScreenConfig {
             override val stateHolder: PickDateStateHolder
         ) : PickDate
     }
+
+    data object ConfirmLeave : CreateTaskScreenConfig
 }

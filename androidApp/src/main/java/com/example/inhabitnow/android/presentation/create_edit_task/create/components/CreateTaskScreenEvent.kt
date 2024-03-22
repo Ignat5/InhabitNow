@@ -3,6 +3,7 @@ package com.example.inhabitnow.android.presentation.create_edit_task.create.comp
 import com.example.inhabitnow.android.presentation.base.components.event.ScreenEvent
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.confirm_leave.ConfirmLeaveScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
@@ -64,5 +65,9 @@ sealed interface CreateTaskScreenEvent : ScreenEvent {
                 override val result: PickDateScreenResult
             ) : PickDate
         }
+
+        data class ConfirmLeave(
+            override val result: ConfirmLeaveScreenResult
+        ) : ResultEvent
     }
 }

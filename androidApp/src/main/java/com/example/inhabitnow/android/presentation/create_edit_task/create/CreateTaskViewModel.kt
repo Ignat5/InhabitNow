@@ -8,6 +8,7 @@ import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStateHolder
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.common.pick_date.model.PickDateRequestModel
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.confirm_leave.ConfirmLeaveScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
@@ -371,7 +372,23 @@ class CreateTaskViewModel @Inject constructor(
 
             is CreateTaskScreenEvent.ResultEvent.PickTaskPriority ->
                 onPickTaskPriorityResultEvent(event)
+
+            is CreateTaskScreenEvent.ResultEvent.ConfirmLeave ->
+                onConfirmLeaveResultEvent(event)
         }
+    }
+
+    private fun onConfirmLeaveResultEvent(event: CreateTaskScreenEvent.ResultEvent.ConfirmLeave) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is ConfirmLeaveScreenResult.Confirm -> onConfirmLeave(result)
+                is ConfirmLeaveScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmLeave(result: ConfirmLeaveScreenResult.Confirm) {
+        setUpNavigationState(CreateTaskScreenNavigation.Back)
     }
 
     private fun onPickTaskPriorityResultEvent(event: CreateTaskScreenEvent.ResultEvent.PickTaskPriority) {
@@ -562,7 +579,11 @@ class CreateTaskViewModel @Inject constructor(
     }
 
     private fun onDismissRequest() {
-        setUpNavigationState(CreateTaskScreenNavigation.Back)
+        if (taskWithContentState.value?.task?.title?.isNotEmpty() == true) {
+            setUpConfigState(CreateTaskScreenConfig.ConfirmLeave)
+        } else {
+            setUpNavigationState(CreateTaskScreenNavigation.Back)
+        }
     }
 
     private suspend fun provideTaskConfigItems(

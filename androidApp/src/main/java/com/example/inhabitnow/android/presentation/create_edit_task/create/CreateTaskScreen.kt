@@ -42,6 +42,7 @@ import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateDialog
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.confirm_leave.ConfirmLeaveDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyDialog
@@ -455,6 +456,14 @@ private fun CreateTaskScreenConfigStateless(
                 stateHolder = config.stateHolder,
                 onResult = {
                     onResultEvent(CreateTaskScreenEvent.ResultEvent.PickTaskPriority(it))
+                }
+            )
+        }
+
+        is CreateTaskScreenConfig.ConfirmLeave -> {
+            ConfirmLeaveDialog(
+                onResult = {
+                    onResultEvent(CreateTaskScreenEvent.ResultEvent.ConfirmLeave(it))
                 }
             )
         }
