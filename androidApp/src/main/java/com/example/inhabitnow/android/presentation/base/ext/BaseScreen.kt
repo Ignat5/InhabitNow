@@ -21,7 +21,7 @@ import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
 inline fun <SE : ScreenEvent, SS : ScreenState, SN : ScreenNavigation, SC : ScreenConfig> BaseScreen(
     viewModel: BaseViewModel<SE, SS, SN, SC>,
     crossinline onNavigation: (destination: SN) -> Unit,
-    crossinline configContent: @Composable (config: SC) -> Unit,
+    crossinline configContent: @Composable (config: SC, onEvent: (SE) -> Unit) -> Unit,
     crossinline screenContent: @Composable (state: SS, onEvent: (SE) -> Unit) -> Unit
 ) {
     val state by viewModel.uiScreenState.collectAsStateWithLifecycle()
@@ -38,7 +38,7 @@ inline fun <SE : ScreenEvent, SS : ScreenState, SN : ScreenNavigation, SC : Scre
         when (val baseCS = baseConfigState) {
             is BaseConfigState.Idle -> Unit
             is BaseConfigState.Config -> {
-                configContent(baseCS.config)
+                configContent(baseCS.config, onEvent)
             }
         }
     }
@@ -61,7 +61,7 @@ inline fun <SE : ScreenEvent, SS : ScreenState, SR : ScreenResult> BaseScreen(
 ) {
     val state by stateHolder.uiScreenState.collectAsStateWithLifecycle()
     val baseResultState by stateHolder.uiScreenResult.collectAsStateWithLifecycle()
-    val onEvent = remember {
+    val onEvent = remember(stateHolder) {
         val callback: (event: SE) -> Unit = { event ->
             stateHolder.onEvent(event)
         }

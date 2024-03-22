@@ -1,15 +1,19 @@
 package com.example.inhabitnow.android.presentation.base.view_model
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.inhabitnow.android.presentation.base.components.config.BaseConfigState
 import com.example.inhabitnow.android.presentation.base.components.config.ScreenConfig
 import com.example.inhabitnow.android.presentation.base.components.navigation.BaseNavigationState
 import com.example.inhabitnow.android.presentation.base.components.navigation.ScreenNavigation
 import com.example.inhabitnow.android.presentation.base.components.event.ScreenEvent
 import com.example.inhabitnow.android.presentation.base.components.state.ScreenState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.job
 
 abstract class BaseViewModel<SE : ScreenEvent, SS : ScreenState, SN : ScreenNavigation, SC : ScreenConfig> :
     ViewModel() {
@@ -52,5 +56,9 @@ abstract class BaseViewModel<SE : ScreenEvent, SS : ScreenState, SN : ScreenNavi
     }
 
     protected fun resetConfigState() = _uiScreenConfigState.update { BaseConfigState.Idle }
+
+    /* other */
+    protected fun provideChildScope() =
+        CoroutineScope(SupervisorJob(viewModelScope.coroutineContext.job))
 
 }

@@ -2,13 +2,32 @@ package com.example.inhabitnow.android.core.di.module.domain.task
 
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.data.repository.task.TaskRepository
+import com.example.inhabitnow.domain.use_case.delete_task_by_id.DefaultDeleteTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.DefaultReadTaskWithContentByIdUseCase
+import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.DefaultSaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
+import com.example.inhabitnow.domain.use_case.save_task_by_id.DefaultSaveTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.save_task_by_id.SaveTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_date.DefaultUpdateTaskDateUseCase
+import com.example.inhabitnow.domain.use_case.update_task_date.UpdateTaskDateUseCase
+import com.example.inhabitnow.domain.use_case.update_task_description.DefaultUpdateTaskDescriptionByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_description.UpdateTaskDescriptionByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.DefaultUpdateTaskFrequencyByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.DefaultUpdateTaskPriorityByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.UpdateTaskPriorityByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.DefaultUpdateTaskProgressByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_title_by_id.DefaultUpdateTaskTitleByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -22,6 +41,101 @@ object TaskDomainModule {
         return DefaultSaveDefaultTaskUseCase(
             taskRepository = taskRepository,
             defaultDispatcher = defaultDispatcher
+        )
+    }
+
+    @Provides
+    fun provideReadTaskWithContentByIdUseCase(
+        taskRepository: TaskRepository,
+        @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher
+    ): ReadTaskWithContentByIdUseCase {
+        return DefaultReadTaskWithContentByIdUseCase(
+            taskRepository = taskRepository,
+            defaultDispatcher = defaultDispatcher
+        )
+    }
+
+    @Provides
+    fun provideUpdateTaskTitleByIdUseCase(
+        taskRepository: TaskRepository
+    ): UpdateTaskTitleByIdUseCase {
+        return DefaultUpdateTaskTitleByIdUseCase(
+            taskRepository = taskRepository
+        )
+    }
+
+    @Provides
+    fun provideUpdateTaskProgressByIdUseCase(
+        taskRepository: TaskRepository,
+        @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher
+    ): UpdateTaskProgressByIdUseCase {
+        return DefaultUpdateTaskProgressByIdUseCase(
+            taskRepository = taskRepository,
+            defaultDispatcher = defaultDispatcher
+        )
+    }
+
+    @Provides
+    fun provideUpdateTaskFrequencyByIdUseCase(
+        taskRepository: TaskRepository,
+        @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher,
+        externalScope: CoroutineScope
+    ): UpdateTaskFrequencyByIdUseCase {
+        return DefaultUpdateTaskFrequencyByIdUseCase(
+            taskRepository = taskRepository,
+            defaultDispatcher = defaultDispatcher,
+            externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideUpdateTaskDateByIdUseCase(
+        taskRepository: TaskRepository,
+        externalScope: CoroutineScope
+    ): UpdateTaskDateUseCase {
+        return DefaultUpdateTaskDateUseCase(
+            taskRepository = taskRepository,
+            externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideUpdateTaskDescriptionByIdUseCase(
+        taskRepository: TaskRepository
+    ): UpdateTaskDescriptionByIdUseCase {
+        return DefaultUpdateTaskDescriptionByIdUseCase(
+            taskRepository = taskRepository
+        )
+    }
+
+    @Provides
+    fun provideUpdateTaskPriorityByIdUseCase(
+        taskRepository: TaskRepository
+    ): UpdateTaskPriorityByIdUseCase {
+        return DefaultUpdateTaskPriorityByIdUseCase(
+            taskRepository = taskRepository
+        )
+    }
+
+    @Provides
+    fun provideSaveTaskByIdUseCase(
+        taskRepository: TaskRepository,
+        externalScope: CoroutineScope
+    ): SaveTaskByIdUseCase {
+        return DefaultSaveTaskByIdUseCase(
+            taskRepository = taskRepository,
+            externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideDeleteTaskByIdUseCase(
+        taskRepository: TaskRepository,
+        externalScope: CoroutineScope
+    ): DeleteTaskByIdUseCase {
+        return DefaultDeleteTaskByIdUseCase(
+            taskRepository = taskRepository,
+            externalScope = externalScope
         )
     }
 

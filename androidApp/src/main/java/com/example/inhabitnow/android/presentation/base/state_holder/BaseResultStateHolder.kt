@@ -4,12 +4,12 @@ import com.example.inhabitnow.android.presentation.base.components.event.ScreenE
 import com.example.inhabitnow.android.presentation.base.components.result.BaseResultState
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
 import com.example.inhabitnow.android.presentation.base.components.state.ScreenState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-abstract class BaseResultStateHolder<SE : ScreenEvent, SS : ScreenState, SR : ScreenResult> :
-    BaseStateHolder<SE, SS>() {
+abstract class BaseResultStateHolder<SE : ScreenEvent, SS : ScreenState, SR : ScreenResult> : BaseStateHolder<SE, SS>() {
     private val _uiScreenResult = MutableStateFlow<BaseResultState<SR>>(BaseResultState.Idle)
     val uiScreenResult: StateFlow<BaseResultState<SR>> = _uiScreenResult
 

@@ -9,6 +9,7 @@ import com.example.inhabitnow.data.model.reminder.ReminderEntity
 import com.example.inhabitnow.data.model.reminder.content.ReminderContentEntity
 import com.example.inhabitnow.data.model.tag.TagEntity
 import com.example.inhabitnow.data.model.task.TaskEntity
+import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
 import com.example.inhabitnow.data.model.task.content.BaseTaskContentEntity
 import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
@@ -16,9 +17,12 @@ import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import database.RecordTable
 import database.ReminderTable
+import database.SelectTaskWithContentById
 import database.TagTable
 import database.TaskContentTable
 import database.TaskTable
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.encodeToString
@@ -33,13 +37,13 @@ fun TaskEntity.toTaskTable(json: Json) = TaskTable(
     title = title,
     description = description,
     startEpochDay = startDate.toEpochDay(),
-    endEpochDay = (endDate ?: DataConst.distantFutureDate).toEpochDay(),
+    endEpochDay = endDate.toEpochDay(),
     priority = priority,
     createdAt = createdAt,
     deletedAt = deletedAt
 )
 
-fun TaskTable.toTaskModel(json: Json) = TaskEntity(
+fun TaskTable.toTaskEntity(json: Json) = TaskEntity(
     id = this.id,
     type = this.type.fromJsonTaskType(json),
     progressType = this.progressType.fromJsonTaskProgressType(json),
@@ -55,7 +59,7 @@ fun TaskTable.toTaskModel(json: Json) = TaskEntity(
     deletedAt = this.deletedAt
 )
 
-fun <T : TaskContentEntity> BaseTaskContentEntity<T>.toTaskContentTable(json: Json) =
+fun BaseTaskContentEntity.toTaskContentTable(json: Json) =
     TaskContentTable(
         id = id,
         taskId = taskId,
@@ -69,7 +73,7 @@ fun <T : TaskContentEntity> BaseTaskContentEntity<T>.toTaskContentTable(json: Js
         createdAt = createdAt
     )
 
-fun TaskContentTable.toBaseTaskContentModel(json: Json): BaseTaskContentEntity<*>? = try {
+fun TaskContentTable.toBaseTaskContentEntity(json: Json): BaseTaskContentEntity? = try {
     when (val decodedContent = content.fromJsonTaskContentEntity(json)) {
         is TaskContentEntity.ProgressContent -> {
             ProgressContentEntity(
@@ -112,6 +116,7 @@ fun TaskProgressType.toJson(json: Json) = json.encodeToString(this)
 fun String.fromJsonTaskProgressType(json: Json) = json.decodeFromString<TaskProgressType>(this)
 
 fun TaskContentEntity.Type.toJson(json: Json) = json.encodeToString(this)
+
 fun TaskContentEntity.toJson(json: Json) = json.encodeToString<TaskContentEntity>(this)
 
 private fun String.fromJsonTaskContentEntity(json: Json): TaskContentEntity =
@@ -121,7 +126,7 @@ private fun String.fromJsonContentType(json: Json) =
     json.decodeFromString<TaskContentEntity.Type>(this)
 
 /** reminder **/
-fun ReminderTable.toReminderModel(json: Json) = ReminderEntity(
+fun ReminderTable.toReminderEntity(json: Json) = ReminderEntity(
     id = this.id,
     taskId = this.taskId,
     type = this.type.fromJsonReminderType(json),
@@ -139,19 +144,19 @@ fun ReminderEntity.toReminderTable(json: Json) = ReminderTable(
     createdAt = this.createdAt
 )
 
-private fun ReminderContentEntity.ScheduleContent.toJson(json: Json) =
+internal fun ReminderContentEntity.ScheduleContent.toJson(json: Json) =
     json.encodeToString<ReminderContentEntity.ScheduleContent>(this)
 
 private fun String.fromJsonScheduleContent(json: Json) =
     json.decodeFromString<ReminderContentEntity.ScheduleContent>(this)
 
-private fun LocalTime.toJson(json: Json) =
+internal fun LocalTime.toJson(json: Json) =
     json.encodeToString<LocalTime>(this)
 
 private fun String.fromJsonTime(json: Json) =
     json.decodeFromString<LocalTime>(this)
 
-private fun ReminderType.toJson(json: Json) =
+internal fun ReminderType.toJson(json: Json) =
     json.encodeToString(this)
 
 private fun String.fromJsonReminderType(json: Json) =
@@ -182,19 +187,96 @@ private fun String.fromJsonRecordEntry(json: Json) =
     json.decodeFromString<RecordContentEntity.Entry>(this)
 
 /** tag model **/
-fun TagTable.toTagModel(json: Json) = TagEntity(
+fun TagTable.toTagEntity() = TagEntity(
     id = id,
     title = title,
     createdAt = createdAt
 )
 
-fun TagEntity.toTagTable(json: Json) = TagTable(
+fun TagEntity.toTagTable() = TagTable(
     id = id,
     title = title,
     createdAt = createdAt
 )
+
+/** complex **/
+
+suspend fun TaskTable.toTaskWithContentEntity(
+    allTaskContent: List<TaskContentTable>,
+    json: Json
+): TaskWithContentEntity? {
+    return coroutineScope {
+        val task = async {
+            this@toTaskWithContentEntity.toTaskEntity(json)
+        }
+        val progressContent = async {
+            allTaskContent.toBaseTaskContentEntity(
+                contentType = TaskContentEntity.Type.Progress,
+                json = json
+            ) as? ProgressContentEntity
+        }
+
+        val frequencyContent = async {
+            allTaskContent.toBaseTaskContentEntity(
+                contentType = TaskContentEntity.Type.Frequency,
+                json = json
+            ) as? FrequencyContentEntity
+        }
+
+        val archiveContent = async {
+            allTaskContent.toBaseTaskContentEntity(
+                contentType = TaskContentEntity.Type.Archive,
+                json = json
+            ) as? ArchiveContentEntity
+        }
+
+        TaskWithContentEntity(
+            task = task.await(),
+            progressContent = progressContent.await() ?: return@coroutineScope null,
+            frequencyContent = frequencyContent.await() ?: return@coroutineScope null,
+            archiveContent = archiveContent.await() ?: return@coroutineScope null
+        )
+    }
+}
+
+private fun List<TaskContentTable>.toBaseTaskContentEntity(
+    contentType: TaskContentEntity.Type,
+    json: Json
+): BaseTaskContentEntity? = this.let { allTaskContent ->
+    val encodedContentType = contentType.toJson(json)
+    allTaskContent
+        .find { it.contentType == encodedContentType }
+        ?.toBaseTaskContentEntity(json)
+}
 
 /** other **/
 
-private fun LocalDate.toEpochDay() = this.toEpochDays().toLong()
-private fun Long.toLocalDate() = LocalDate.fromEpochDays(this.toInt())
+internal fun LocalDate?.toEpochDay() = (this ?: DataConst.distantFutureDate).toEpochDays().toLong()
+internal fun Long.toLocalDate() = LocalDate.fromEpochDays(this.toInt())
+
+/** query mappings  **/
+fun SelectTaskWithContentById.toTaskTable(): TaskTable {
+    return TaskTable(
+        id = task_id,
+        type = task_type,
+        progressType = task_progressType,
+        title = task_title,
+        description = task_description,
+        startEpochDay = task_startEpochDay,
+        endEpochDay = task_endEpochDay,
+        priority = task_priority,
+        createdAt = task_createdAt,
+        deletedAt = task_deletedAt
+    )
+}
+
+fun SelectTaskWithContentById.toTaskContentTable(): TaskContentTable {
+    return TaskContentTable(
+        id = taskContent_id,
+        taskId = taskContent_taskId,
+        contentType = taskContent_contentType,
+        content = taskContent_content,
+        startEpochDay = taskContent_startEpochDay,
+        createdAt = taskContent_createdAt
+    )
+}

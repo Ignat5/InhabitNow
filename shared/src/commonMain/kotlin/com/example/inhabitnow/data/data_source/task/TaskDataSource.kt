@@ -1,14 +1,65 @@
 package com.example.inhabitnow.data.data_source.task
 
 import com.example.inhabitnow.core.model.ResultModel
+import database.SelectTaskWithContentById
 import database.TaskContentTable
 import database.TaskTable
+import kotlinx.coroutines.flow.Flow
 
 interface TaskDataSource {
+
+    fun readTaskWithContentById(taskId: String): Flow<List<SelectTaskWithContentById>>
 
     suspend fun insertTaskWithContent(
         taskTable: TaskTable,
         allTaskContent: List<TaskContentTable>
     ): ResultModel<Unit>
+
+    suspend fun insertTaskContent(taskContentTable: TaskContentTable): ResultModel<Unit>
+
+    suspend fun updateTaskTitleById(taskId: String, title: String): ResultModel<Unit>
+
+    suspend fun updateTaskDescriptionById(
+        taskId: String,
+        description: String
+    ): ResultModel<Unit>
+
+    suspend fun updateTaskPriorityById(
+        taskId: String,
+        priority: String
+    ): ResultModel<Unit>
+
+    suspend fun updateTaskDeletedAtById(
+        taskId: String,
+        deletedAt: Long?
+    ): ResultModel<Unit>
+
+    suspend fun deleteTaskById(taskId: String): ResultModel<Unit>
+
+    suspend fun updateTaskStartDateById(
+        taskId: String,
+        taskStartEpochDay: Long
+    ): ResultModel<Unit>
+
+    suspend fun updateTaskEndDateById(
+        taskId: String,
+        taskEndEpochDay: Long
+    ): ResultModel<Unit>
+
+    suspend fun updateTaskStartEndDateById(
+        taskId: String,
+        taskStartEpochDay: Long,
+        taskEndEpochDay: Long
+    ): ResultModel<Unit>
+
+    suspend fun updateTaskContentById(
+        contentId: String,
+        content: String
+    ): ResultModel<Unit>
+
+    suspend fun getTaskContentByTaskId(
+        taskId: String,
+        taskContentType: String
+    ): TaskContentTable?
 
 }

@@ -61,3 +61,79 @@ VALUES ?;
 insertTaskContent:
 INSERT OR REPLACE INTO TaskContentTable
 VALUES ?;
+
+selectTaskWithContentById:
+SELECT
+tTask.id task_id,
+tTask.type task_type,
+tTask.progressType task_progressType,
+tTask.title task_title,
+tTask.description task_description,
+tTask.startEpochDay task_startEpochDay,
+tTask.endEpochDay task_endEpochDay,
+tTask.priority task_priority,
+tTask.createdAt task_createdAt,
+tTask.deletedAt task_deletedAt,
+
+tTaskContent.id taskContent_id,
+tTaskContent.taskId taskContent_taskId,
+tTaskContent.contentType taskContent_contentType,
+tTaskContent.content taskContent_content,
+tTaskContent.startEpochDay taskContent_startEpochDay,
+tTaskContent.createdAt taskContent_createdAt
+
+FROM TaskTable tTask
+INNER JOIN (
+    SELECT * FROM TaskContentTable tInner
+    WHERE tInner.taskId = :taskId
+    GROUP BY tInner.contentType
+    HAVING tInner.startEpochDay = MAX(tInner.startEpochDay)
+) tTaskContent ON tTaskContent.taskId = tTask.id
+WHERE tTask.id = :taskId;
+
+updateTaskTitleById:
+UPDATE TaskTable SET title = :title
+WHERE id = :taskId;
+
+updateTaskDescriptionById:
+UPDATE TaskTable SET description = :description
+WHERE id = :taskId;
+
+updateTaskPriorityById:
+UPDATE TaskTable SET priority = :priority
+WHERE id = :taskId;
+
+updateTaskDeletedAtById:
+UPDATE TaskTable SET deletedAt = :deletedAt
+WHERE id = :taskId;
+
+updateTaskContentById:
+UPDATE TaskContentTable SET content = :content
+WHERE id = :contentId;
+
+updateTaskStartDateById:
+UPDATE TaskTable SET
+startEpochDay = :taskStartEpochDay
+WHERE id = :taskId;
+
+updateTaskEndDateById:
+UPDATE TaskTable SET
+endEpochDay = :taskEndEpochDay
+WHERE id = :taskId;
+
+updateTaskStartEndDateById:
+UPDATE TaskTable SET
+startEpochDay = :taskStartEpochDay,
+endEpochDay = :taskEndEpochDay
+WHERE id = :taskId;
+
+deleteTaskById:
+DELETE FROM TaskTable
+WHERE id = :taskId;
+
+selectTaskContentByTaskId:
+SELECT * FROM TaskContentTable tTaskContent
+WHERE tTaskContent.taskId = :taskId
+AND tTaskContent.contentType = :taskContentType
+GROUP BY tTaskContent.contentType
+HAVING tTaskContent.startEpochDay = MAX(tTaskContent.startEpochDay);

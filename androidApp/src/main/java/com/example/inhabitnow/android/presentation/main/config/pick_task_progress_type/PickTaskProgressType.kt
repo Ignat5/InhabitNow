@@ -20,36 +20,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.inhabitnow.android.R
-import com.example.inhabitnow.android.ui.base.BaseDialog
-import com.example.inhabitnow.android.ui.base.BaseDialogBody
-import com.example.inhabitnow.android.ui.base.BaseDialogTitle
+import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
 import com.example.inhabitnow.core.type.TaskProgressType
-import kotlin.enums.EnumEntries
 
 @Composable
 fun PickTaskProgressType(
     allTaskProgressTypes: List<TaskProgressType>,
     onResult: (PickTaskProgressTypeScreenResult) -> Unit
 ) {
-    BaseDialog(
+    BaseDialogBuilder.BaseDialog(
         onDismissRequest = { onResult(PickTaskProgressTypeScreenResult.Dismiss) },
-        baseDialogTitle = BaseDialogTitle.Text("Pick progress type"),
-        baseDialogBody = BaseDialogBody.Custom.Static {
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(
-                    items = allTaskProgressTypes,
-                    key = { it.ordinal }
-                ) { taskProgressType ->
-                    ItemTaskProgressType(
-                        taskProgressType = taskProgressType,
-                        onClick = {
-                            onResult(PickTaskProgressTypeScreenResult.Confirm(taskProgressType))
-                        }
-                    )
-                }
+        title = {
+            BaseDialogBuilder.BaseDialogTitle(titleText = "Pick progress type")
+        }
+    ) {
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            items(
+                items = allTaskProgressTypes,
+                key = { it.ordinal }
+            ) { taskProgressType ->
+                ItemTaskProgressType(
+                    taskProgressType = taskProgressType,
+                    onClick = {
+                        onResult(PickTaskProgressTypeScreenResult.Confirm(taskProgressType))
+                    }
+                )
             }
-        },
-    )
+        }
+    }
 }
 
 @Composable

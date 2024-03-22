@@ -3,6 +3,7 @@ package com.example.inhabitnow.data.data_source.base
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
 import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.database.InhabitNowDatabase
 import kotlinx.coroutines.CoroutineDispatcher
@@ -21,6 +22,22 @@ abstract class BaseDataSource(
         query()
             .asFlow()
             .mapToList(ioDispatcher)
+
+    protected fun <T : Any> readQuery(query: () -> Query<T>): Flow<T> =
+        query()
+            .asFlow()
+            .mapToOne(ioDispatcher)
+
+    protected suspend fun <T : Any> getOneOrNull(query: () -> Query<T>): T? =
+        try {
+            withContext(ioDispatcher) {
+                query()
+                    .executeAsOneOrNull()
+            }
+        } catch (e: Exception) {
+            null
+        }
+
 
     protected suspend fun <T : Any> runQuery(query: () -> T): ResultModel<T> =
         try {
