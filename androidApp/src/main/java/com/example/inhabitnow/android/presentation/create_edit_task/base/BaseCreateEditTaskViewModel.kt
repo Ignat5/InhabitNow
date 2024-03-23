@@ -14,6 +14,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components.PickTaskTimeProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
 import com.example.inhabitnow.android.presentation.model.UITaskContent
@@ -120,9 +122,23 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
             is BaseItemTaskConfig.Title -> onConfigTaskTitleClick()
             is BaseItemTaskConfig.Description -> onConfigTaskDescriptionClick()
             is BaseItemTaskConfig.Progress.Number -> onConfigTaskNumberProgressClick()
+            is BaseItemTaskConfig.Progress.Time -> onConfigTaskTimeProgressClick()
             else -> {
                 /* TODO */
             }
+        }
+    }
+
+    private fun onConfigTaskTimeProgressClick() {
+        (taskWithContentState.value?.progressContent as? TaskContentModel.ProgressContent.Time)?.let { pc ->
+            setUpBaseConfigState(
+                BaseCreateEditTaskScreenConfig.PickTaskTimeProgress(
+                    stateHolder = PickTaskTimeProgressStateHolder(
+                        initProgressContent = pc,
+                        holderScope = provideChildScope()
+                    )
+                )
+            )
         }
     }
 
@@ -175,6 +191,27 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
 
             is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskNumberProgress ->
                 onPickTaskNumberProgressResultEvent(event)
+
+            is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskTimeProgress ->
+                onPickTaskTimeProgressResultEvent(event)
+        }
+    }
+
+    private fun onPickTaskTimeProgressResultEvent(event: BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskTimeProgress) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskTimeProgressScreenResult.Confirm -> onConfirmPickTaskTimeProgress(result)
+                is PickTaskTimeProgressScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskTimeProgress(result: PickTaskTimeProgressScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskProgressByIdUseCase(
+                taskId = taskId,
+                progressContent = result.progressContent
+            )
         }
     }
 

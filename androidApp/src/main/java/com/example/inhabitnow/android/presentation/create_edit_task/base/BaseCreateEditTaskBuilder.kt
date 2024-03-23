@@ -87,6 +87,17 @@ object BaseCreateEditTaskBuilder {
                     }
                 )
             }
+
+            is BaseCreateEditTaskScreenConfig.PickTaskTimeProgress -> {
+                PickTaskTimeProgressDialog(
+                    stateHolder = baseConfig.stateHolder,
+                    onResult = {
+                        onBaseResultEvent(
+                            BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskTimeProgress(it)
+                        )
+                    }
+                )
+            }
         }
     }
 
