@@ -9,7 +9,7 @@ import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStat
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.common.pick_date.model.PickDateRequestModel
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.confirm_leave.ConfirmLeaveScreenResult
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.BaseItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyStateHolder
@@ -33,10 +33,8 @@ import com.example.inhabitnow.android.ui.toFrequencyContent
 import com.example.inhabitnow.android.ui.toUIDateContent
 import com.example.inhabitnow.android.ui.toUIFrequencyContent
 import com.example.inhabitnow.android.ui.toUIProgressContent
-import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
-import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.save_task_by_id.SaveTaskByIdUseCase
@@ -49,11 +47,8 @@ import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.Update
 import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.UpdateTaskPriorityByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
-import com.example.inhabitnow.domain.util.DomainConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -84,8 +79,6 @@ class CreateTaskViewModel @Inject constructor(
     private val updateTaskPriorityByIdUseCase: UpdateTaskPriorityByIdUseCase,
     private val saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
     private val saveTaskByIdUseCase: SaveTaskByIdUseCase,
-    private val deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
-    private val externalScope: CoroutineScope,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher,
 ) : BaseViewModel<CreateTaskScreenEvent, CreateTaskScreenState, CreateTaskScreenNavigation, CreateTaskScreenConfig>() {
 
@@ -188,20 +181,20 @@ class CreateTaskViewModel @Inject constructor(
 
     private fun onItemTaskConfigClick(event: CreateTaskScreenEvent.OnItemTaskConfigClick) {
         when (event.item) {
-            is ItemTaskConfig.Title -> onConfigTaskTitleClick()
-            is ItemTaskConfig.Date -> onConfigDateClick(event.item)
-            is ItemTaskConfig.Progress -> {
+            is BaseItemTaskConfig.Title -> onConfigTaskTitleClick()
+            is BaseItemTaskConfig.Date -> onConfigDateClick(event.item)
+            is BaseItemTaskConfig.Progress -> {
                 when (event.item) {
-                    is ItemTaskConfig.Progress.Number -> onConfigTaskNumberProgressClick()
-                    is ItemTaskConfig.Progress.Time -> onConfigTaskTimeProgressClick()
+                    is BaseItemTaskConfig.Progress.Number -> onConfigTaskNumberProgressClick()
+                    is BaseItemTaskConfig.Progress.Time -> onConfigTaskTimeProgressClick()
                 }
             }
 
-            is ItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
-            is ItemTaskConfig.Reminders -> onConfigTaskRemindersClick()
-            is ItemTaskConfig.Tags -> onConfigTaskTagsClick()
-            is ItemTaskConfig.Description -> onConfigDescriptionClick()
-            is ItemTaskConfig.Priority -> onConfigTaskPriorityClick()
+            is BaseItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
+            is BaseItemTaskConfig.Reminders -> onConfigTaskRemindersClick()
+            is BaseItemTaskConfig.Tags -> onConfigTaskTagsClick()
+            is BaseItemTaskConfig.Description -> onConfigDescriptionClick()
+            is BaseItemTaskConfig.Priority -> onConfigTaskPriorityClick()
         }
     }
 
@@ -231,11 +224,11 @@ class CreateTaskViewModel @Inject constructor(
         }
     }
 
-    private fun onConfigDateClick(itemConfig: ItemTaskConfig.Date) {
+    private fun onConfigDateClick(itemConfig: BaseItemTaskConfig.Date) {
         when (itemConfig) {
-            is ItemTaskConfig.Date.StartDate -> onConfigStartDateClick()
-            is ItemTaskConfig.Date.EndDate -> onConfigEndDateClick()
-            is ItemTaskConfig.Date.OneDayDate -> onConfigOneDayDate()
+            is BaseItemTaskConfig.Date.StartDate -> onConfigStartDateClick()
+            is BaseItemTaskConfig.Date.EndDate -> onConfigEndDateClick()
+            is BaseItemTaskConfig.Date.OneDayDate -> onConfigOneDayDate()
         }
     }
 
@@ -587,7 +580,7 @@ class CreateTaskViewModel @Inject constructor(
         viewModelScope.launch {
             updateTaskTitleByIdUseCase(
                 taskId = taskId,
-                title = result.input
+                title = result.title
             )
         }
     }
@@ -604,22 +597,22 @@ class CreateTaskViewModel @Inject constructor(
         taskWithContentModel: TaskWithContentModel?,
         taskRemindersCount: Int,
         taskTagsCount: Int
-    ): List<ItemTaskConfig> =
+    ): List<BaseItemTaskConfig> =
         withContext(defaultDispatcher) {
             if (taskWithContentModel != null) {
-                mutableListOf<ItemTaskConfig>().apply {
-                    add(ItemTaskConfig.Title(taskWithContentModel.task.title))
-                    add(ItemTaskConfig.Description(taskWithContentModel.task.description))
+                mutableListOf<BaseItemTaskConfig>().apply {
+                    add(BaseItemTaskConfig.Title(taskWithContentModel.task.title))
+                    add(BaseItemTaskConfig.Description(taskWithContentModel.task.description))
                     when (val pc = taskWithContentModel.progressContent.toUIProgressContent()) {
                         is UITaskContent.Progress.Number -> {
                             add(
-                                ItemTaskConfig.Progress.Number(pc)
+                                BaseItemTaskConfig.Progress.Number(pc)
                             )
                         }
 
                         is UITaskContent.Progress.Time -> {
                             add(
-                                ItemTaskConfig.Progress.Time(pc)
+                                BaseItemTaskConfig.Progress.Time(pc)
                             )
                         }
 
@@ -629,7 +622,7 @@ class CreateTaskViewModel @Inject constructor(
                     when (val fc = taskWithContentModel.frequencyContent.toUIFrequencyContent()) {
                         is UITaskContent.Frequency -> {
                             add(
-                                ItemTaskConfig.Frequency(fc)
+                                BaseItemTaskConfig.Frequency(fc)
                             )
                         }
 
@@ -638,18 +631,18 @@ class CreateTaskViewModel @Inject constructor(
 
                     when (val dc = taskWithContentModel.task.toUIDateContent()) {
                         is UITaskContent.Date.OneDay -> add(
-                            ItemTaskConfig.Date.OneDayDate(dc.date)
+                            BaseItemTaskConfig.Date.OneDayDate(dc.date)
                         )
 
                         is UITaskContent.Date.Period -> {
-                            add(ItemTaskConfig.Date.StartDate(dc.startDate))
-                            add(ItemTaskConfig.Date.EndDate(dc.endDate))
+                            add(BaseItemTaskConfig.Date.StartDate(dc.startDate))
+                            add(BaseItemTaskConfig.Date.EndDate(dc.endDate))
                         }
                     }
 
-                    add(ItemTaskConfig.Reminders(taskRemindersCount))
-                    add(ItemTaskConfig.Tags(taskTagsCount))
-                    add(ItemTaskConfig.Priority(taskWithContentModel.task.priority))
+                    add(BaseItemTaskConfig.Reminders(taskRemindersCount))
+                    add(BaseItemTaskConfig.Tags(taskTagsCount))
+                    add(BaseItemTaskConfig.Priority(taskWithContentModel.task.priority))
 
                 }.sortedBy { it.key.ordinal }
             } else emptyList()
@@ -658,7 +651,6 @@ class CreateTaskViewModel @Inject constructor(
     companion object {
         private const val DEFAULT_REMINDER_COUNT = 0
         private const val DEFAULT_TAG_COUNT = 0
-        private const val DEFAULT_DELETE_AFTER_DELAY = 5000L
     }
 
 }

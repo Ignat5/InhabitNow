@@ -3,24 +3,24 @@ package com.example.inhabitnow.android.presentation.create_edit_task.common.conf
 import com.example.inhabitnow.android.presentation.model.UITaskContent
 import kotlinx.datetime.LocalDate
 
-sealed class ItemTaskConfig(val key: Key, val contentType: ContentType) {
+sealed class BaseItemTaskConfig(val key: Key, val contentType: ContentType) {
     enum class Key { Title, Description, Progress, Frequency, OneDayDate, StartDate, EndDate, Reminders, Tags, Priority }
     enum class ContentType { Basic, Switch }
 
-    data class Title(val title: String) : ItemTaskConfig(Key.Title, ContentType.Basic)
+    data class Title(val title: String) : BaseItemTaskConfig(Key.Title, ContentType.Basic)
     data class Description(
         val description: String
-    ) : ItemTaskConfig(Key.Description, ContentType.Basic)
+    ) : BaseItemTaskConfig(Key.Description, ContentType.Basic)
 
-    data class Priority(val priority: String) : ItemTaskConfig(Key.Priority, ContentType.Basic)
+    data class Priority(val priority: String) : BaseItemTaskConfig(Key.Priority, ContentType.Basic)
     data class Frequency(
         val uiFrequencyContent: UITaskContent.Frequency
-    ) : ItemTaskConfig(Key.Frequency, ContentType.Basic)
+    ) : BaseItemTaskConfig(Key.Frequency, ContentType.Basic)
 
-    data class Reminders(val count: Int) : ItemTaskConfig(Key.Reminders, ContentType.Basic)
-    data class Tags(val count: Int) : ItemTaskConfig(Key.Tags, ContentType.Basic)
+    data class Reminders(val count: Int) : BaseItemTaskConfig(Key.Reminders, ContentType.Basic)
+    data class Tags(val count: Int) : BaseItemTaskConfig(Key.Tags, ContentType.Basic)
 
-    sealed class Date(key: Key, contentType: ContentType) : ItemTaskConfig(key, contentType) {
+    sealed class Date(key: Key, contentType: ContentType) : BaseItemTaskConfig(key, contentType) {
         abstract val date: LocalDate?
 
         data class OneDayDate(
@@ -36,7 +36,7 @@ sealed class ItemTaskConfig(val key: Key, val contentType: ContentType) {
         ) : Date(Key.EndDate, ContentType.Switch)
     }
 
-    sealed class Progress(key: Key, contentType: ContentType) : ItemTaskConfig(key, contentType) {
+    sealed class Progress(key: Key, contentType: ContentType) : BaseItemTaskConfig(key, contentType) {
         abstract val uiProgressContent: UITaskContent.Progress
 
         data class Number(

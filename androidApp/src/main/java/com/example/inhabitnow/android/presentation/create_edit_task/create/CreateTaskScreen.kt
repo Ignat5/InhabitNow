@@ -16,9 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -43,7 +41,7 @@ import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateDialog
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.confirm_leave.ConfirmLeaveDialog
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.ItemTaskConfig
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.BaseItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_priority.PickTaskPriorityDialog
@@ -58,7 +56,6 @@ import com.example.inhabitnow.android.presentation.create_edit_task.create.compo
 import com.example.inhabitnow.android.presentation.model.UITaskContent
 import com.example.inhabitnow.android.ui.toDayMonthYear
 import com.example.inhabitnow.android.ui.toDisplay
-import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 
 @Composable
 fun CreateTaskScreen(onNavigation: (CreateTaskScreenNavigation) -> Unit) {
@@ -103,7 +100,7 @@ private fun CreateTaskScreenStateless(
                 state.allTaskConfigItems.lastIndex
             }
             val onItemClick = remember {
-                val callback: (item: ItemTaskConfig) -> Unit = { item ->
+                val callback: (item: BaseItemTaskConfig) -> Unit = { item ->
                     onEvent(CreateTaskScreenEvent.OnItemTaskConfigClick(item))
                 }
                 callback
@@ -120,51 +117,51 @@ private fun CreateTaskScreenStateless(
                             callback
                         }
                         when (item) {
-                            is ItemTaskConfig.Title -> {
+                            is BaseItemTaskConfig.Title -> {
                                 ItemTitleConfig(
                                     item = item,
                                     onClick = onClick
                                 )
                             }
 
-                            is ItemTaskConfig.Description -> {
+                            is BaseItemTaskConfig.Description -> {
                                 ItemDescriptionConfig(
                                     item = item,
                                     onClick = onClick
                                 )
                             }
 
-                            is ItemTaskConfig.Progress -> {
+                            is BaseItemTaskConfig.Progress -> {
                                 ItemProgressConfig(
                                     item = item,
                                     onClick = onClick
                                 )
                             }
 
-                            is ItemTaskConfig.Frequency -> {
+                            is BaseItemTaskConfig.Frequency -> {
                                 ItemFrequencyConfig(
                                     item = item,
                                     onClick = onClick
                                 )
                             }
 
-                            is ItemTaskConfig.Date -> {
+                            is BaseItemTaskConfig.Date -> {
                                 when (item) {
-                                    is ItemTaskConfig.Date.OneDayDate -> {
+                                    is BaseItemTaskConfig.Date.OneDayDate -> {
                                         ItemOneDayDateConfig(
                                             item = item,
                                             onClick = onClick
                                         )
                                     }
 
-                                    is ItemTaskConfig.Date.StartDate -> {
+                                    is BaseItemTaskConfig.Date.StartDate -> {
                                         ItemStartDateConfig(
                                             item = item,
                                             onClick = onClick
                                         )
                                     }
 
-                                    is ItemTaskConfig.Date.EndDate -> {
+                                    is BaseItemTaskConfig.Date.EndDate -> {
                                         ItemEndDateConfig(
                                             item = item,
                                             onClick = onClick,
@@ -176,21 +173,21 @@ private fun CreateTaskScreenStateless(
                                 }
                             }
 
-                            is ItemTaskConfig.Reminders -> {
+                            is BaseItemTaskConfig.Reminders -> {
                                 ItemRemindersConfig(
                                     item = item,
                                     onClick = onClick
                                 )
                             }
 
-                            is ItemTaskConfig.Tags -> {
+                            is BaseItemTaskConfig.Tags -> {
                                 ItemTagsConfig(
                                     item = item,
                                     onClick = onClick
                                 )
                             }
 
-                            is ItemTaskConfig.Priority -> {
+                            is BaseItemTaskConfig.Priority -> {
                                 ItemPriorityConfig(
                                     item = item,
                                     onClick = onClick
@@ -209,7 +206,7 @@ private fun CreateTaskScreenStateless(
 
 @Composable
 private fun ItemTitleConfig(
-    item: ItemTaskConfig.Title,
+    item: BaseItemTaskConfig.Title,
     onClick: () -> Unit
 ) {
     BasicItemConfig(
@@ -222,7 +219,7 @@ private fun ItemTitleConfig(
 
 @Composable
 private fun ItemDescriptionConfig(
-    item: ItemTaskConfig.Description,
+    item: BaseItemTaskConfig.Description,
     onClick: () -> Unit
 ) {
     BasicItemConfig(
@@ -235,13 +232,13 @@ private fun ItemDescriptionConfig(
 
 @Composable
 private fun ItemProgressConfig(
-    item: ItemTaskConfig.Progress,
+    item: BaseItemTaskConfig.Progress,
     onClick: () -> Unit
 ) {
     val dataText = remember(item) {
         when (item) {
-            is ItemTaskConfig.Progress.Number -> item.uiProgressContent.toDisplay()
-            is ItemTaskConfig.Progress.Time -> item.uiProgressContent.toDisplay()
+            is BaseItemTaskConfig.Progress.Number -> item.uiProgressContent.toDisplay()
+            is BaseItemTaskConfig.Progress.Time -> item.uiProgressContent.toDisplay()
         }
     }
     BasicItemConfig(
@@ -254,7 +251,7 @@ private fun ItemProgressConfig(
 
 @Composable
 private fun ItemFrequencyConfig(
-    item: ItemTaskConfig.Frequency,
+    item: BaseItemTaskConfig.Frequency,
     onClick: () -> Unit
 ) {
     val dataText = remember(item) {
@@ -273,7 +270,7 @@ private fun ItemFrequencyConfig(
 
 @Composable
 private fun ItemOneDayDateConfig(
-    item: ItemTaskConfig.Date.OneDayDate,
+    item: BaseItemTaskConfig.Date.OneDayDate,
     onClick: () -> Unit
 ) {
     val dataText = remember(item) {
@@ -289,7 +286,7 @@ private fun ItemOneDayDateConfig(
 
 @Composable
 private fun ItemStartDateConfig(
-    item: ItemTaskConfig.Date.StartDate,
+    item: BaseItemTaskConfig.Date.StartDate,
     onClick: () -> Unit
 ) {
     val dataText = remember(item) {
@@ -305,7 +302,7 @@ private fun ItemStartDateConfig(
 
 @Composable
 private fun ItemEndDateConfig(
-    item: ItemTaskConfig.Date.EndDate,
+    item: BaseItemTaskConfig.Date.EndDate,
     onClick: () -> Unit,
     onSwitchClick: () -> Unit
 ) {
@@ -327,7 +324,7 @@ private fun ItemEndDateConfig(
 
 @Composable
 private fun ItemRemindersConfig(
-    item: ItemTaskConfig.Reminders,
+    item: BaseItemTaskConfig.Reminders,
     onClick: () -> Unit
 ) {
     BasicItemConfig(
@@ -340,7 +337,7 @@ private fun ItemRemindersConfig(
 
 @Composable
 private fun ItemTagsConfig(
-    item: ItemTaskConfig.Tags,
+    item: BaseItemTaskConfig.Tags,
     onClick: () -> Unit
 ) {
     BasicItemConfig(
@@ -353,7 +350,7 @@ private fun ItemTagsConfig(
 
 @Composable
 private fun ItemPriorityConfig(
-    item: ItemTaskConfig.Priority,
+    item: BaseItemTaskConfig.Priority,
     onClick: () -> Unit
 ) {
     BasicItemConfig(
