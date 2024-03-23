@@ -65,6 +65,17 @@ object BaseCreateEditTaskBuilder {
                     }
                 )
             }
+
+            is BaseCreateEditTaskScreenConfig.PickTaskDescription -> {
+                PickTaskDescriptionDialog(
+                    stateHolder = baseConfig.stateHolder,
+                    onResult = {
+                        onBaseResultEvent(
+                            BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDescription(it)
+                        )
+                    }
+                )
+            }
         }
     }
 

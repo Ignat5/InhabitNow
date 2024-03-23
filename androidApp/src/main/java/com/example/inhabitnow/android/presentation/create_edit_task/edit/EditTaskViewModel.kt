@@ -56,6 +56,7 @@ class EditTaskViewModel @Inject constructor(
     readTagsUseCase = readTagsUseCase,
     readTagIdsByTaskIdUseCase = readTagIdsByTaskIdUseCase,
     updateTaskTitleByIdUseCase = updateTaskTitleByIdUseCase,
+    updateTaskDescriptionByIdUseCase = updateTaskDescriptionByIdUseCase,
     defaultDispatcher = defaultDispatcher
 ) {
 

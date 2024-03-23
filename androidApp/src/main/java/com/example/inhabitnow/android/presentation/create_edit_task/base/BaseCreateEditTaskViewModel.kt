@@ -10,6 +10,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.base.compone
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenState
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.BaseItemTaskConfig
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
 import com.example.inhabitnow.android.presentation.model.UITaskContent
@@ -21,6 +23,7 @@ import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadT
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
+import com.example.inhabitnow.domain.use_case.update_task_description.UpdateTaskDescriptionByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,6 +41,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     readTagsUseCase: ReadTagsUseCase,
     readTagIdsByTaskIdUseCase: ReadTagIdsByTaskIdUseCase,
     private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
+    private val updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
     private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<SE, SS, SN, SC>() {
 
@@ -108,9 +112,23 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     private fun onBaseItemTaskConfigClick(event: BaseCreateEditTaskScreenEvent.OnBaseItemTaskConfigClick) {
         when (event.item) {
             is BaseItemTaskConfig.Title -> onConfigTaskTitleClick()
+            is BaseItemTaskConfig.Description -> onConfigTaskDescriptionClick()
             else -> {
                 /* TODO */
             }
+        }
+    }
+
+    private fun onConfigTaskDescriptionClick() {
+        taskWithContentState.value?.task?.description?.let { description ->
+            setUpBaseConfigState(
+                BaseCreateEditTaskScreenConfig.PickTaskDescription(
+                    stateHolder = PickTaskDescriptionStateHolder(
+                        initDescription = description,
+                        holderScope = provideChildScope()
+                    )
+                )
+            )
         }
     }
 
@@ -131,6 +149,27 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
         when (event) {
             is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskTitle ->
                 onPickTaskTitleResultEvent(event)
+
+            is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDescription ->
+                onPickTaskDescriptionResultEvent(event)
+        }
+    }
+
+    private fun onPickTaskDescriptionResultEvent(event: BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDescription) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskDescriptionScreenResult.Confirm -> onConfirmPickTaskDescription(result)
+                is PickTaskDescriptionScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskDescription(result: PickTaskDescriptionScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskDescriptionByIdUseCase(
+                taskId = taskId,
+                description = result.description
+            )
         }
     }
 
