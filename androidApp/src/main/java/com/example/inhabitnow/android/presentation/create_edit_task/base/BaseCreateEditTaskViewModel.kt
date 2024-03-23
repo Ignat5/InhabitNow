@@ -12,6 +12,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.base.compone
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.BaseItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
 import com.example.inhabitnow.android.presentation.model.UITaskContent
@@ -19,11 +21,14 @@ import com.example.inhabitnow.android.ui.toUIDateContent
 import com.example.inhabitnow.android.ui.toUIFrequencyContent
 import com.example.inhabitnow.android.ui.toUIProgressContent
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
+import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import com.example.inhabitnow.domain.use_case.update_task_description.UpdateTaskDescriptionByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.UpdateTaskPriorityByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,6 +47,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     readTagIdsByTaskIdUseCase: ReadTagIdsByTaskIdUseCase,
     private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
     private val updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
+    private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
     private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<SE, SS, SN, SC>() {
 
@@ -113,9 +119,23 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
         when (event.item) {
             is BaseItemTaskConfig.Title -> onConfigTaskTitleClick()
             is BaseItemTaskConfig.Description -> onConfigTaskDescriptionClick()
+            is BaseItemTaskConfig.Progress.Number -> onConfigTaskNumberProgressClick()
             else -> {
                 /* TODO */
             }
+        }
+    }
+
+    private fun onConfigTaskNumberProgressClick() {
+        (taskWithContentState.value?.progressContent as? TaskContentModel.ProgressContent.Number)?.let { pc ->
+            setUpBaseConfigState(
+                BaseCreateEditTaskScreenConfig.PickTaskNumberProgress(
+                    stateHolder = PickTaskNumberProgressStateHolder(
+                        initProgressContent = pc,
+                        holderScope = provideChildScope()
+                    )
+                )
+            )
         }
     }
 
@@ -152,6 +172,29 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
 
             is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDescription ->
                 onPickTaskDescriptionResultEvent(event)
+
+            is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskNumberProgress ->
+                onPickTaskNumberProgressResultEvent(event)
+        }
+    }
+
+    private fun onPickTaskNumberProgressResultEvent(event: BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskNumberProgress) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskNumberProgressScreenResult.Confirm ->
+                    onConfirmPickTaskNumberProgress(result)
+
+                is PickTaskNumberProgressScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskNumberProgress(result: PickTaskNumberProgressScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskProgressByIdUseCase(
+                taskId = taskId,
+                progressContent = result.progressContent
+            )
         }
     }
 

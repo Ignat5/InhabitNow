@@ -76,6 +76,17 @@ object BaseCreateEditTaskBuilder {
                     }
                 )
             }
+
+            is BaseCreateEditTaskScreenConfig.PickTaskNumberProgress -> {
+                PickTaskNumberProgressDialog(
+                    stateHolder = baseConfig.stateHolder,
+                    onResult = {
+                        onBaseResultEvent(
+                            BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskNumberProgress(it)
+                        )
+                    }
+                )
+            }
         }
     }
 
