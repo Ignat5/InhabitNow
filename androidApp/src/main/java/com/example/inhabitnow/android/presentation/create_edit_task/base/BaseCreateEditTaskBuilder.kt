@@ -98,6 +98,17 @@ object BaseCreateEditTaskBuilder {
                     }
                 )
             }
+
+            is BaseCreateEditTaskScreenConfig.PickTaskFrequency -> {
+                PickTaskFrequencyDialog(
+                    stateHolder = baseConfig.stateHolder,
+                    onResult = {
+                        onBaseResultEvent(
+                            BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskFrequency(it)
+                        )
+                    }
+                )
+            }
         }
     }
 

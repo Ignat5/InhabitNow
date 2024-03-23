@@ -12,6 +12,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.base.compone
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.BaseItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressStateHolder
@@ -19,6 +21,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
 import com.example.inhabitnow.android.presentation.model.UITaskContent
+import com.example.inhabitnow.android.ui.toFrequencyContent
 import com.example.inhabitnow.android.ui.toUIDateContent
 import com.example.inhabitnow.android.ui.toUIFrequencyContent
 import com.example.inhabitnow.android.ui.toUIProgressContent
@@ -29,6 +32,7 @@ import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_t
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import com.example.inhabitnow.domain.use_case.update_task_description.UpdateTaskDescriptionByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.UpdateTaskPriorityByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
@@ -50,6 +54,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
     private val updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
     private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
+    private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
     private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<SE, SS, SN, SC>() {
 
@@ -123,9 +128,23 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
             is BaseItemTaskConfig.Description -> onConfigTaskDescriptionClick()
             is BaseItemTaskConfig.Progress.Number -> onConfigTaskNumberProgressClick()
             is BaseItemTaskConfig.Progress.Time -> onConfigTaskTimeProgressClick()
+            is BaseItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
             else -> {
                 /* TODO */
             }
+        }
+    }
+
+    private fun onConfigTaskFrequencyClick() {
+        taskWithContentState.value?.frequencyContent?.toUIFrequencyContent()?.let { fc ->
+            setUpBaseConfigState(
+                BaseCreateEditTaskScreenConfig.PickTaskFrequency(
+                    stateHolder = PickTaskFrequencyStateHolder(
+                        initFrequency = fc,
+                        holderScope = provideChildScope()
+                    )
+                )
+            )
         }
     }
 
@@ -194,6 +213,27 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
 
             is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskTimeProgress ->
                 onPickTaskTimeProgressResultEvent(event)
+
+            is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskFrequency ->
+                onPickTaskFrequencyResultEvent(event)
+        }
+    }
+
+    private fun onPickTaskFrequencyResultEvent(event: BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskFrequency) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskFrequencyScreenResult.Confirm -> onConfirmPickTaskFrequency(result)
+                is PickTaskFrequencyScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskFrequency(result: PickTaskFrequencyScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskFrequencyByIdUseCase(
+                taskId = taskId,
+                content = result.uiFrequencyContent.toFrequencyContent()
+            )
         }
     }
 
