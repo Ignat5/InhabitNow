@@ -3,6 +3,7 @@ package com.example.inhabitnow.android.presentation.search_tasks
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -127,8 +128,9 @@ private fun ItemTask(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_search),
@@ -136,7 +138,10 @@ private fun ItemTask(
                 contentDescription = null
             )
             Column(modifier = Modifier.weight(1f)) {
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     Text(
                         text = item.task.title,
                         style = MaterialTheme.typography.titleMedium,
@@ -144,7 +149,6 @@ private fun ItemTask(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = item.task.toDatePeriodDisplay(),
                         style = MaterialTheme.typography.labelSmall,
@@ -153,9 +157,9 @@ private fun ItemTask(
                 }
                 Text(
                     text = item.task.type.toDisplay(),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
