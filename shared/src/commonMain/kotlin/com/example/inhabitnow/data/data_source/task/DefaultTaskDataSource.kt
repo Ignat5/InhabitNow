@@ -4,6 +4,7 @@ import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.data.data_source.base.BaseDataSource
 import com.example.inhabitnow.database.InhabitNowDatabase
 import database.SelectTaskWithContentById
+import database.SelectTasksWithContentBySearchQuery
 import database.TaskContentTable
 import database.TaskTable
 import kotlinx.coroutines.CoroutineDispatcher
@@ -19,6 +20,13 @@ class DefaultTaskDataSource(
     override fun readTaskWithContentById(taskId: String): Flow<List<SelectTaskWithContentById>> =
         readQueryList {
             taskDao.selectTaskWithContentById(taskId)
+        }
+
+    override fun readTasksWithContentBySearchQuery(searchQuery: String): Flow<List<SelectTasksWithContentBySearchQuery>> =
+        readQueryList {
+            taskDao.selectTasksWithContentBySearchQuery(
+                searchQuery = "%$searchQuery%"
+            )
         }
 
     override suspend fun insertTaskWithContent(

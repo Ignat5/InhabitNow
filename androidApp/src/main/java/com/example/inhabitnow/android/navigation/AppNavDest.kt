@@ -9,6 +9,7 @@ sealed class AppNavDest(val route: String) {
     )
 
     data object ViewTagsDestination : AppNavDest(VIEW_TAGS_ROUTE)
+    data object SearchTasksDestination : AppNavDest(SEARCH_TASKS_ROUTE)
 
     companion object {
         private const val ROOT_GRAPH_ROUTE = "ROOT_GRAPH_ROUTE"
@@ -16,11 +17,13 @@ sealed class AppNavDest(val route: String) {
         private const val CREATE_TASK_ROUTE = "CREATE_TASK_ROUTE"
         private const val VIEW_TASK_REMINDERS_ROUTE = "VIEW_TASK_REMINDERS_ROUTE"
         private const val VIEW_TAGS_ROUTE = "VIEW_TAGS_ROUTE"
+        private const val SEARCH_TASKS_ROUTE = "SEARCH_TASKS_ROUTE"
 
         const val TASK_ID_KEY = "TASK_ID_KEY"
         fun buildCreateTaskRoute(taskId: String) = "$CREATE_TASK_ROUTE/$taskId"
         fun buildViewTaskRemindersRoute(taskId: String) = "$VIEW_TASK_REMINDERS_ROUTE/$taskId"
         fun buildViewTagsRoute() = VIEW_TAGS_ROUTE
+        fun buildSearchTasksRoute() = SEARCH_TASKS_ROUTE
     }
 
 }

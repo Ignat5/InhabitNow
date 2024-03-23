@@ -4,4 +4,5 @@ import com.example.inhabitnow.android.presentation.base.components.navigation.Sc
 
 sealed interface MainScreenNavigation: ScreenNavigation {
     data class CreateTask(val taskId: String) : MainScreenNavigation
+    data object SearchTasks : MainScreenNavigation
 }

@@ -7,6 +7,7 @@ import com.example.inhabitnow.android.presentation.main.config.pick_task_type.Pi
 
 sealed interface MainScreenEvent : ScreenEvent {
     data object OnCreateTaskClick : MainScreenEvent
+    data object OnSearchTasksClick : MainScreenEvent
 
     sealed interface ResultEvent : MainScreenEvent {
         val result: ScreenResult

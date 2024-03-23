@@ -34,8 +34,13 @@ class MainViewModel @Inject constructor(
     override fun onEvent(event: MainScreenEvent) {
         when (event) {
             is MainScreenEvent.OnCreateTaskClick -> onCreateTaskClick()
+            is MainScreenEvent.OnSearchTasksClick -> onSearchTasksClick()
             is MainScreenEvent.ResultEvent -> onResultEvent(event)
         }
+    }
+
+    private fun onSearchTasksClick() {
+        setUpNavigationState(MainScreenNavigation.SearchTasks)
     }
 
     private fun onResultEvent(event: MainScreenEvent.ResultEvent) {
@@ -96,7 +101,8 @@ class MainViewModel @Inject constructor(
                         setUpNavigationState(MainScreenNavigation.CreateTask(taskId))
                     }
 
-                    is ResultModel.Error -> { /* TODO */ }
+                    is ResultModel.Error -> { /* TODO */
+                    }
                 }
             }
         }

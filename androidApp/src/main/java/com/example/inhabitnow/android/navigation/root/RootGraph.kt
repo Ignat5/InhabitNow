@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.navigation.create_task.createTaskScreen
 import com.example.inhabitnow.android.navigation.main.mainGraph
+import com.example.inhabitnow.android.navigation.search_tasks.searchTasksScreen
 import com.example.inhabitnow.android.navigation.view_tags.viewTagsScreen
 import com.example.inhabitnow.android.navigation.view_task_reminders.viewTaskRemindersScreen
 
@@ -35,6 +36,11 @@ fun RootGraph() {
                     navController.navigate(
                         route = AppNavDest.buildCreateTaskRoute(taskId),
                     )
+                },
+                onNavigateToSearchTasks = {
+                    navController.navigate(
+                        route = AppNavDest.buildSearchTasksRoute()
+                    )
                 }
             )
             createTaskScreen(
@@ -52,6 +58,12 @@ fun RootGraph() {
             )
             viewTaskRemindersScreen(onBack = onBack)
             viewTagsScreen(onBack = onBack)
+            searchTasksScreen(
+                onNavigateToEditTask = {
+                    /* TODO */
+                },
+                onBack = onBack
+            )
         }
     }
 }

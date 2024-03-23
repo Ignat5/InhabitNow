@@ -6,6 +6,8 @@ import com.example.inhabitnow.domain.use_case.delete_task_by_id.DefaultDeleteTas
 import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.DefaultReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
+import com.example.inhabitnow.domain.use_case.read_tasks_by_search_query.DefaultReadTasksBySearchQueryUseCase
+import com.example.inhabitnow.domain.use_case.read_tasks_by_search_query.ReadTasksBySearchQueryUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.DefaultSaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.save_task_by_id.DefaultSaveTaskByIdUseCase
@@ -50,6 +52,17 @@ object TaskDomainModule {
         @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher
     ): ReadTaskWithContentByIdUseCase {
         return DefaultReadTaskWithContentByIdUseCase(
+            taskRepository = taskRepository,
+            defaultDispatcher = defaultDispatcher
+        )
+    }
+
+    @Provides
+    fun provideReadTasksBySearchQueryUseCase(
+        taskRepository: TaskRepository,
+        @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher
+    ): ReadTasksBySearchQueryUseCase {
+        return DefaultReadTasksBySearchQueryUseCase(
             taskRepository = taskRepository,
             defaultDispatcher = defaultDispatcher
         )

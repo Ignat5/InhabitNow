@@ -12,6 +12,8 @@ import com.example.inhabitnow.data.util.toTaskTable
 import com.example.inhabitnow.data.util.toTaskWithContentEntity
 import database.TaskContentTable
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -39,6 +41,32 @@ class DefaultTaskRepository(
                     )
                 }
             } else null
+        }
+
+    override fun readTasksWithContentBySearchQuery(searchQuery: String): Flow<List<TaskWithContentEntity>> =
+        taskDataSource.readTasksWithContentBySearchQuery(searchQuery).map { queryList ->
+            if (queryList.isNotEmpty()) {
+                withContext(defaultDispatcher) {
+                    val allTaskIds = queryList.distinctBy { it.task_id }.map { it.task_id }
+                    allTaskIds.map { taskId ->
+                        async {
+                            val tTask = queryList.find { it.task_id == taskId }?.toTaskTable()
+                                ?: return@async null
+                            val allTaskContent = queryList
+                                .asSequence()
+                                .filter { it.taskContent_taskId == taskId }
+                                .distinctBy { it.taskContent_id }
+                                .map { it.toTaskContentTable() }
+                                .toList()
+
+                            return@async tTask.toTaskWithContentEntity(
+                                allTaskContent = allTaskContent,
+                                json = json
+                            )
+                        }
+                    }.awaitAll().filterNotNull()
+                }
+            } else emptyList()
         }
 
     override suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit> =
