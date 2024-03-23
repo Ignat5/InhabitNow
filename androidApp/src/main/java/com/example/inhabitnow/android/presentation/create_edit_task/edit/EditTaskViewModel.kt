@@ -100,7 +100,8 @@ class EditTaskViewModel @Inject constructor(
     override fun onEvent(event: EditTaskScreenEvent) {
         when (event) {
             is EditTaskScreenEvent.BaseEvent -> onBaseEvent(event.baseEvent)
-            else -> { /* TODO */
+            else -> {
+                /* TODO */
             }
         }
     }
