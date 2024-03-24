@@ -11,6 +11,7 @@ import com.example.inhabitnow.android.presentation.common.pick_date.components.P
 import com.example.inhabitnow.android.presentation.common.pick_date.model.PickDateRequestModel
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenEvent
+import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenNavigation
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.BaseItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
@@ -22,6 +23,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components.PickTaskTimeProgressScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.PickTaskTagsStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.components.PickTaskTagsScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
 import com.example.inhabitnow.android.presentation.model.UITaskContent
@@ -35,6 +38,7 @@ import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadT
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
+import com.example.inhabitnow.domain.use_case.tag.save_tag_cross_by_task_id.SaveTagCrossByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_date.UpdateTaskDateUseCase
 import com.example.inhabitnow.domain.use_case.update_task_description.UpdateTaskDescriptionByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
@@ -67,6 +71,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
     private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
     private val updateTaskDateUseCase: UpdateTaskDateUseCase,
+    private val saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
     private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<SE, SS, SN, SC>() {
 
@@ -145,10 +150,29 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
             is BaseItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
             is BaseItemTaskConfig.Date -> onConfigDateClick(item)
             is BaseItemTaskConfig.Priority -> onConfigTaskPriorityClick()
-            else -> {
-                /* TODO */
-            }
+            is BaseItemTaskConfig.Tags -> onConfigTaskTagsClick()
+            is BaseItemTaskConfig.Reminders -> onConfigTaskRemindersClick()
         }
+    }
+
+    private fun onConfigTaskTagsClick() {
+        setUpBaseConfigState(
+            BaseCreateEditTaskScreenConfig.PickTaskTags(
+                stateHolder = PickTaskTagsStateHolder(
+                    allTags = allTagsState.value,
+                    initSelectedTagIds = taskTagIdsState.value,
+                    holderScope = provideChildScope()
+                )
+            )
+        )
+    }
+
+    private fun onConfigTaskRemindersClick() {
+        setUpBaseNavigationState(
+            BaseCreateEditTaskScreenNavigation.ViewTaskReminders(
+                taskId
+            )
+        )
     }
 
     private fun onConfigTaskPriorityClick() {
@@ -315,7 +339,33 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
 
             is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskPriority ->
                 onPickTaskPriorityResultEvent(event)
+
+            is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskTags ->
+                onPickTaskTagsResultEvent(event)
         }
+    }
+
+    private fun onPickTaskTagsResultEvent(event: BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskTags) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskTagsScreenResult.Confirm -> onConfirmPickTaskTags(result)
+                is PickTaskTagsScreenResult.ManageTags -> onManageTagsResult()
+                is PickTaskTagsScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskTags(result: PickTaskTagsScreenResult.Confirm) {
+        viewModelScope.launch {
+            saveTagCrossByTaskIdUseCase(
+                taskId = taskId,
+                allTagIds = result.tagIds
+            )
+        }
+    }
+
+    private fun onManageTagsResult() {
+        setUpBaseNavigationState(BaseCreateEditTaskScreenNavigation.ViewTags)
     }
 
     private fun onPickTaskPriorityResultEvent(event: BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskPriority) {
@@ -483,6 +533,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     protected abstract fun setUpBaseConfigState(baseConfig: BaseCreateEditTaskScreenConfig)
+    protected abstract fun setUpBaseNavigationState(baseNav: BaseCreateEditTaskScreenNavigation)
 
     private suspend fun provideBaseTaskConfigItems(
         taskWithContentModel: TaskWithContentModel?,

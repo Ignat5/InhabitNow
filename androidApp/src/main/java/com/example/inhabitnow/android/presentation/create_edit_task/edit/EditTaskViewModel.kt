@@ -6,6 +6,7 @@ import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifi
 import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.presentation.create_edit_task.base.BaseCreateEditTaskViewModel
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenConfig
+import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenNavigation
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenNavigation
@@ -35,18 +36,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EditTaskViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-    private val readTaskWithContentByIdUseCase: ReadTaskWithContentByIdUseCase,
-    private val readRemindersCountByTaskIdUseCase: ReadRemindersCountByTaskIdUseCase,
-    private val readTagsUseCase: ReadTagsUseCase,
-    private val readTagIdsByTaskIdUseCase: ReadTagIdsByTaskIdUseCase,
-    private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
-    private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
-    private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
-    private val updateTaskDateUseCase: UpdateTaskDateUseCase,
-    private val updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
-    private val updateTaskPriorityByIdUseCase: UpdateTaskPriorityByIdUseCase,
-    private val saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
+    savedStateHandle: SavedStateHandle,
+    readTaskWithContentByIdUseCase: ReadTaskWithContentByIdUseCase,
+    readRemindersCountByTaskIdUseCase: ReadRemindersCountByTaskIdUseCase,
+    readTagsUseCase: ReadTagsUseCase,
+    readTagIdsByTaskIdUseCase: ReadTagIdsByTaskIdUseCase,
+    updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
+    updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
+    updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
+    updateTaskDateUseCase: UpdateTaskDateUseCase,
+    updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
+    updateTaskPriorityByIdUseCase: UpdateTaskPriorityByIdUseCase,
+    saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
     private val saveTaskByIdUseCase: SaveTaskByIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher,
 ) : BaseCreateEditTaskViewModel<EditTaskScreenEvent, EditTaskScreenState, EditTaskScreenNavigation, EditTaskScreenConfig>(
@@ -61,6 +62,7 @@ class EditTaskViewModel @Inject constructor(
     updateTaskProgressByIdUseCase = updateTaskProgressByIdUseCase,
     updateTaskFrequencyByIdUseCase = updateTaskFrequencyByIdUseCase,
     updateTaskDateUseCase = updateTaskDateUseCase,
+    saveTagCrossByTaskIdUseCase = saveTagCrossByTaskIdUseCase,
     defaultDispatcher = defaultDispatcher
 ) {
 
@@ -113,6 +115,10 @@ class EditTaskViewModel @Inject constructor(
 
     override fun setUpBaseConfigState(baseConfig: BaseCreateEditTaskScreenConfig) {
         setUpConfigState(EditTaskScreenConfig.BaseConfig(baseConfig))
+    }
+
+    override fun setUpBaseNavigationState(baseNav: BaseCreateEditTaskScreenNavigation) {
+        setUpNavigationState(EditTaskScreenNavigation.Base(baseNav))
     }
 
 }

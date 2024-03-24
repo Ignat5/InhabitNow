@@ -123,6 +123,17 @@ object BaseCreateEditTaskBuilder {
                 )
             }
 
+            is BaseCreateEditTaskScreenConfig.PickTaskTags -> {
+                PickTaskTagsDialog(
+                    stateHolder = baseConfig.stateHolder,
+                    onResult = {
+                        onBaseResultEvent(
+                            BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskTags(it)
+                        )
+                    }
+                )
+            }
+
             is BaseCreateEditTaskScreenConfig.PickDate -> {
                 val onResult: (PickDateScreenResult) -> Unit = remember {
                     val callback: (PickDateScreenResult) -> Unit = { sr ->

@@ -7,6 +7,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_priority.PickTaskPriorityStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.PickTaskTagsStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 
 sealed interface BaseCreateEditTaskScreenConfig : ScreenConfig {
@@ -32,6 +33,10 @@ sealed interface BaseCreateEditTaskScreenConfig : ScreenConfig {
 
     data class PickTaskPriority(
         val stateHolder: PickTaskPriorityStateHolder
+    ) : BaseCreateEditTaskScreenConfig
+
+    data class PickTaskTags(
+        val stateHolder: PickTaskTagsStateHolder
     ) : BaseCreateEditTaskScreenConfig
 
     sealed interface PickDate : BaseCreateEditTaskScreenConfig {
