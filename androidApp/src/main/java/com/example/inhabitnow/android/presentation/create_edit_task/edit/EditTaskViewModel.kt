@@ -57,6 +57,7 @@ class EditTaskViewModel @Inject constructor(
     readTagIdsByTaskIdUseCase = readTagIdsByTaskIdUseCase,
     updateTaskTitleByIdUseCase = updateTaskTitleByIdUseCase,
     updateTaskDescriptionByIdUseCase = updateTaskDescriptionByIdUseCase,
+    updateTaskPriorityByIdUseCase = updateTaskPriorityByIdUseCase,
     updateTaskProgressByIdUseCase = updateTaskProgressByIdUseCase,
     updateTaskFrequencyByIdUseCase = updateTaskFrequencyByIdUseCase,
     updateTaskDateUseCase = updateTaskDateUseCase,

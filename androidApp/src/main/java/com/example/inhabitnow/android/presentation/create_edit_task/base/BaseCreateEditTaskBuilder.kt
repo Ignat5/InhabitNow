@@ -110,6 +110,19 @@ object BaseCreateEditTaskBuilder {
                 )
             }
 
+            is BaseCreateEditTaskScreenConfig.PickTaskPriority -> {
+                PickTaskPriorityDialog(
+                    stateHolder = baseConfig.stateHolder,
+                    onResult = {
+                        onBaseResultEvent(
+                            BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskPriority(
+                                it
+                            )
+                        )
+                    }
+                )
+            }
+
             is BaseCreateEditTaskScreenConfig.PickDate -> {
                 val onResult: (PickDateScreenResult) -> Unit = remember {
                     val callback: (PickDateScreenResult) -> Unit = { sr ->

@@ -16,6 +16,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_priority.PickTaskPriorityStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_priority.components.PickTaskPriorityScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.PickTaskNumberProgressStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressStateHolder
@@ -36,6 +38,7 @@ import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import com.example.inhabitnow.domain.use_case.update_task_date.UpdateTaskDateUseCase
 import com.example.inhabitnow.domain.use_case.update_task_description.UpdateTaskDescriptionByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
+import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.UpdateTaskPriorityByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
 import kotlinx.coroutines.CoroutineDispatcher
@@ -60,6 +63,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     readTagIdsByTaskIdUseCase: ReadTagIdsByTaskIdUseCase,
     private val updateTaskTitleByIdUseCase: UpdateTaskTitleByIdUseCase,
     private val updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
+    private val updateTaskPriorityByIdUseCase: UpdateTaskPriorityByIdUseCase,
     private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
     private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
     private val updateTaskDateUseCase: UpdateTaskDateUseCase,
@@ -140,9 +144,23 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
             is BaseItemTaskConfig.Progress.Time -> onConfigTaskTimeProgressClick()
             is BaseItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
             is BaseItemTaskConfig.Date -> onConfigDateClick(item)
+            is BaseItemTaskConfig.Priority -> onConfigTaskPriorityClick()
             else -> {
                 /* TODO */
             }
+        }
+    }
+
+    private fun onConfigTaskPriorityClick() {
+        taskWithContentState.value?.task?.priority?.let { priority ->
+            setUpBaseConfigState(
+                BaseCreateEditTaskScreenConfig.PickTaskPriority(
+                    stateHolder = PickTaskPriorityStateHolder(
+                        initPriority = priority,
+                        holderScope = provideChildScope()
+                    )
+                )
+            )
         }
     }
 
@@ -294,6 +312,27 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
 
             is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDate ->
                 onPickDateResultEvent(event)
+
+            is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskPriority ->
+                onPickTaskPriorityResultEvent(event)
+        }
+    }
+
+    private fun onPickTaskPriorityResultEvent(event: BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskPriority) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskPriorityScreenResult.Confirm -> onConfirmPickTaskPriority(result)
+                is PickTaskPriorityScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskPriority(result: PickTaskPriorityScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskPriorityByIdUseCase(
+                taskId = taskId,
+                priority = result.priority
+            )
         }
     }
 
