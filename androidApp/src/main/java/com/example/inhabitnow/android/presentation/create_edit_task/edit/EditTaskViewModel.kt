@@ -107,10 +107,15 @@ class EditTaskViewModel @Inject constructor(
     override fun onEvent(event: EditTaskScreenEvent) {
         when (event) {
             is EditTaskScreenEvent.BaseEvent -> onBaseEvent(event.baseEvent)
+            is EditTaskScreenEvent.OnBackRequest -> onBackRequest()
             else -> {
                 /* TODO */
             }
         }
+    }
+
+    private fun onBackRequest() {
+        setUpNavigationState(EditTaskScreenNavigation.Back)
     }
 
     override fun setUpBaseConfigState(baseConfig: BaseCreateEditTaskScreenConfig) {

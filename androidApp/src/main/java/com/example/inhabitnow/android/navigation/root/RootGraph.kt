@@ -68,7 +68,19 @@ fun RootGraph() {
                 },
                 onBack = onBack
             )
-            editTaskScreen(onBack = onBack)
+            editTaskScreen(
+                onViewTaskReminders = { taskId ->
+                    navController.navigate(
+                        route = AppNavDest.buildViewTaskRemindersRoute(taskId)
+                    )
+                },
+                onViewTags = {
+                    navController.navigate(
+                        route = AppNavDest.buildViewTagsRoute()
+                    )
+                },
+                onBack = onBack
+            )
         }
     }
 }
