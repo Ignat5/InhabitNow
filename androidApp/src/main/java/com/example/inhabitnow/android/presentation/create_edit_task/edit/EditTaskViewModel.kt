@@ -11,8 +11,11 @@ import com.example.inhabitnow.android.presentation.create_edit_task.edit.compone
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenNavigation
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenState
+import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.model.ItemTaskAction
 import com.example.inhabitnow.core.type.TaskType
+import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.save_task_by_id.SaveTaskByIdUseCase
@@ -32,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -48,7 +52,8 @@ class EditTaskViewModel @Inject constructor(
     updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
     updateTaskPriorityByIdUseCase: UpdateTaskPriorityByIdUseCase,
     saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
-    private val saveTaskByIdUseCase: SaveTaskByIdUseCase,
+    private val archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
+    private val deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher,
 ) : BaseCreateEditTaskViewModel<EditTaskScreenEvent, EditTaskScreenState, EditTaskScreenNavigation, EditTaskScreenConfig>(
     taskId = checkNotNull(savedStateHandle.get<String>(AppNavDest.TASK_ID_KEY)),
@@ -107,11 +112,75 @@ class EditTaskViewModel @Inject constructor(
     override fun onEvent(event: EditTaskScreenEvent) {
         when (event) {
             is EditTaskScreenEvent.BaseEvent -> onBaseEvent(event.baseEvent)
+            is EditTaskScreenEvent.OnItemTaskActionClick -> onItemTaskActionClick(event)
+            is EditTaskScreenEvent.ResultEvent -> onResultEvent(event)
             is EditTaskScreenEvent.OnBackRequest -> onBackRequest()
-            else -> {
-                /* TODO */
+        }
+    }
+
+    private fun onResultEvent(event: EditTaskScreenEvent.ResultEvent) {
+        when (event) {
+            is EditTaskScreenEvent.ResultEvent.ConfirmArchiveTask ->
+                onConfirmArchiveTaskResultEvent(event)
+        }
+    }
+
+    private fun onConfirmArchiveTaskResultEvent(event: EditTaskScreenEvent.ResultEvent.ConfirmArchiveTask) {
+        onIdleToAction {
+            when (event.result) {
+                is ConfirmArchiveTaskScreenResult.Confirm -> onConfirmArchiveTask()
+                is ConfirmArchiveTaskScreenResult.Dismiss -> Unit
             }
         }
+    }
+
+    private fun onConfirmArchiveTask() {
+        viewModelScope.launch {
+            archiveTaskByIdUseCase(
+                taskId = taskId,
+                archive = true
+            )
+        }
+    }
+
+    private fun onItemTaskActionClick(event: EditTaskScreenEvent.OnItemTaskActionClick) {
+        when (val item = event.item) {
+            is ItemTaskAction.ViewStatistics -> onViewStatistics()
+            is ItemTaskAction.RestartHabit -> onRestartHabit()
+            is ItemTaskAction.ArchiveUnarchive -> {
+                when (item) {
+                    is ItemTaskAction.ArchiveUnarchive.Archive -> onArchiveTask()
+                    is ItemTaskAction.ArchiveUnarchive.Unarchive -> onUnarchiveTask()
+                }
+            }
+
+            is ItemTaskAction.DeleteTask -> onDeleteTask()
+        }
+    }
+
+    private fun onArchiveTask() {
+        setUpConfigState(EditTaskScreenConfig.ConfirmArchiveTask)
+    }
+
+    private fun onUnarchiveTask() {
+        viewModelScope.launch {
+            archiveTaskByIdUseCase(
+                taskId = taskId,
+                archive = false
+            )
+        }
+    }
+
+    private fun onRestartHabit() {
+        setUpConfigState(EditTaskScreenConfig.ConfirmRestartHabit)
+    }
+
+    private fun onViewStatistics() {
+        /* TODO */
+    }
+
+    private fun onDeleteTask() {
+        setUpConfigState(EditTaskScreenConfig.ConfirmDeleteTask)
     }
 
     private fun onBackRequest() {

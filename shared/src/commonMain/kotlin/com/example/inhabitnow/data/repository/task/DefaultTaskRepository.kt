@@ -160,6 +160,16 @@ class DefaultTaskRepository(
         content = content
     )
 
+    override suspend fun saveTaskArchiveContent(
+        taskId: String,
+        targetDate: LocalDate,
+        content: TaskContentEntity.ArchiveContent
+    ): ResultModel<Unit> = saveTaskContent(
+        taskId = taskId,
+        targetDate = targetDate,
+        content = content
+    )
+
     private suspend fun saveTaskContent(
         taskId: String,
         targetDate: LocalDate,
