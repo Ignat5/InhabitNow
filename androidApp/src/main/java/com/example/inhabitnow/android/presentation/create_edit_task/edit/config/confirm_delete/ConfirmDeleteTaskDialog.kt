@@ -1,23 +1,23 @@
-package com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive
+package com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete
 
 import androidx.compose.runtime.Composable
 import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
 
 @Composable
-fun ConfirmArchiveTaskDialog(
+fun ConfirmDeleteTaskDialog(
     taskId: String,
-    onResult: (ConfirmArchiveTaskScreenResult) -> Unit
+    onResult: (ConfirmDeleteTaskScreenResult) -> Unit
 ) {
     BaseDialogBuilder.BaseMessageDialog(
-        onDismissRequest = { onResult(ConfirmArchiveTaskScreenResult.Dismiss) },
-        titleText = "Archive activity",
-        messageText = "Are you sure you want to archive the activity?",
+        onDismissRequest = { onResult(ConfirmDeleteTaskScreenResult.Dismiss) },
+        titleText = "Delete activity",
+        messageText = "Are you sure you want to delete the activity?",
         actionButtons = BaseDialogBuilder.ActionButtons(
             confirmButton = {
                 BaseDialogBuilder.BaseActionButton(
                     text = "Confirm",
                     onClick = {
-                        onResult(ConfirmArchiveTaskScreenResult.Confirm(taskId))
+                        onResult(ConfirmDeleteTaskScreenResult.Confirm(taskId))
                     }
                 )
             },
@@ -25,7 +25,7 @@ fun ConfirmArchiveTaskDialog(
                 BaseDialogBuilder.BaseActionButton(
                     text = "Cancel",
                     onClick = {
-                        onResult(ConfirmArchiveTaskScreenResult.Dismiss)
+                        onResult(ConfirmDeleteTaskScreenResult.Dismiss)
                     }
                 )
             }

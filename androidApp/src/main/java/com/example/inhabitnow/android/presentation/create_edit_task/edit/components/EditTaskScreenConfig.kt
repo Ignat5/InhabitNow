@@ -6,7 +6,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.base.compone
 sealed interface EditTaskScreenConfig : ScreenConfig {
     data class BaseConfig(val baseConfig: BaseCreateEditTaskScreenConfig) : EditTaskScreenConfig
 
-    data object ConfirmArchiveTask : EditTaskScreenConfig
-    data object ConfirmDeleteTask : EditTaskScreenConfig
-    data object ConfirmRestartHabit : EditTaskScreenConfig
+    data class ConfirmArchiveTask(val taskId: String) : EditTaskScreenConfig
+    data class ConfirmDeleteTask(val taskId: String) : EditTaskScreenConfig
+    data class ConfirmRestartHabit(val taskId: String) : EditTaskScreenConfig
 }

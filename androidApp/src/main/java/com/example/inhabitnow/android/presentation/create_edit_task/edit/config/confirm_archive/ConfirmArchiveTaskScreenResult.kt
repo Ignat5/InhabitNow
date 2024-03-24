@@ -3,6 +3,6 @@ package com.example.inhabitnow.android.presentation.create_edit_task.edit.config
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
 
 sealed interface ConfirmArchiveTaskScreenResult : ScreenResult {
-    data object Confirm : ConfirmArchiveTaskScreenResult
+    data class Confirm(val taskId: String) : ConfirmArchiveTaskScreenResult
     data object Dismiss : ConfirmArchiveTaskScreenResult
 }

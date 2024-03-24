@@ -32,6 +32,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.edit.compone
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenNavigation
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenState
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskDialog
+import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.model.ItemTaskAction
 
 @Composable
@@ -106,10 +107,20 @@ private fun EditTaskScreenConfigStateless(
 
         is EditTaskScreenConfig.ConfirmArchiveTask -> {
             ConfirmArchiveTaskDialog(
+                taskId = config.taskId,
                 onResult = {
                     onResultEvent(
                         EditTaskScreenEvent.ResultEvent.ConfirmArchiveTask(it)
                     )
+                }
+            )
+        }
+
+        is EditTaskScreenConfig.ConfirmDeleteTask -> {
+            ConfirmDeleteTaskDialog(
+                taskId = config.taskId,
+                onResult = {
+                    onResultEvent(EditTaskScreenEvent.ResultEvent.ConfirmDeleteTask(it))
                 }
             )
         }

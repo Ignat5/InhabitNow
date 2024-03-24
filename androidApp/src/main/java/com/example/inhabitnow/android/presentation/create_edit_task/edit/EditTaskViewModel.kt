@@ -12,6 +12,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.edit.compone
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenNavigation
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenState
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.model.ItemTaskAction
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskByIdUseCase
@@ -122,6 +123,25 @@ class EditTaskViewModel @Inject constructor(
         when (event) {
             is EditTaskScreenEvent.ResultEvent.ConfirmArchiveTask ->
                 onConfirmArchiveTaskResultEvent(event)
+
+            is EditTaskScreenEvent.ResultEvent.ConfirmDeleteTask ->
+                onConfirmDeleteTask(event)
+        }
+    }
+
+    private fun onConfirmDeleteTask(event: EditTaskScreenEvent.ResultEvent.ConfirmDeleteTask) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is ConfirmDeleteTaskScreenResult.Confirm -> onConfirmDeleteTask()
+                is ConfirmDeleteTaskScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmDeleteTask() {
+        viewModelScope.launch {
+            deleteTaskByIdUseCase(taskId)
+            setUpNavigationState(EditTaskScreenNavigation.Back)
         }
     }
 
@@ -159,7 +179,7 @@ class EditTaskViewModel @Inject constructor(
     }
 
     private fun onArchiveTask() {
-        setUpConfigState(EditTaskScreenConfig.ConfirmArchiveTask)
+        setUpConfigState(EditTaskScreenConfig.ConfirmArchiveTask(taskId))
     }
 
     private fun onUnarchiveTask() {
@@ -172,15 +192,15 @@ class EditTaskViewModel @Inject constructor(
     }
 
     private fun onRestartHabit() {
-        setUpConfigState(EditTaskScreenConfig.ConfirmRestartHabit)
+        setUpConfigState(EditTaskScreenConfig.ConfirmRestartHabit(taskId))
     }
 
     private fun onViewStatistics() {
-        /* TODO */
+        setUpNavigationState(EditTaskScreenNavigation.ViewStatistics(taskId))
     }
 
     private fun onDeleteTask() {
-        setUpConfigState(EditTaskScreenConfig.ConfirmDeleteTask)
+        setUpConfigState(EditTaskScreenConfig.ConfirmDeleteTask(taskId))
     }
 
     private fun onBackRequest() {
