@@ -6,9 +6,11 @@ import com.example.inhabitnow.android.presentation.base.components.event.ScreenE
 import com.example.inhabitnow.android.presentation.base.components.navigation.ScreenNavigation
 import com.example.inhabitnow.android.presentation.base.components.state.ScreenState
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
+import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStateHolder
+import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
+import com.example.inhabitnow.android.presentation.common.pick_date.model.PickDateRequestModel
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenEvent
-import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenState
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.BaseItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
@@ -31,9 +33,9 @@ import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadT
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
+import com.example.inhabitnow.domain.use_case.update_task_date.UpdateTaskDateUseCase
 import com.example.inhabitnow.domain.use_case.update_task_description.UpdateTaskDescriptionByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.UpdateTaskFrequencyByIdUseCase
-import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.UpdateTaskPriorityByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,6 +46,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 
 abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, SN : ScreenNavigation, SC : ScreenConfig>(
     protected val taskId: String,
@@ -55,8 +62,11 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     private val updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
     private val updateTaskProgressByIdUseCase: UpdateTaskProgressByIdUseCase,
     private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
+    private val updateTaskDateUseCase: UpdateTaskDateUseCase,
     private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<SE, SS, SN, SC>() {
+
+    private val todayDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
     protected val taskWithContentState = readTaskWithContentByIdUseCase(taskId)
         .stateIn(
@@ -123,15 +133,80 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onBaseItemTaskConfigClick(event: BaseCreateEditTaskScreenEvent.OnBaseItemTaskConfigClick) {
-        when (event.item) {
+        when (val item = event.item) {
             is BaseItemTaskConfig.Title -> onConfigTaskTitleClick()
             is BaseItemTaskConfig.Description -> onConfigTaskDescriptionClick()
             is BaseItemTaskConfig.Progress.Number -> onConfigTaskNumberProgressClick()
             is BaseItemTaskConfig.Progress.Time -> onConfigTaskTimeProgressClick()
             is BaseItemTaskConfig.Frequency -> onConfigTaskFrequencyClick()
+            is BaseItemTaskConfig.Date -> onConfigDateClick(item)
             else -> {
                 /* TODO */
             }
+        }
+    }
+
+    private fun onConfigDateClick(item: BaseItemTaskConfig.Date) {
+        when (item) {
+            is BaseItemTaskConfig.Date.StartDate -> onConfigStartDateClick()
+            is BaseItemTaskConfig.Date.EndDate -> onConfigEndDateClick()
+            is BaseItemTaskConfig.Date.OneDayDate -> onConfigOneDayDateClick()
+        }
+    }
+
+    private fun onConfigOneDayDateClick() {
+        taskWithContentState.value?.task?.let { task ->
+            setUpBaseConfigState(
+                BaseCreateEditTaskScreenConfig.PickDate.OneDayDate(
+                    stateHolder = PickDateStateHolder(
+                        requestModel = PickDateRequestModel(
+                            currentDate = task.startDate,
+                            minDate = minOf(task.startDate, todayDate),
+                            maxDate = task.startDate.plus(1, DateTimeUnit.YEAR)
+                        ),
+                        holderScope = provideChildScope(),
+                        defaultDispatcher = defaultDispatcher
+                    )
+                )
+            )
+        }
+    }
+
+    private fun onConfigEndDateClick() {
+        taskWithContentState.value?.task?.let { task ->
+            setUpBaseConfigState(
+                BaseCreateEditTaskScreenConfig.PickDate.EndDate(
+                    stateHolder = PickDateStateHolder(
+                        requestModel = (task.endDate ?: task.startDate).let { currentDate ->
+                            PickDateRequestModel(
+                                currentDate = currentDate,
+                                minDate = task.startDate,
+                                maxDate = currentDate.plus(1, DateTimeUnit.YEAR)
+                            )
+                        },
+                        holderScope = provideChildScope(),
+                        defaultDispatcher = defaultDispatcher
+                    )
+                )
+            )
+        }
+    }
+
+    private fun onConfigStartDateClick() {
+        taskWithContentState.value?.task?.let { task ->
+            setUpBaseConfigState(
+                BaseCreateEditTaskScreenConfig.PickDate.StartDate(
+                    stateHolder = PickDateStateHolder(
+                        requestModel = PickDateRequestModel(
+                            currentDate = task.startDate,
+                            minDate = minOf(task.startDate, todayDate),
+                            maxDate = task.endDate ?: task.startDate.plus(1, DateTimeUnit.YEAR)
+                        ),
+                        holderScope = provideChildScope(),
+                        defaultDispatcher = defaultDispatcher
+                    )
+                )
+            )
         }
     }
 
@@ -216,6 +291,63 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
 
             is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskFrequency ->
                 onPickTaskFrequencyResultEvent(event)
+
+            is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDate ->
+                onPickDateResultEvent(event)
+        }
+    }
+
+    private fun onPickDateResultEvent(event: BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDate) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickDateScreenResult.Confirm -> {
+                    when (event) {
+                        is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDate.StartDate ->
+                            onConfirmPickStartDate(result)
+
+                        is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDate.EndDate ->
+                            onConfirmPickEndDate(result)
+
+                        is BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDate.OneDayDate ->
+                            onConfirmPickOneDayDate(result)
+                    }
+                }
+
+                is PickDateScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickOneDayDate(result: PickDateScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskDateUseCase(
+                taskId = taskId,
+                requestType = UpdateTaskDateUseCase.RequestType.OneDayDate(
+                    result.date
+                )
+            )
+        }
+    }
+
+    private fun onConfirmPickEndDate(result: PickDateScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskDateUseCase(
+                taskId = taskId,
+                requestType = UpdateTaskDateUseCase.RequestType.EndDate(
+                    result.date
+                )
+            )
+        }
+    }
+
+    private fun onConfirmPickStartDate(result: PickDateScreenResult.Confirm) {
+        viewModelScope.launch {
+            updateTaskDateUseCase(
+                taskId = taskId,
+                requestType = UpdateTaskDateUseCase.RequestType.StartDate(
+                    date = result.date
+                )
+            )
         }
     }
 

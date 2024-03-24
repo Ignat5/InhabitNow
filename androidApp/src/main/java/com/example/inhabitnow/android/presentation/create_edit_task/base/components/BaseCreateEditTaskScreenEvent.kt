@@ -2,6 +2,7 @@ package com.example.inhabitnow.android.presentation.create_edit_task.base.compon
 
 import com.example.inhabitnow.android.presentation.base.components.event.ScreenEvent
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
+import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.BaseItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.components.PickTaskDescriptionScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
@@ -36,5 +37,13 @@ sealed interface BaseCreateEditTaskScreenEvent : ScreenEvent {
         data class PickTaskFrequency(
             override val result: PickTaskFrequencyScreenResult
         ) : ResultEvent
+
+        sealed interface PickTaskDate : ResultEvent {
+            override val result: PickDateScreenResult
+
+            data class StartDate(override val result: PickDateScreenResult) : PickTaskDate
+            data class EndDate(override val result: PickDateScreenResult) : PickTaskDate
+            data class OneDayDate(override val result: PickDateScreenResult) : PickTaskDate
+        }
     }
 }

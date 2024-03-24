@@ -170,7 +170,7 @@ class CreateTaskViewModel @Inject constructor(
             viewModelScope.launch {
                 updateTaskDateUseCase(
                     taskId = taskId,
-                    requestBody = UpdateTaskDateUseCase.RequestBody.EndDate(
+                    requestType = UpdateTaskDateUseCase.RequestType.EndDate(
                         date = if (task.endDate != null) null
                         else task.startDate.plus(1, DateTimeUnit.MONTH)
                     )
@@ -459,7 +459,7 @@ class CreateTaskViewModel @Inject constructor(
         viewModelScope.launch {
             updateTaskDateUseCase(
                 taskId = taskId,
-                requestBody = UpdateTaskDateUseCase.RequestBody.StartDate(
+                requestType = UpdateTaskDateUseCase.RequestType.StartDate(
                     date = result.date
                 )
             )
@@ -470,7 +470,7 @@ class CreateTaskViewModel @Inject constructor(
         viewModelScope.launch {
             updateTaskDateUseCase(
                 taskId = taskId,
-                requestBody = UpdateTaskDateUseCase.RequestBody.EndDate(
+                requestType = UpdateTaskDateUseCase.RequestType.EndDate(
                     date = result.date
                 )
             )
@@ -481,7 +481,7 @@ class CreateTaskViewModel @Inject constructor(
         viewModelScope.launch {
             updateTaskDateUseCase(
                 taskId = taskId,
-                requestBody = UpdateTaskDateUseCase.RequestBody.OneDayDate(
+                requestType = UpdateTaskDateUseCase.RequestType.OneDayDate(
                     date = result.date
                 )
             )

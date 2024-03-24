@@ -109,6 +109,43 @@ object BaseCreateEditTaskBuilder {
                     }
                 )
             }
+
+            is BaseCreateEditTaskScreenConfig.PickDate -> {
+                val onResult: (PickDateScreenResult) -> Unit = remember {
+                    val callback: (PickDateScreenResult) -> Unit = { sr ->
+                        when (baseConfig) {
+                            is BaseCreateEditTaskScreenConfig.PickDate.StartDate -> {
+                                onBaseResultEvent(
+                                    BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDate.StartDate(
+                                        sr
+                                    )
+                                )
+                            }
+
+                            is BaseCreateEditTaskScreenConfig.PickDate.EndDate -> {
+                                onBaseResultEvent(
+                                    BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDate.EndDate(
+                                        sr
+                                    )
+                                )
+                            }
+
+                            is BaseCreateEditTaskScreenConfig.PickDate.OneDayDate -> {
+                                onBaseResultEvent(
+                                    BaseCreateEditTaskScreenEvent.ResultEvent.PickTaskDate.OneDayDate(
+                                        sr
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    callback
+                }
+                PickDateDialog(
+                    stateHolder = baseConfig.stateHolder,
+                    onResult = onResult
+                )
+            }
         }
     }
 
