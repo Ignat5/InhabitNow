@@ -542,7 +542,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     protected abstract fun setUpBaseConfigState(baseConfig: BaseCreateEditTaskScreenConfig)
-    protected abstract fun setUpBaseNavigationState(baseNav: BaseCreateEditTaskScreenNavigation)
+    protected abstract fun setUpBaseNavigationState(baseSN: BaseCreateEditTaskScreenNavigation)
 
     private suspend fun provideBaseTaskConfigItems(
         taskWithContentModel: TaskWithContentModel?,

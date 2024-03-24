@@ -122,8 +122,8 @@ class EditTaskViewModel @Inject constructor(
         setUpConfigState(EditTaskScreenConfig.BaseConfig(baseConfig))
     }
 
-    override fun setUpBaseNavigationState(baseNav: BaseCreateEditTaskScreenNavigation) {
-        setUpNavigationState(EditTaskScreenNavigation.Base(baseNav))
+    override fun setUpBaseNavigationState(baseSN: BaseCreateEditTaskScreenNavigation) {
+        setUpNavigationState(EditTaskScreenNavigation.Base(baseSN))
     }
 
 }

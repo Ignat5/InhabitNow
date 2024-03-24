@@ -2,6 +2,7 @@ package com.example.inhabitnow.android.presentation.create_edit_task.create.comp
 
 import com.example.inhabitnow.android.presentation.base.components.config.ScreenConfig
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStateHolder
+import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_priority.PickTaskPriorityStateHolder
@@ -11,49 +12,6 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.PickTaskTagsStateHolder
 
 sealed interface CreateTaskScreenConfig : ScreenConfig {
-    data class PickTitle(
-        val stateHolder: PickTaskTitleStateHolder
-    ) : CreateTaskScreenConfig
-
-    data class PickTaskNumberProgress(
-        val stateHolder: PickTaskNumberProgressStateHolder
-    ) : CreateTaskScreenConfig
-
-    data class PickTaskTimeProgress(
-        val stateHolder: PickTaskTimeProgressStateHolder
-    ) : CreateTaskScreenConfig
-
-    data class PickTaskFrequency(
-        val stateHolder: PickTaskFrequencyStateHolder
-    ) : CreateTaskScreenConfig
-
-    data class PickTaskTags(
-        val stateHolder: PickTaskTagsStateHolder
-    ) : CreateTaskScreenConfig
-
-    data class PickTaskDescription(
-        val stateHolder: PickTaskDescriptionStateHolder
-    ) : CreateTaskScreenConfig
-
-    data class PickTaskPriority(
-        val stateHolder: PickTaskPriorityStateHolder
-    ) : CreateTaskScreenConfig
-
-    sealed interface PickDate : CreateTaskScreenConfig {
-        val stateHolder: PickDateStateHolder
-
-        data class StartDate(
-            override val stateHolder: PickDateStateHolder
-        ) : PickDate
-
-        data class EndDate(
-            override val stateHolder: PickDateStateHolder
-        ) : PickDate
-
-        data class OneDayDate(
-            override val stateHolder: PickDateStateHolder
-        ) : PickDate
-    }
-
+    data class Base(val baseConfig: BaseCreateEditTaskScreenConfig) : CreateTaskScreenConfig
     data object ConfirmLeave : CreateTaskScreenConfig
 }
