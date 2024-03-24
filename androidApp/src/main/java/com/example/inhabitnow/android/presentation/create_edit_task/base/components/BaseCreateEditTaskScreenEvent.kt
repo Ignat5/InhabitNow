@@ -17,6 +17,7 @@ sealed interface BaseCreateEditTaskScreenEvent : ScreenEvent {
         val item: BaseItemTaskConfig
     ) : BaseCreateEditTaskScreenEvent
 
+
     sealed interface ResultEvent : BaseCreateEditTaskScreenEvent {
         val result: ScreenResult
 

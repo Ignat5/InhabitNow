@@ -216,21 +216,30 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
 
     private fun onConfigEndDateClick() {
         taskWithContentState.value?.task?.let { task ->
-            setUpBaseConfigState(
-                BaseCreateEditTaskScreenConfig.PickDate.EndDate(
-                    stateHolder = PickDateStateHolder(
-                        requestModel = (task.endDate ?: task.startDate).let { currentDate ->
-                            PickDateRequestModel(
-                                currentDate = currentDate,
-                                minDate = task.startDate,
-                                maxDate = currentDate.plus(1, DateTimeUnit.YEAR)
-                            )
-                        },
-                        holderScope = provideChildScope(),
-                        defaultDispatcher = defaultDispatcher
+            if (task.endDate != null) {
+                viewModelScope.launch {
+                    updateTaskDateUseCase(
+                        taskId = taskId,
+                        requestType = UpdateTaskDateUseCase.RequestType.EndDate(null)
+                    )
+                }
+            } else {
+                setUpBaseConfigState(
+                    BaseCreateEditTaskScreenConfig.PickDate.EndDate(
+                        stateHolder = PickDateStateHolder(
+                            requestModel = (task.startDate).let { currentDate ->
+                                PickDateRequestModel(
+                                    currentDate = currentDate,
+                                    minDate = task.startDate,
+                                    maxDate = currentDate.plus(1, DateTimeUnit.YEAR)
+                                )
+                            },
+                            holderScope = provideChildScope(),
+                            defaultDispatcher = defaultDispatcher
+                        )
                     )
                 )
-            )
+            }
         }
     }
 

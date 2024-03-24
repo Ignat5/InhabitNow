@@ -236,10 +236,7 @@ object BaseCreateEditTaskBuilder {
                             is BaseItemTaskConfig.Date.EndDate -> {
                                 ItemEndDateConfig(
                                     item = item,
-                                    onClick = onClick,
-                                    onSwitchClick = {
-//                                        onEvent(CreateTaskScreenEvent.OnEndDateSwitchClick)
-                                    }
+                                    onClick = onClick
                                 )
                             }
                         }
@@ -373,7 +370,6 @@ object BaseCreateEditTaskBuilder {
     private fun ItemEndDateConfig(
         item: BaseItemTaskConfig.Date.EndDate,
         onClick: () -> Unit,
-        onSwitchClick: () -> Unit
     ) {
         val dataText = remember(item) {
             item.date?.toDayMonthYear() ?: ""
@@ -386,8 +382,7 @@ object BaseCreateEditTaskBuilder {
             titleText = "End date",
             dataText = dataText,
             isChecked = isChecked,
-            onClick = onClick,
-            onSwitchClick = { onSwitchClick() }
+            onClick = onClick
         )
     }
 
@@ -608,17 +603,17 @@ object BaseCreateEditTaskBuilder {
         dataText: String,
         isChecked: Boolean,
         onClick: () -> Unit,
-        onSwitchClick: (Boolean) -> Unit
     ) {
         BaseItemConfigContainer(
             iconResId = iconResId,
             titleText = titleText,
             onClick = onClick,
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             dataContent = {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
                         text = dataText,
@@ -629,10 +624,9 @@ object BaseCreateEditTaskBuilder {
                         textAlign = TextAlign.End,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
                     Switch(
                         checked = isChecked,
-                        onCheckedChange = onSwitchClick
+                        onCheckedChange = null
                     )
                 }
             }
