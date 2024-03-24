@@ -142,6 +142,9 @@ private fun ItemTag(
 ) {
     BaseItemOptionBuilder.BaseItemCheckbox(
         titleText = tagModel.title,
+        leadingIcon = {
+            Icon(painter = painterResource(id = R.drawable.ic_tag), contentDescription = null)
+        },
         isSelected = isSelected,
         onClick = onClick,
         modifier = modifier

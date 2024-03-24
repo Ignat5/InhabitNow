@@ -53,7 +53,8 @@ object BaseItemOptionBuilder {
         titleText: String,
         isSelected: Boolean,
         onClick: () -> Unit,
-        modifier: Modifier = Modifier
+        modifier: Modifier = Modifier,
+        leadingIcon: @Composable (() -> Unit)? = null,
     ) {
         Box(
             modifier = modifier
@@ -65,6 +66,10 @@ object BaseItemOptionBuilder {
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
+                if (leadingIcon != null) {
+                    leadingIcon()
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
                 Text(
                     text = titleText,
                     style = MaterialTheme.typography.titleMedium,
