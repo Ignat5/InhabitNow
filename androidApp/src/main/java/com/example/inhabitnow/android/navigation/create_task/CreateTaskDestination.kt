@@ -5,6 +5,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.inhabitnow.android.navigation.AppNavDest
+import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenNavigation
 import com.example.inhabitnow.android.presentation.create_edit_task.create.CreateTaskScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
 
@@ -25,11 +26,16 @@ fun NavGraphBuilder.createTaskScreen(
             onNavigation = { destination ->
                 when (destination) {
                     is CreateTaskScreenNavigation.Back -> onBack()
-                    is CreateTaskScreenNavigation.ViewReminders -> {
-                        onNavigateToViewTaskReminders(destination.taskId)
-                    }
-                    is CreateTaskScreenNavigation.ViewTags -> {
-                        onNavigateToViewTags()
+                    is CreateTaskScreenNavigation.Base -> {
+                        when (val sn = destination.baseSN) {
+                            is BaseCreateEditTaskScreenNavigation.ViewTaskReminders -> {
+                                onNavigateToViewTaskReminders(sn.taskId)
+                            }
+
+                            is BaseCreateEditTaskScreenNavigation.ViewTags -> {
+                                onNavigateToViewTags()
+                            }
+                        }
                     }
                 }
             }

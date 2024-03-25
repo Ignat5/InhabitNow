@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.navigation.create_task.createTaskScreen
+import com.example.inhabitnow.android.navigation.edit_task.editTaskScreen
 import com.example.inhabitnow.android.navigation.main.mainGraph
 import com.example.inhabitnow.android.navigation.search_tasks.searchTasksScreen
 import com.example.inhabitnow.android.navigation.view_tags.viewTagsScreen
@@ -59,8 +60,24 @@ fun RootGraph() {
             viewTaskRemindersScreen(onBack = onBack)
             viewTagsScreen(onBack = onBack)
             searchTasksScreen(
-                onNavigateToEditTask = {
-                    /* TODO */
+                onNavigateToEditTask = { taskId, navOptions ->
+                    navController.navigate(
+                        route = AppNavDest.buildEditTaskRoute(taskId),
+                        navOptions = navOptions
+                    )
+                },
+                onBack = onBack
+            )
+            editTaskScreen(
+                onViewTaskReminders = { taskId ->
+                    navController.navigate(
+                        route = AppNavDest.buildViewTaskRemindersRoute(taskId)
+                    )
+                },
+                onViewTags = {
+                    navController.navigate(
+                        route = AppNavDest.buildViewTagsRoute()
+                    )
                 },
                 onBack = onBack
             )

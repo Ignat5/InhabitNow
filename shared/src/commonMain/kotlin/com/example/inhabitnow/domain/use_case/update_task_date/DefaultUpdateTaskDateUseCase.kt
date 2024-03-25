@@ -12,28 +12,28 @@ class DefaultUpdateTaskDateUseCase(
 
     override suspend operator fun invoke(
         taskId: String,
-        requestBody: UpdateTaskDateUseCase.RequestBody
+        requestType: UpdateTaskDateUseCase.RequestType
     ): ResultModel<Unit> {
-        val resultModel = when (requestBody) {
-            is UpdateTaskDateUseCase.RequestBody.StartDate -> {
+        val resultModel = when (requestType) {
+            is UpdateTaskDateUseCase.RequestType.StartDate -> {
                 taskRepository.updateTaskStartDateById(
                     taskId = taskId,
-                    taskStartDate = requestBody.date
+                    taskStartDate = requestType.date
                 )
             }
 
-            is UpdateTaskDateUseCase.RequestBody.EndDate -> {
+            is UpdateTaskDateUseCase.RequestType.EndDate -> {
                 taskRepository.updateTaskEndDateById(
                     taskId = taskId,
-                    taskEndDate = requestBody.date
+                    taskEndDate = requestType.date
                 )
             }
 
-            is UpdateTaskDateUseCase.RequestBody.OneDayDate -> {
+            is UpdateTaskDateUseCase.RequestType.OneDayDate -> {
                 taskRepository.updateTaskStartEndDateById(
                     taskId = taskId,
-                    taskStartDate = requestBody.date,
-                    taskEndDate = requestBody.date
+                    taskStartDate = requestType.date,
+                    taskEndDate = requestType.date
                 )
             }
         }

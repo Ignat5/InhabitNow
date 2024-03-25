@@ -112,7 +112,11 @@ class DefaultTaskRepository(
         )
 
     override suspend fun deleteTaskById(taskId: String): ResultModel<Unit> =
-        taskDataSource.deleteTaskById(taskId = taskId)
+        taskDataSource.updateTaskDeletedAtById(
+            taskId = taskId,
+            deletedAt = Clock.System.now().toEpochMilliseconds()
+        )
+//        taskDataSource.deleteTaskById(taskId = taskId)
 
     override suspend fun updateTaskStartDateById(
         taskId: String,
@@ -154,6 +158,16 @@ class DefaultTaskRepository(
         taskId: String,
         targetDate: LocalDate,
         content: TaskContentEntity.FrequencyContent
+    ): ResultModel<Unit> = saveTaskContent(
+        taskId = taskId,
+        targetDate = targetDate,
+        content = content
+    )
+
+    override suspend fun saveTaskArchiveContent(
+        taskId: String,
+        targetDate: LocalDate,
+        content: TaskContentEntity.ArchiveContent
     ): ResultModel<Unit> = saveTaskContent(
         taskId = taskId,
         targetDate = targetDate,

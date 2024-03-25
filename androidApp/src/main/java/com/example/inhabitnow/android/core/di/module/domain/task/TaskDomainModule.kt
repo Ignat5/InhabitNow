@@ -2,6 +2,8 @@ package com.example.inhabitnow.android.core.di.module.domain.task
 
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.data.repository.task.TaskRepository
+import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.archive_task_by_id.DefaultArchiveTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.delete_task_by_id.DefaultDeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.DefaultReadTaskWithContentByIdUseCase
@@ -147,6 +149,17 @@ object TaskDomainModule {
         externalScope: CoroutineScope
     ): DeleteTaskByIdUseCase {
         return DefaultDeleteTaskByIdUseCase(
+            taskRepository = taskRepository,
+            externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideArchiveTaskByIdUseCase(
+        taskRepository: TaskRepository,
+        externalScope: CoroutineScope
+    ): ArchiveTaskByIdUseCase {
+        return DefaultArchiveTaskByIdUseCase(
             taskRepository = taskRepository,
             externalScope = externalScope
         )
