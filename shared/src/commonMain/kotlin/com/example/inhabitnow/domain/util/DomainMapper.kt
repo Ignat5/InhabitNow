@@ -7,12 +7,14 @@ import com.example.inhabitnow.data.model.task.TaskEntity
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
+import com.example.inhabitnow.data.model.task.derived.FullTaskEntity
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
 import com.example.inhabitnow.domain.model.reminder.content.ReminderContentModel
 import com.example.inhabitnow.domain.model.tag.TagModel
 import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.model.task.TaskWithContentModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
+import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
 
 // task
 
@@ -95,6 +97,12 @@ internal fun TaskContentModel.FrequencyContent.toFrequencyContentEntity(): TaskC
 private fun TaskContentEntity.ArchiveContent.toArchiveContentModel(): TaskContentModel.ArchiveContent {
     return TaskContentModel.ArchiveContent(this.isArchived)
 }
+
+internal fun FullTaskEntity.toFullTaskModel() = FullTaskModel(
+    taskWithContentModel = taskWithContentEntity.toTaskWithContentModel(),
+    allReminders = allReminders.map { it.toReminderModel() },
+    allTags = allTags.map { it.toTagModel() }
+)
 
 // reminder
 

@@ -120,6 +120,61 @@ INNER JOIN (
 WHERE tTask.deletedAt IS NULL AND
 tTask.title LIKE :searchQuery;
 
+selectFullTasksByDate:
+SELECT
+tTask.id task_id,
+tTask.type task_type,
+tTask.progressType task_progressType,
+tTask.title task_title,
+tTask.description task_description,
+tTask.startEpochDay task_startEpochDay,
+tTask.endEpochDay task_endEpochDay,
+tTask.priority task_priority,
+tTask.createdAt task_createdAt,
+tTask.deletedAt task_deletedAt,
+
+tTaskContent.id taskContent_id,
+tTaskContent.taskId taskContent_taskId,
+tTaskContent.contentType taskContent_contentType,
+tTaskContent.content taskContent_content,
+tTaskContent.startEpochDay taskContent_startEpochDay,
+tTaskContent.createdAt taskContent_createdAt,
+
+tReminder.id reminder_id,
+tReminder.taskId reminder_taskId,
+tReminder.time reminder_time,
+tReminder.type reminder_type,
+tReminder.schedule reminder_schedule,
+tReminder.createdAt reminder_createdAt,
+
+tCross.taskId tagCross_taskId,
+tCross.tagId tagCross_tagId,
+
+tTag.id tag_id,
+tTag.title tag_title,
+tTag.createdAt tag_createdAt
+
+FROM TaskTable tTask
+INNER JOIN (
+    SELECT * FROM TaskContentTable tInner
+    WHERE tInner.startEpochDay <= :targetEpochDay
+    GROUP BY tInner.taskId, tInner.contentType
+    HAVING tInner.startEpochDay = MAX(tInner.startEpochDay)
+) tTaskContent ON tTaskContent.taskId = tTask.id
+
+LEFT JOIN ReminderTable tReminder
+ON tReminder.taskId = tTask.id
+
+LEFT JOIN TagCrossTable tCross
+ON tCross.taskId = tTask.id
+
+LEFT JOIN TagTable tTag
+ON tTag.id = tCross.tagId
+
+WHERE tTask.deletedAt IS NULL AND
+tTask.startEpochDay <= :targetEpochDay AND
+tTask.endEpochDay >= :targetEpochDay;
+
 updateTaskTitleById:
 UPDATE TaskTable SET title = :title
 WHERE id = :taskId;
