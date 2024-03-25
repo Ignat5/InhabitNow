@@ -28,7 +28,7 @@ fun UITaskContent.Progress.Number.toDisplay(): String {
 fun ProgressLimitType.toDisplay() = when (this) {
     ProgressLimitType.AtLeast -> "At least"
     ProgressLimitType.Exactly -> "Exactly"
-    ProgressLimitType.NoMoreThan -> "No more than"
+//    ProgressLimitType.NoMoreThan -> "No more than"
 }
 
 fun UITaskContent.Frequency.EveryDay.toDisplay() = "Every day"

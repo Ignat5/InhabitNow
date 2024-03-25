@@ -28,7 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.navigation.AppNavDest
-import com.example.inhabitnow.android.navigation.all_scheduled_tasks.allScheduledTasks
+import com.example.inhabitnow.android.navigation.view_schedule.viewScheduleScreen
 import com.example.inhabitnow.android.navigation.view_all_habits.viewAllHabits
 import com.example.inhabitnow.android.navigation.view_all_tasks.viewAllTasks
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
@@ -118,11 +118,11 @@ fun NavGraphBuilder.mainGraph(
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = MainNavDest.AllScheduledTasksDestination.route,
+                        startDestination = MainNavDest.ViewScheduleDestination.route,
                         route = AppNavDest.MainGraphDestination.route,
                         modifier = Modifier.padding(it)
                     ) {
-                        allScheduledTasks()
+                        viewScheduleScreen()
                         viewAllHabits()
                         viewAllTasks()
                     }
@@ -252,19 +252,19 @@ private fun ScreenFAB(onClick: () -> Unit) {
 }
 
 private fun MainNavDest.toTitleText() = when (this) {
-    is MainNavDest.AllScheduledTasksDestination -> "Today"
+    is MainNavDest.ViewScheduleDestination -> "Schedule"
     is MainNavDest.ViewAllHabitsDestination -> "Habits"
     is MainNavDest.ViewAllTasksDestination -> "Tasks"
 }
 
 private fun MainNavDest.toIconResId() = when (this) {
-    is MainNavDest.AllScheduledTasksDestination -> R.drawable.ic_today
+    is MainNavDest.ViewScheduleDestination -> R.drawable.ic_today
     is MainNavDest.ViewAllHabitsDestination -> R.drawable.ic_habit
     is MainNavDest.ViewAllTasksDestination -> R.drawable.ic_task
 }
 
 private fun findMainNavDestByRoute(route: String?): MainNavDest? = when (route) {
-    MainNavDest.AllScheduledTasksDestination.route -> MainNavDest.AllScheduledTasksDestination
+    MainNavDest.ViewScheduleDestination.route -> MainNavDest.ViewScheduleDestination
     MainNavDest.ViewAllHabitsDestination.route -> MainNavDest.ViewAllHabitsDestination
     MainNavDest.ViewAllTasksDestination.route -> MainNavDest.ViewAllTasksDestination
     else -> null

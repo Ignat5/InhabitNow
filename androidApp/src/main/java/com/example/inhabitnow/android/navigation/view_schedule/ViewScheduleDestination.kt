@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.navigation.all_scheduled_tasks
+package com.example.inhabitnow.android.navigation.view_schedule
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,11 +9,11 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.example.inhabitnow.android.navigation.main.MainNavDest
 
-fun NavGraphBuilder.allScheduledTasks() {
-    composable(route = MainNavDest.AllScheduledTasksDestination.route) {
+fun NavGraphBuilder.viewScheduleScreen() {
+    composable(route = MainNavDest.ViewScheduleDestination.route) {
         Box(modifier = Modifier.fillMaxSize()) {
             Text(
-                text = "AllScheduledTasks",
+                text = "ViewSchedule",
                 modifier = Modifier.align(Alignment.Center)
             )
         }
