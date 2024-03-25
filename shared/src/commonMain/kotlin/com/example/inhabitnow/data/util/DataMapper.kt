@@ -166,7 +166,7 @@ private fun String.fromJsonReminderType(json: Json) =
 
 
 /** record **/
-fun RecordTable.toRecordModel(json: Json) = RecordEntity(
+fun RecordTable.toRecordEntity(json: Json) = RecordEntity(
     id = id,
     taskId = taskId,
     date = epochDay.toLocalDate(),

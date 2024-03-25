@@ -1,5 +1,7 @@
 package com.example.inhabitnow.domain.util
 
+import com.example.inhabitnow.data.model.record.RecordEntity
+import com.example.inhabitnow.data.model.record.content.RecordContentEntity
 import com.example.inhabitnow.data.model.reminder.ReminderEntity
 import com.example.inhabitnow.data.model.reminder.content.ReminderContentEntity
 import com.example.inhabitnow.data.model.tag.TagEntity
@@ -8,6 +10,8 @@ import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import com.example.inhabitnow.data.model.task.derived.FullTaskEntity
+import com.example.inhabitnow.domain.model.record.RecordModel
+import com.example.inhabitnow.domain.model.record.content.RecordContentModel
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
 import com.example.inhabitnow.domain.model.reminder.content.ReminderContentModel
 import com.example.inhabitnow.domain.model.tag.TagModel
@@ -137,6 +141,30 @@ internal fun TagEntity.toTagModel() = TagModel(
     title = title,
     createdAt = createdAt
 )
+
+// record
+internal fun RecordEntity.toRecordModel() = RecordModel(
+    id = id,
+    taskId = taskId,
+    date = date,
+    entry = entry.toRecordEntryModel(),
+    createdAt = createdAt
+)
+
+private fun RecordContentEntity.Entry.toRecordEntryModel(): RecordContentModel.Entry =
+    when (this) {
+        is RecordContentEntity.Entry.Done -> RecordContentModel.Entry.Done
+        is RecordContentEntity.Entry.Number -> RecordContentModel.Entry.Number(
+            number = this.number
+        )
+
+        is RecordContentEntity.Entry.Time -> RecordContentModel.Entry.Time(
+            time = this.time
+        )
+
+        is RecordContentEntity.Entry.Fail -> RecordContentModel.Entry.Fail
+        is RecordContentEntity.Entry.Skip -> RecordContentModel.Entry.Skip
+    }
 
 
 

@@ -5,6 +5,7 @@ import com.example.inhabitnow.data.data_source.base.BaseDataSource
 import com.example.inhabitnow.database.InhabitNowDatabase
 import database.RecordTable
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 
 class DefaultRecordDataSource(
     private val db: InhabitNowDatabase,
@@ -12,6 +13,10 @@ class DefaultRecordDataSource(
 ) : BaseDataSource(db, ioDispatcher), RecordDataSource {
 
     private val recordDao = db.recordDaoQueries
+
+    override fun readRecordsByDate(targetEpochDay: Long): Flow<List<RecordTable>> = readQueryList {
+        recordDao.selectRecordsByDate(targetEpochDay)
+    }
 
     override suspend fun insertRecord(recordTable: RecordTable): ResultModel<Unit> = runQuery {
         recordDao.insertRecord(recordTable)
