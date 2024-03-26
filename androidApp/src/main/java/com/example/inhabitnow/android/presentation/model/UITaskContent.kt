@@ -11,7 +11,7 @@ sealed interface UITaskContent {
 
         data class Number(
             val limitType: ProgressLimitType,
-            val limitNumber: String,
+            val limitNumber: Double,
             val limitUnit: String
         ) : Progress
 

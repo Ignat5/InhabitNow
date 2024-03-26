@@ -66,8 +66,8 @@ class CreateTaskViewModel @Inject constructor(
     defaultDispatcher = defaultDispatcher
 ) {
 
-    private val canSaveState = taskWithContentState.map { taskWithContent ->
-        taskWithContent?.task?.title?.isNotBlank() == true
+    private val canSaveState = taskModelState.map { taskModel ->
+        taskModel?.title?.isNotBlank() == true
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,

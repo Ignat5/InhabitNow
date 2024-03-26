@@ -22,7 +22,7 @@ sealed interface RecordContentEntity {
 
         @SerialName("RecordContent.Entry.Number")
         @Serializable
-        data class Number(val number: String) : Entry
+        data class Number(val number: Double) : Entry
 
         @SerialName("RecordContent.Entry.Time")
         @Serializable

@@ -4,6 +4,7 @@ import com.example.inhabitnow.android.presentation.base.state_holder.BaseResultS
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.number.components.PickTaskNumberProgressScreenState
+import com.example.inhabitnow.android.ui.limitNumberToString
 import com.example.inhabitnow.core.type.ProgressLimitType
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +24,7 @@ class PickTaskNumberProgressStateHolder(
         MutableStateFlow<ProgressLimitType>(initProgressContent.limitType)
 
     private val inputLimitNumberState =
-        MutableStateFlow<String>(initProgressContent.limitNumber)
+        MutableStateFlow<String>(initProgressContent.limitNumber.limitNumberToString())
 
     private val inputLimitUnitState =
         MutableStateFlow<String>(initProgressContent.limitUnit)
@@ -87,10 +88,7 @@ class PickTaskNumberProgressStateHolder(
 
     private fun onConfirmClick() {
         if (uiScreenState.value.canSave) {
-            inputLimitNumberState.value.let { inputLimitNumber ->
-                inputLimitNumber.toIntOrNull()?.toString()
-                    ?: inputLimitNumber.toDoubleOrNull()?.toString()
-            }?.let { limitNumber ->
+            inputLimitNumberState.value.toDoubleOrNull()?.let { limitNumber ->
                 setUpResult(
                     PickTaskNumberProgressScreenResult.Confirm(
                         progressContent = TaskContentModel.ProgressContent.Number(

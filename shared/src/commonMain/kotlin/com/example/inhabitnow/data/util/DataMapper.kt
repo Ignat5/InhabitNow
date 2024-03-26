@@ -40,7 +40,7 @@ fun TaskEntity.toTaskTable(json: Json) = TaskTable(
     description = description,
     startEpochDay = startDate.toEpochDay(),
     endEpochDay = endDate.toEpochDay(),
-    priority = priority,
+    priority = priority.toLong(),
     createdAt = createdAt,
     deletedAt = deletedAt
 )
@@ -56,7 +56,7 @@ fun TaskTable.toTaskEntity(json: Json) = TaskEntity(
         if (date != DataConst.distantFutureDate) date
         else null
     },
-    priority = this.priority,
+    priority = this.priority.toInt(),
     createdAt = this.createdAt,
     deletedAt = this.deletedAt
 )

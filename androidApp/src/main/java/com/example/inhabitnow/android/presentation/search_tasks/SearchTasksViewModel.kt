@@ -7,7 +7,7 @@ import com.example.inhabitnow.android.presentation.search_tasks.components.Searc
 import com.example.inhabitnow.android.presentation.search_tasks.components.SearchTasksScreenEvent
 import com.example.inhabitnow.android.presentation.search_tasks.components.SearchTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.search_tasks.components.SearchTasksScreenState
-import com.example.inhabitnow.domain.model.task.TaskWithContentModel
+import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.use_case.read_tasks_by_search_query.ReadTasksBySearchQueryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,7 +31,7 @@ class SearchTasksViewModel @Inject constructor(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val allTasksWithContentState: StateFlow<List<TaskWithContentModel>> =
+    private val allTasksWithContentState: StateFlow<List<TaskModel>> =
         searchQueryState.flatMapLatest { searchQuery ->
             if (searchQuery.isNotBlank()) readTasksBySearchQueryUseCase(searchQuery)
             else flow { emit(emptyList()) }

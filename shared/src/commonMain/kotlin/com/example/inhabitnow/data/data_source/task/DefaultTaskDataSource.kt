@@ -74,7 +74,7 @@ class DefaultTaskDataSource(
 
     override suspend fun updateTaskPriorityById(
         taskId: String,
-        priority: String
+        priority: Long
     ): ResultModel<Unit> = runQuery {
         taskDao.updateTaskPriorityById(
             taskId = taskId,

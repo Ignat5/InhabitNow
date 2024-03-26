@@ -12,7 +12,7 @@ sealed class BaseItemTaskConfig(val key: Key, val contentType: ContentType) {
         val description: String
     ) : BaseItemTaskConfig(Key.Description, ContentType.Basic)
 
-    data class Priority(val priority: String) : BaseItemTaskConfig(Key.Priority, ContentType.Basic)
+    data class Priority(val priority: Int) : BaseItemTaskConfig(Key.Priority, ContentType.Basic)
     data class Frequency(
         val uiFrequencyContent: UITaskContent.Frequency
     ) : BaseItemTaskConfig(Key.Frequency, ContentType.Basic)

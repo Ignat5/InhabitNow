@@ -43,7 +43,7 @@ class DefaultSaveDefaultTaskUseCase(
             description = DomainConst.DEFAULT_TASK_DESCRIPTION,
             startDate = startDate,
             endDate = endDate,
-            priority = DomainConst.DEFAULT_PRIORITY.toString(),
+            priority = DomainConst.DEFAULT_PRIORITY,
             createdAt = nowMillis,
             deletedAt = nowMillis
         )
@@ -54,7 +54,7 @@ class DefaultSaveDefaultTaskUseCase(
                 TaskProgressType.YesNo -> TaskContentEntity.ProgressContent.YesNo
                 TaskProgressType.Number -> TaskContentEntity.ProgressContent.Number(
                     limitType = DomainConst.DEFAULT_LIMIT_TYPE,
-                    limitNumber = DomainConst.DEFAULT_LIMIT_NUMBER.toString(),
+                    limitNumber = DomainConst.DEFAULT_LIMIT_NUMBER,
                     limitUnit = DomainConst.DEFAULT_LIMIT_UNIT
                 )
 

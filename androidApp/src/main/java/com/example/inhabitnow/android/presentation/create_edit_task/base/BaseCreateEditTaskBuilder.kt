@@ -420,7 +420,7 @@ object BaseCreateEditTaskBuilder {
         BasicItemConfig(
             iconResId = R.drawable.ic_priority,
             titleText = "Priority",
-            dataText = item.priority,
+            dataText = "${item.priority}",
             onClick = onClick
         )
     }

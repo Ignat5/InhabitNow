@@ -5,6 +5,6 @@ import com.example.inhabitnow.core.model.ResultModel
 interface UpdateTaskPriorityByIdUseCase {
     suspend operator fun invoke(
         taskId: String,
-        priority: String
+        priority: Int
     ): ResultModel<Unit>
 }

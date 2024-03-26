@@ -13,7 +13,7 @@ object DomainConst {
     const val DEFAULT_PRIORITY = 1
     val DEFAULT_LIMIT_TYPE
         get() = ProgressLimitType.AtLeast
-    const val DEFAULT_LIMIT_NUMBER = 0
+    const val DEFAULT_LIMIT_NUMBER: Double = 0.0
     val DEFAULT_LIMIT_TIME
         get() = LocalTime(0, 0, 0)
     const val DEFAULT_LIMIT_UNIT = ""

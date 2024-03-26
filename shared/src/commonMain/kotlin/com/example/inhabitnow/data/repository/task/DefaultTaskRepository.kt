@@ -166,10 +166,10 @@ class DefaultTaskRepository(
 
     override suspend fun updateTaskPriorityById(
         taskId: String,
-        priority: String
+        priority: Int
     ): ResultModel<Unit> = taskDataSource.updateTaskPriorityById(
         taskId = taskId,
-        priority = priority
+        priority = priority.toLong()
     )
 
     override suspend fun saveTaskById(taskId: String): ResultModel<Unit> =

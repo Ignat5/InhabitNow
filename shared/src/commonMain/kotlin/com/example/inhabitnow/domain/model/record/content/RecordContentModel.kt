@@ -8,7 +8,7 @@ sealed interface RecordContentModel {
         data object Skip : Entry
         data object Fail : Entry
 
-        data class Number(val number: String) : Entry
+        data class Number(val number: Double) : Entry
         data class Time(val time: LocalTime) : Entry
     }
 }

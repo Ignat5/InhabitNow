@@ -32,7 +32,7 @@ interface TaskDataSource {
 
     suspend fun updateTaskPriorityById(
         taskId: String,
-        priority: String
+        priority: Long
     ): ResultModel<Unit>
 
     suspend fun updateTaskDeletedAtById(

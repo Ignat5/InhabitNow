@@ -15,11 +15,11 @@ import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.model.ItemTaskAction
 import com.example.inhabitnow.core.type.TaskType
+import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
-import com.example.inhabitnow.domain.use_case.save_task_by_id.SaveTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import com.example.inhabitnow.domain.use_case.tag.save_tag_cross_by_task_id.SaveTagCrossByTaskIdUseCase
@@ -72,15 +72,15 @@ class EditTaskViewModel @Inject constructor(
     defaultDispatcher = defaultDispatcher
 ) {
 
-    private val allTaskActionItemsState = taskWithContentState.map { taskWithContent ->
-        if (taskWithContent != null) {
+    private val allTaskActionItemsState = taskModelState.map { taskModel ->
+        if (taskModel != null) {
             mutableListOf<ItemTaskAction>().apply {
-                if (taskWithContent.task.type == TaskType.Habit) {
+                if (taskModel is TaskModel.Habit) {
                     add(ItemTaskAction.ViewStatistics)
                     add(ItemTaskAction.RestartHabit)
                 }
                 add(
-                    if (taskWithContent.archiveContent.isArchived) ItemTaskAction.ArchiveUnarchive.Unarchive
+                    if (taskModel.isArchived) ItemTaskAction.ArchiveUnarchive.Unarchive
                     else ItemTaskAction.ArchiveUnarchive.Archive
                 )
                 add(ItemTaskAction.DeleteTask)

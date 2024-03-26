@@ -2,15 +2,14 @@ package com.example.inhabitnow.domain.model.task.content
 
 import com.example.inhabitnow.core.type.ProgressLimitType
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
 sealed interface TaskContentModel {
     sealed interface ProgressContent : TaskContentModel {
-        data object YesNo : ProgressContent
-
         data class Number(
             val limitType: ProgressLimitType,
-            val limitNumber: String,
+            val limitNumber: Double,
             val limitUnit: String
         ) : ProgressContent
 
@@ -21,10 +20,16 @@ sealed interface TaskContentModel {
     }
 
     sealed interface FrequencyContent : TaskContentModel {
-        data object OneDay : FrequencyContent
         data object EveryDay : FrequencyContent
         data class DaysOfWeek(val daysOfWeek: Set<DayOfWeek>) : FrequencyContent
     }
 
-    data class ArchiveContent(val isArchived: Boolean) : TaskContentModel
+    sealed interface DateContent : TaskContentModel {
+        data class Day(val date: LocalDate) : DateContent
+        data class Period(
+            val startDate: LocalDate,
+            val endDate: LocalDate?
+        ) : DateContent
+
+    }
 }

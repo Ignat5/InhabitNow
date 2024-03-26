@@ -24,7 +24,7 @@ interface TaskRepository {
     ): ResultModel<Unit>
     suspend fun updateTaskPriorityById(
         taskId: String,
-        priority: String
+        priority: Int
     ): ResultModel<Unit>
     suspend fun updateTaskStartDateById(
         taskId: String,
