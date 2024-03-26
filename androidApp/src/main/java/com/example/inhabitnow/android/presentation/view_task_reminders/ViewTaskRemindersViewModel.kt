@@ -14,8 +14,6 @@ import com.example.inhabitnow.android.presentation.view_task_reminders.config.cr
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.create.components.CreateReminderScreenResult
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.EditReminderStateHolder
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.components.EditReminderScreenResult
-import com.example.inhabitnow.android.ui.toScheduleContent
-import com.example.inhabitnow.android.ui.toUIScheduleContent
 import com.example.inhabitnow.domain.use_case.reminder.delete_reminder_by_id.DeleteReminderByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.SaveReminderUseCase
@@ -100,7 +98,7 @@ class ViewTaskRemindersViewModel @Inject constructor(
                     reminderModel = reminderModel.copy(
                         type = result.reminderType,
                         time = result.reminderTime,
-                        schedule = result.reminderSchedule.toScheduleContent()
+                        schedule = result.reminderSchedule
                     )
                 )
             }
@@ -137,7 +135,7 @@ class ViewTaskRemindersViewModel @Inject constructor(
                 taskId = taskId,
                 reminderType = result.type,
                 reminderTime = result.time,
-                reminderSchedule = result.uiScheduleContent.toScheduleContent()
+                reminderSchedule = result.schedule
             )
         }
     }
@@ -150,7 +148,7 @@ class ViewTaskRemindersViewModel @Inject constructor(
                         reminderId = reminderModel.id,
                         reminderTime = reminderModel.time,
                         reminderType = reminderModel.type,
-                        reminderSchedule = reminderModel.schedule.toUIScheduleContent(),
+                        reminderSchedule = reminderModel.schedule,
                         holderScope = provideChildScope()
                     )
                 )

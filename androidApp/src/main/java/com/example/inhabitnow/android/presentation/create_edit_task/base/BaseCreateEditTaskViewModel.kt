@@ -27,10 +27,6 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.components.PickTaskTagsScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
-import com.example.inhabitnow.android.presentation.model.UITaskContent
-import com.example.inhabitnow.android.ui.toFrequencyContent
-import com.example.inhabitnow.android.ui.toUIFrequencyContent
-import com.example.inhabitnow.android.ui.toUIProgressContent
 import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
@@ -261,17 +257,16 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onConfigTaskFrequencyClick() {
-        (taskModelState.value as? TaskModel.RecurringActivity)?.frequencyContent?.toUIFrequencyContent()
-            ?.let { fc ->
-                setUpBaseConfigState(
-                    BaseCreateEditTaskScreenConfig.PickTaskFrequency(
-                        stateHolder = PickTaskFrequencyStateHolder(
-                            initFrequency = fc,
-                            holderScope = provideChildScope()
-                        )
+        (taskModelState.value as? TaskModel.RecurringActivity)?.frequencyContent?.let { fc ->
+            setUpBaseConfigState(
+                BaseCreateEditTaskScreenConfig.PickTaskFrequency(
+                    stateHolder = PickTaskFrequencyStateHolder(
+                        initFrequency = fc,
+                        holderScope = provideChildScope()
                     )
                 )
-            }
+            )
+        }
     }
 
     private fun onConfigTaskTimeProgressClick() {
@@ -462,7 +457,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
         viewModelScope.launch {
             updateTaskFrequencyByIdUseCase(
                 taskId = taskId,
-                content = result.uiFrequencyContent.toFrequencyContent()
+                content = result.frequencyContent
             )
         }
     }
@@ -557,19 +552,13 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
                     when (taskModel) {
                         is TaskModel.Habit.HabitContinuous.HabitNumber -> {
                             add(
-                                BaseItemTaskConfig.Progress.Number(
-                                    taskModel.progressContent.toUIProgressContent()
-                                            as UITaskContent.Progress.Number
-                                )
+                                BaseItemTaskConfig.Progress.Number(taskModel.progressContent)
                             )
                         }
 
                         is TaskModel.Habit.HabitContinuous.HabitTime -> {
                             add(
-                                BaseItemTaskConfig.Progress.Time(
-                                    taskModel.progressContent.toUIProgressContent()
-                                            as UITaskContent.Progress.Time
-                                )
+                                BaseItemTaskConfig.Progress.Time(taskModel.progressContent)
                             )
                         }
 
@@ -577,9 +566,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
                     }
                     if (taskModel is TaskModel.RecurringActivity) {
                         add(
-                            BaseItemTaskConfig.Frequency(
-                                taskModel.frequencyContent.toUIFrequencyContent()
-                            )
+                            BaseItemTaskConfig.Frequency(taskModel.frequencyContent)
                         )
                     }
 

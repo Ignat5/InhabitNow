@@ -9,11 +9,8 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.HorizontalDivider
@@ -34,7 +31,6 @@ import com.example.inhabitnow.android.presentation.common.pick_date.PickDateDial
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenEvent
-import com.example.inhabitnow.android.presentation.create_edit_task.common.config.confirm_leave.ConfirmLeaveDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.model.BaseItemTaskConfig
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_description.PickTaskDescriptionDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.PickTaskFrequencyDialog
@@ -43,11 +39,9 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.PickTaskTimeProgressDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.PickTaskTagsDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleDialog
-import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenConfig
-import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenEvent
-import com.example.inhabitnow.android.presentation.model.UITaskContent
 import com.example.inhabitnow.android.ui.toDayMonthYear
 import com.example.inhabitnow.android.ui.toDisplay
+import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 
 object BaseCreateEditTaskBuilder {
 
@@ -303,8 +297,8 @@ object BaseCreateEditTaskBuilder {
     ) {
         val dataText = remember(item) {
             when (item) {
-                is BaseItemTaskConfig.Progress.Number -> item.uiProgressContent.toDisplay()
-                is BaseItemTaskConfig.Progress.Time -> item.uiProgressContent.toDisplay()
+                is BaseItemTaskConfig.Progress.Number -> item.progressContent.toDisplay()
+                is BaseItemTaskConfig.Progress.Time -> item.progressContent.toDisplay()
             }
         }
         BasicItemConfig(
@@ -321,9 +315,9 @@ object BaseCreateEditTaskBuilder {
         onClick: () -> Unit
     ) {
         val dataText = remember(item) {
-            when (val fc = item.uiFrequencyContent) {
-                is UITaskContent.Frequency.EveryDay -> fc.toDisplay()
-                is UITaskContent.Frequency.DaysOfWeek -> fc.toDisplay()
+            when (val fc = item.frequencyContent) {
+                is TaskContentModel.FrequencyContent.EveryDay -> fc.toDisplay()
+                is TaskContentModel.FrequencyContent.DaysOfWeek -> fc.toDisplay()
             }
         }
         BasicItemConfig(

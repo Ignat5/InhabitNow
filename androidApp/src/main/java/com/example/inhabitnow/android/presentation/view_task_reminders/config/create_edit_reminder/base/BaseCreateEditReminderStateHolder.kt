@@ -3,10 +3,10 @@ package com.example.inhabitnow.android.presentation.view_task_reminders.config.c
 import com.example.inhabitnow.android.presentation.base.components.event.ScreenEvent
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
 import com.example.inhabitnow.android.presentation.base.state_holder.BaseResultStateHolder
-import com.example.inhabitnow.android.presentation.model.UIReminderContent
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.components.BaseCreateEditReminderScreenEvent
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.components.BaseCreateEditReminderScreenState
 import com.example.inhabitnow.core.type.ReminderType
+import com.example.inhabitnow.domain.model.reminder.content.ReminderContentModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,7 +19,7 @@ import kotlinx.datetime.LocalTime
 abstract class BaseCreateEditReminderStateHolder<SE : ScreenEvent, SS : BaseCreateEditReminderScreenState, SR : ScreenResult>(
     initTime: LocalTime? = null,
     initType: ReminderType? = null,
-    initSchedule: UIReminderContent.Schedule? = null,
+    initSchedule: ReminderContentModel.ScheduleContent? = null,
     final override val holderScope: CoroutineScope
 ) : BaseResultStateHolder<SE, SS, SR>() {
 
@@ -33,8 +33,8 @@ abstract class BaseCreateEditReminderStateHolder<SE : ScreenEvent, SS : BaseCrea
 
     protected val canConfirmState = inputScheduleState.map { schedule ->
         when (schedule) {
-            is UIReminderContent.Schedule.EveryDay -> true
-            is UIReminderContent.Schedule.DaysOfWeek -> schedule.daysOfWeek.isNotEmpty()
+            is ReminderContentModel.ScheduleContent.EveryDay -> true
+            is ReminderContentModel.ScheduleContent.DaysOfWeek -> schedule.daysOfWeek.isNotEmpty()
         }
     }.stateIn(
         holderScope,
@@ -84,10 +84,11 @@ abstract class BaseCreateEditReminderStateHolder<SE : ScreenEvent, SS : BaseCrea
         if (inputScheduleState.value.type != clickedType) {
             inputScheduleState.update {
                 when (clickedType) {
-                    UIReminderContent.Schedule.Type.EveryDay -> UIReminderContent.Schedule.EveryDay
-                    UIReminderContent.Schedule.Type.DaysOfWeek -> UIReminderContent.Schedule.DaysOfWeek(
-                        emptySet()
-                    )
+                    ReminderContentModel.ScheduleContent.Type.EveryDay ->
+                        ReminderContentModel.ScheduleContent.EveryDay
+
+                    ReminderContentModel.ScheduleContent.Type.DaysOfWeek ->
+                        ReminderContentModel.ScheduleContent.DaysOfWeek(emptySet())
                 }
             }
         }
@@ -95,13 +96,13 @@ abstract class BaseCreateEditReminderStateHolder<SE : ScreenEvent, SS : BaseCrea
 
     private fun onDayOfWeekClick(event: BaseCreateEditReminderScreenEvent.OnDayOfWeekClick) {
         inputScheduleState.update { oldSchedule ->
-            (oldSchedule as? UIReminderContent.Schedule.DaysOfWeek)?.daysOfWeek?.let { oldSet ->
+            (oldSchedule as? ReminderContentModel.ScheduleContent.DaysOfWeek)?.daysOfWeek?.let { oldSet ->
                 val clickedDayOfWeek = event.dayOfWeek
                 val newSet = mutableSetOf<DayOfWeek>()
                 newSet.addAll(oldSet)
                 if (newSet.contains(clickedDayOfWeek)) newSet.remove(clickedDayOfWeek)
                 else newSet.add(clickedDayOfWeek)
-                UIReminderContent.Schedule.DaysOfWeek(newSet)
+                ReminderContentModel.ScheduleContent.DaysOfWeek(newSet)
             } ?: oldSchedule
         }
     }
@@ -122,7 +123,7 @@ abstract class BaseCreateEditReminderStateHolder<SE : ScreenEvent, SS : BaseCrea
     private val defaultType: ReminderType
         get() = ReminderType.NoReminder
 
-    private val defaultSchedule: UIReminderContent.Schedule
-        get() = UIReminderContent.Schedule.EveryDay
+    private val defaultSchedule: ReminderContentModel.ScheduleContent
+        get() = ReminderContentModel.ScheduleContent.EveryDay
 
 }

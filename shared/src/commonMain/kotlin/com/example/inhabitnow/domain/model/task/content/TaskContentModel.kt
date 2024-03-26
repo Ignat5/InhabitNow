@@ -19,9 +19,11 @@ sealed interface TaskContentModel {
         ) : ProgressContent
     }
 
-    sealed interface FrequencyContent : TaskContentModel {
-        data object EveryDay : FrequencyContent
-        data class DaysOfWeek(val daysOfWeek: Set<DayOfWeek>) : FrequencyContent
+    sealed class FrequencyContent(val type: Type) : TaskContentModel {
+        enum class Type { EveryDay, DaysOfWeek }
+
+        data object EveryDay : FrequencyContent(Type.EveryDay)
+        data class DaysOfWeek(val daysOfWeek: Set<DayOfWeek>) : FrequencyContent(Type.DaysOfWeek)
     }
 
     sealed interface DateContent : TaskContentModel {
