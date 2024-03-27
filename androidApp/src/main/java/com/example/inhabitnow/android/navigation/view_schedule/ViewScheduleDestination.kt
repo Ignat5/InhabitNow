@@ -8,14 +8,20 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.example.inhabitnow.android.navigation.main.MainNavDest
+import com.example.inhabitnow.android.presentation.view_schedule.ViewScheduleScreen
 
 fun NavGraphBuilder.viewScheduleScreen() {
     composable(route = MainNavDest.ViewScheduleDestination.route) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text(
-                text = "ViewSchedule",
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
+        ViewScheduleScreen(
+            onNavigate = {
+                /* TODO */
+            }
+        )
+//        Box(modifier = Modifier.fillMaxSize()) {
+//            Text(
+//                text = "ViewSchedule",
+//                modifier = Modifier.align(Alignment.Center)
+//            )
+//        }
     }
 }

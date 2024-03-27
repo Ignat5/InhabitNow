@@ -29,7 +29,9 @@ class DefaultReadFullTasksByDateUseCase(
                         .map { fullTask ->
                             async {
                                 fullTask.copy(
-                                    allReminders = fullTask.allReminders.filterReminders(targetDate)
+                                    allReminders = fullTask.allReminders
+                                        .filterReminders(targetDate)
+                                        .sortedBy { it.time }
                                 )
                             }
                         }.awaitAll()

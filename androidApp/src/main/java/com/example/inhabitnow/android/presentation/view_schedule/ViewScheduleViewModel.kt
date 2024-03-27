@@ -49,28 +49,29 @@ class ViewScheduleViewModel @Inject constructor(
     private val todayDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     private val currentDateState = MutableStateFlow<LocalDate>(todayDate)
 
-    private val allTasksState: StateFlow<List<FullTaskWithRecordModel>?> = currentDateState.flatMapLatest { date ->
-        combine(
-            readFullTasksByDateUseCase(date),
-            readRecordsByDateUseCase(date)
-        ) { allFullTasks, allRecords ->
-            if (allFullTasks.isNotEmpty()) {
-                withContext(defaultDispatcher) {
-                    allFullTasks.map { fullTaskModel ->
-                        async {
-                            val recordEntry =
-                                allRecords.find { it.taskId == fullTaskModel.taskModel.id }?.entry
-                            fullTaskModel.toFullTaskModelWithRecord(recordEntry)
-                        }
-                    }.awaitAll().sortTasks()
-                }
-            } else emptyList()
-        }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        null
-    )
+    private val allTasksState: StateFlow<List<FullTaskWithRecordModel>> =
+        currentDateState.flatMapLatest { date ->
+            combine(
+                readFullTasksByDateUseCase(date),
+                readRecordsByDateUseCase(date)
+            ) { allFullTasks, allRecords ->
+                if (allFullTasks.isNotEmpty()) {
+                    withContext(defaultDispatcher) {
+                        allFullTasks.map { fullTaskModel ->
+                            async {
+                                val recordEntry =
+                                    allRecords.find { it.taskId == fullTaskModel.taskModel.id }?.entry
+                                fullTaskModel.toFullTaskModelWithRecord(recordEntry)
+                            }
+                        }.awaitAll().sortTasks()
+                    }
+                } else emptyList()
+            }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            emptyList()
+        )
 
     private val isLockedState = currentDateState.map { currentDate ->
         currentDate > todayDate
@@ -80,11 +81,25 @@ class ViewScheduleViewModel @Inject constructor(
         false
     )
 
-    override val uiScreenState: StateFlow<ViewScheduleScreenState>
-        get() = TODO("Not yet implemented")
+    override val uiScreenState: StateFlow<ViewScheduleScreenState> =
+        combine(currentDateState, allTasksState, isLockedState) { currentDate, allTasks, isLocked ->
+            ViewScheduleScreenState(
+                currentDate = currentDate,
+                allTasksWithRecord = allTasks,
+                isLocked = isLocked
+            )
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            ViewScheduleScreenState(
+                currentDate = currentDateState.value,
+                allTasksWithRecord = allTasksState.value,
+                isLocked = isLockedState.value
+            )
+        )
 
     override fun onEvent(event: ViewScheduleScreenEvent) {
-        TODO("Not yet implemented")
+
     }
 
     private fun FullTaskModel.toFullTaskModelWithRecord(
