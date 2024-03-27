@@ -1,20 +1,31 @@
 package com.example.inhabitnow.android.presentation.view_schedule
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -27,17 +38,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenState
 import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskWithRecordModel
+import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskWithRecordModel
 import com.example.inhabitnow.android.ui.toDisplay
@@ -48,6 +63,8 @@ import com.example.inhabitnow.domain.model.record.content.RecordContentModel
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
 import com.example.inhabitnow.domain.model.tag.TagModel
 import com.example.inhabitnow.domain.model.task.TaskModel
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 
 private const val PROGRESS_FULL = 1f
 private const val PROGRESS_EMPTY = 0f
@@ -75,6 +92,19 @@ private fun ViewScheduleScreenStateless(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            WeekRow(
+                allDateItems = state.allDaysOfWeek,
+                onDateClick = {
+                    onEvent(ViewScheduleScreenEvent.OnDateClick(it))
+                },
+                onPrevClick = {
+                    onEvent(ViewScheduleScreenEvent.OnPrevWeekClick)
+                },
+                onNextClick = {
+                    onEvent(ViewScheduleScreenEvent.OnNextWeekClick)
+                }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(
                     items = state.allTasksWithRecord,
@@ -82,6 +112,7 @@ private fun ViewScheduleScreenStateless(
                 ) { item ->
                     ItemTaskWithRecord(
                         item = item,
+                        isLocked = state.isLocked,
                         onClick = {},
                         onLongClick = {}
                     )
@@ -95,6 +126,7 @@ private fun ViewScheduleScreenStateless(
 @Composable
 private fun ItemTaskWithRecord(
     item: FullTaskWithRecordModel,
+    isLocked: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
@@ -105,6 +137,7 @@ private fun ItemTaskWithRecord(
                 onClick = onClick,
                 onLongClick = onLongClick
             )
+            .alpha(if (isLocked) 0.7f else 1f)
     ) {
         Row(
             modifier = Modifier
@@ -132,7 +165,6 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
         is TaskScheduleStatusType.Done -> PROGRESS_FULL
         is TaskScheduleStatusType.Failed -> PROGRESS_FULL
         is TaskScheduleStatusType.Skipped -> PROGRESS_FULL
-        is TaskScheduleStatusType.Locked -> PROGRESS_EMPTY
 
         is TaskScheduleStatusType.InProgress -> {
             when (taskWithRecord) {
@@ -180,16 +212,14 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
         else -> MaterialTheme.colorScheme.onPrimaryContainer
     }
     val progressState by animateFloatAsState(targetValue = progress, label = "")
-    if (taskWithRecord.statusType != TaskScheduleStatusType.Locked) {
-        CircularProgressIndicator(
-            progress = {
-                progressState
-            },
-            modifier = Modifier.size(32.dp),
-            color = progressColor,
-            trackColor = containerColor
-        )
-    }
+    CircularProgressIndicator(
+        progress = {
+            progressState
+        },
+        modifier = Modifier.size(32.dp),
+        color = progressColor,
+        trackColor = containerColor
+    )
 }
 
 @Composable
@@ -232,9 +262,9 @@ private fun DetailRow(fullTaskWithRecord: FullTaskWithRecordModel) {
         if (fullTaskWithRecord.allReminders.isNotEmpty()) {
             ItemTaskReminders(fullTaskWithRecord.allReminders)
         }
-        if (fullTaskWithRecord.allTags.isNotEmpty()) {
-            ItemTaskTags(fullTaskWithRecord.allTags)
-        }
+//        if (fullTaskWithRecord.allTags.isNotEmpty()) {
+//            ItemTaskTags(fullTaskWithRecord.allTags)
+//        }
     }
 }
 
@@ -389,6 +419,124 @@ private fun getProgressTextOrNull(taskWithRecord: TaskWithRecordModel): String? 
 //
 //        else -> null
 //    }
+}
+
+@Composable
+private fun WeekRow(
+    allDateItems: List<ItemDayOfWeek>,
+    onDateClick: (LocalDate) -> Unit,
+    onPrevClick: () -> Unit,
+    onNextClick: () -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        NextPrevButton(
+            iconId = R.drawable.ic_previous,
+            onClick = onPrevClick
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(DayOfWeek.entries.size),
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp)
+        ) {
+            items(
+                items = allDateItems,
+                key = { it.date.toEpochDays() }
+            ) { item ->
+                ItemWeekDay(
+                    item = item,
+                    onClick = {
+                        onDateClick(item.date)
+                    }
+                )
+            }
+        }
+        NextPrevButton(
+            iconId = R.drawable.ic_next,
+            onClick = onNextClick
+        )
+    }
+}
+
+@Composable
+private fun ItemWeekDay(
+    item: ItemDayOfWeek,
+    onClick: () -> Unit
+) {
+    val dayOfWeekText = remember(item) {
+        item.date.dayOfWeek.toDisplay().take(3)
+    }
+    val dayOfMonthText = remember(item) {
+        "${item.date.dayOfMonth}"
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 4.dp)
+            .clickable { onClick() }
+            .then(
+                when (item) {
+                    is ItemDayOfWeek.Current -> {
+                        Modifier
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.shapes.small
+                            )
+                    }
+
+                    is ItemDayOfWeek.Today -> {
+                        Modifier
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.shapes.small
+                            )
+                    }
+
+                    is ItemDayOfWeek.Day -> Modifier
+                }
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(4.dp)
+        ) {
+            Text(
+                text = dayOfWeekText,
+                style = MaterialTheme.typography.labelSmall,
+                color = when (item) {
+                    is ItemDayOfWeek.Current -> MaterialTheme.colorScheme.onPrimary
+                    is ItemDayOfWeek.Today -> MaterialTheme.colorScheme.primary
+                    is ItemDayOfWeek.Day -> MaterialTheme.colorScheme.onSurface
+                }
+            )
+            Text(
+                text = dayOfMonthText,
+                style = MaterialTheme.typography.titleSmall,
+                color = when (item) {
+                    is ItemDayOfWeek.Current -> MaterialTheme.colorScheme.onPrimary
+                    is ItemDayOfWeek.Today -> MaterialTheme.colorScheme.primary
+                    is ItemDayOfWeek.Day -> MaterialTheme.colorScheme.onSurface
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun NextPrevButton(
+    @DrawableRes iconId: Int,
+    onClick: () -> Unit
+) {
+    IconButton(onClick = onClick) {
+        Icon(
+            painter = painterResource(id = iconId),
+            tint = MaterialTheme.colorScheme.onSurface,
+            contentDescription = null
+        )
+    }
 }
 
 @Composable

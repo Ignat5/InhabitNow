@@ -9,6 +9,7 @@ import com.example.inhabitnow.android.presentation.view_schedule.components.View
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenState
 import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskWithRecordModel
+import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskWithRecordModel
 import com.example.inhabitnow.core.type.ProgressLimitType
@@ -29,11 +30,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 
@@ -45,9 +51,25 @@ class ViewScheduleViewModel @Inject constructor(
     private val readRecordsByDateUseCase: ReadRecordsByDateUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<ViewScheduleScreenEvent, ViewScheduleScreenState, ViewScheduleScreenNavigation, ViewScheduleScreenConfig>() {
+    private val todayDateState = MutableStateFlow(nowDate)
+    private val currentDateState = MutableStateFlow<LocalDate>(todayDateState.value)
+    private val currentStartOfWeekDateState = MutableStateFlow(todayDateState.value.firstDayOfWeek)
 
-    private val todayDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    private val currentDateState = MutableStateFlow<LocalDate>(todayDate)
+    private val allDaysOfWeekState = combine(
+        currentDateState,
+        currentStartOfWeekDateState,
+        todayDateState,
+    ) { currentDate, currentStartOfWeekDate, todayDate ->
+        provideDateItems(
+            targetDate = currentStartOfWeekDate,
+            currentDate = currentDate,
+            todayDate = todayDate
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        emptyList()
+    )
 
     private val allTasksState: StateFlow<List<FullTaskWithRecordModel>> =
         currentDateState.flatMapLatest { date ->
@@ -73,19 +95,26 @@ class ViewScheduleViewModel @Inject constructor(
             emptyList()
         )
 
-    private val isLockedState = currentDateState.map { currentDate ->
-        currentDate > todayDate
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        false
-    )
+    private val isLockedState =
+        combine(currentDateState, todayDateState) { currentDate, todayDate ->
+            currentDate > todayDate
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            false
+        )
 
     override val uiScreenState: StateFlow<ViewScheduleScreenState> =
-        combine(currentDateState, allTasksState, isLockedState) { currentDate, allTasks, isLocked ->
+        combine(
+            allTasksState,
+            currentDateState,
+            allDaysOfWeekState,
+            isLockedState
+        ) { allTasks, currentDate, allDaysOfWeek, isLocked ->
             ViewScheduleScreenState(
-                currentDate = currentDate,
                 allTasksWithRecord = allTasks,
+                currentDate = currentDate,
+                allDaysOfWeek = allDaysOfWeek,
                 isLocked = isLocked
             )
         }.stateIn(
@@ -94,12 +123,38 @@ class ViewScheduleViewModel @Inject constructor(
             ViewScheduleScreenState(
                 currentDate = currentDateState.value,
                 allTasksWithRecord = allTasksState.value,
+                allDaysOfWeek = allDaysOfWeekState.value,
                 isLocked = isLockedState.value
             )
         )
 
     override fun onEvent(event: ViewScheduleScreenEvent) {
+        when (event) {
+            is ViewScheduleScreenEvent.OnDateClick ->
+                onDateClick(event)
 
+            is ViewScheduleScreenEvent.OnPrevWeekClick ->
+                onPrevWeekClick()
+
+            is ViewScheduleScreenEvent.OnNextWeekClick ->
+                onNextWeekClick()
+        }
+    }
+
+    private fun onDateClick(event: ViewScheduleScreenEvent.OnDateClick) {
+        currentDateState.update { event.date }
+    }
+
+    private fun onPrevWeekClick() {
+        currentStartOfWeekDateState.update { oldDate ->
+            oldDate.minus(1, DateTimeUnit.WEEK)
+        }
+    }
+
+    private fun onNextWeekClick() {
+        currentStartOfWeekDateState.update { oldDate ->
+            oldDate.plus(1, DateTimeUnit.WEEK)
+        }
     }
 
     private fun FullTaskModel.toFullTaskModelWithRecord(
@@ -238,6 +293,28 @@ class ViewScheduleViewModel @Inject constructor(
 
         )
     }
+
+    private fun provideDateItems(
+        targetDate: LocalDate,
+        currentDate: LocalDate,
+        todayDate: LocalDate
+    ): List<ItemDayOfWeek> = targetDate.firstDayOfWeek.let { startOfWeekDate ->
+        IntRange(0, DayOfWeek.entries.size - 1).map { offset ->
+            startOfWeekDate.plus(offset, DateTimeUnit.DAY).let { nextDate ->
+                when (nextDate) {
+                    currentDate -> ItemDayOfWeek.Current(nextDate)
+                    todayDate -> ItemDayOfWeek.Today(nextDate)
+                    else -> ItemDayOfWeek.Day(nextDate)
+                }
+            }
+        }
+    }
+
+    private val LocalDate.firstDayOfWeek
+        get() = this.let { date -> date.minus(date.dayOfWeek.ordinal, DateTimeUnit.DAY) }
+
+    private val nowDate: LocalDate
+        get() = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
     companion object {
         private const val FINISHED_WEIGHT = 1
