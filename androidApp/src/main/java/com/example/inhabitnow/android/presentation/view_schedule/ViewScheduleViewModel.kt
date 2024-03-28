@@ -7,6 +7,7 @@ import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStateHolder
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.common.pick_date.model.PickDateRequestModel
+import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenConfig
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
@@ -74,7 +75,7 @@ class ViewScheduleViewModel @Inject constructor(
         emptyList()
     )
 
-    private val allTasksState: StateFlow<List<FullTaskWithRecordModel>> =
+    private val allTasksState: StateFlow<UIResultModel<List<FullTaskWithRecordModel>>> =
         currentDateState.flatMapLatest { date ->
             combine(
                 readFullTasksByDateUseCase(date),
@@ -82,20 +83,22 @@ class ViewScheduleViewModel @Inject constructor(
             ) { allFullTasks, allRecords ->
                 if (allFullTasks.isNotEmpty()) {
                     withContext(defaultDispatcher) {
-                        allFullTasks.map { fullTaskModel ->
-                            async {
-                                val recordEntry =
-                                    allRecords.find { it.taskId == fullTaskModel.taskModel.id }?.entry
-                                fullTaskModel.toFullTaskModelWithRecord(recordEntry)
-                            }
-                        }.awaitAll().sortTasks()
+                        UIResultModel.Data(
+                            allFullTasks.map { fullTaskModel ->
+                                async {
+                                    val recordEntry =
+                                        allRecords.find { it.taskId == fullTaskModel.taskModel.id }?.entry
+                                    fullTaskModel.toFullTaskModelWithRecord(recordEntry)
+                                }
+                            }.awaitAll().sortTasks()
+                        )
                     }
-                } else emptyList()
+                } else UIResultModel.NoData
             }
         }.stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
-            emptyList()
+            UIResultModel.Loading(emptyList())
         )
 
     private val isLockedState =
@@ -176,17 +179,19 @@ class ViewScheduleViewModel @Inject constructor(
 
     private fun onPickDateClick() {
         currentDateState.value.let { currentDate ->
-            setUpConfigState(ViewScheduleScreenConfig.PickDate(
-                stateHolder = PickDateStateHolder(
-                    requestModel = PickDateRequestModel(
-                        currentDate = currentDate,
-                        minDate = currentDate.minus(1, DateTimeUnit.YEAR),
-                        maxDate = currentDate.plus(1, DateTimeUnit.YEAR)
-                    ),
-                    holderScope = provideChildScope(),
-                    defaultDispatcher = defaultDispatcher
+            setUpConfigState(
+                ViewScheduleScreenConfig.PickDate(
+                    stateHolder = PickDateStateHolder(
+                        requestModel = PickDateRequestModel(
+                            currentDate = currentDate,
+                            minDate = currentDate.minus(1, DateTimeUnit.YEAR),
+                            maxDate = currentDate.plus(1, DateTimeUnit.YEAR)
+                        ),
+                        holderScope = provideChildScope(),
+                        defaultDispatcher = defaultDispatcher
+                    )
                 )
-            ))
+            )
         }
     }
 

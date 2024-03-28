@@ -26,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -42,12 +43,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateDialog
+import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenConfig
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
@@ -115,6 +118,17 @@ private fun ViewScheduleScreenStateless(
                 .fillMaxSize()
                 .padding(it)
         ) {
+            if (state.allTasksWithRecord is UIResultModel.NoData) {
+                Text(
+                    text = "No activities scheduled for the day",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center),
+                    textAlign = TextAlign.Center
+                )
+            }
             Column(modifier = Modifier.fillMaxSize()) {
                 WeekRow(
                     allDateItems = state.allDaysOfWeek,
@@ -130,17 +144,22 @@ private fun ViewScheduleScreenStateless(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(
-                        items = state.allTasksWithRecord,
-                        key = { it.taskWithRecordModel.task.id }
-                    ) { item ->
-                        ItemTaskWithRecord(
-                            item = item,
-                            isLocked = state.isLocked,
-                            onClick = {},
-                            onLongClick = {},
-                            modifier = Modifier.animateItemPlacement()
-                        )
+                    when (state.allTasksWithRecord) {
+                        is UIResultModel.Loading, is UIResultModel.Data -> {
+                            items(
+                                items = state.allTasksWithRecord.data ?: emptyList(),
+                                key = { it.taskWithRecordModel.task.id }
+                            ) { item ->
+                                ItemTaskWithRecord(
+                                    item = item,
+                                    isLocked = state.isLocked,
+                                    onClick = {},
+                                    onLongClick = {},
+                                    modifier = Modifier.animateItemPlacement()
+                                )
+                            }
+                        }
+                        else -> Unit
                     }
                 }
             }
