@@ -3,6 +3,11 @@ selectRecordsByDate:
 SELECT * FROM RecordTable tRecord
 WHERE tRecord.epochDay = :targetEpochDay;
 
+selectRecordByTaskIdAndDate:
+SELECT * FROM RecordTable tRecord
+WHERE tRecord.taskId = :taskId AND
+tRecord.epochDay = :targetEpochDay;
+
 insertRecord:
 INSERT OR REPLACE INTO RecordTable
 VALUES ?;

@@ -13,6 +13,7 @@ import com.example.inhabitnow.android.presentation.view_schedule.components.View
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenState
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.EnterTaskNumberRecordStateHolder
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.components.EnterTaskNumberRecordScreenResult
 import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskWithRecordModel
 import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
@@ -23,6 +24,7 @@ import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
 import com.example.inhabitnow.domain.use_case.read_full_tasks_by_date.ReadFullTasksByDateUseCase
 import com.example.inhabitnow.domain.use_case.record.read_records_by_date.ReadRecordsByDateUseCase
+import com.example.inhabitnow.domain.use_case.record.save_record.SaveRecordUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,6 +38,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -54,6 +57,7 @@ class ViewScheduleViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val readFullTasksByDateUseCase: ReadFullTasksByDateUseCase,
     private val readRecordsByDateUseCase: ReadRecordsByDateUseCase,
+    private val saveRecordUseCase: SaveRecordUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<ViewScheduleScreenEvent, ViewScheduleScreenState, ViewScheduleScreenNavigation, ViewScheduleScreenConfig>() {
     private val todayDateState = MutableStateFlow(nowDate)
@@ -175,7 +179,22 @@ class ViewScheduleViewModel @Inject constructor(
 
     private fun onEnterTaskNumberRecordResultEvent(event: ViewScheduleScreenEvent.ResultEvent.EnterTaskNumberRecord) {
         onIdleToAction {
-            // TODO()
+            when (val result = event.result) {
+                is EnterTaskNumberRecordScreenResult.Confirm ->
+                    onConfirmEnterTaskNumberRecord(result)
+
+                is EnterTaskNumberRecordScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmEnterTaskNumberRecord(result: EnterTaskNumberRecordScreenResult.Confirm) {
+        viewModelScope.launch {
+            saveRecordUseCase(
+                taskId = result.taskId,
+                targetDate = result.date,
+                entry = RecordContentModel.Entry.Number(result.number)
+            )
         }
     }
 
@@ -209,11 +228,13 @@ class ViewScheduleViewModel @Inject constructor(
                     is TaskWithRecordModel.Habit.HabitContinuous.HabitNumber -> {
                         onHabitNumberClick(taskWithRecordModel)
                     }
+
                     is TaskWithRecordModel.Habit.HabitContinuous.HabitTime -> {
 
                     }
                 }
             }
+
             is TaskWithRecordModel.Habit.HabitYesNo -> {
 
             }

@@ -228,3 +228,18 @@ private fun RecordContentEntity.Entry.toRecordEntryModel(): RecordContentModel.E
         is RecordContentEntity.Entry.Fail -> RecordContentModel.Entry.Fail
         is RecordContentEntity.Entry.Skip -> RecordContentModel.Entry.Skip
     }
+
+internal fun RecordContentModel.Entry.toRecordContentEntity(): RecordContentEntity.Entry =
+    when (this) {
+        is RecordContentModel.Entry.Done -> RecordContentEntity.Entry.Done
+        is RecordContentModel.Entry.Number -> RecordContentEntity.Entry.Number(
+            number = this.number
+        )
+
+        is RecordContentModel.Entry.Time -> RecordContentEntity.Entry.Time(
+            time = this.time
+        )
+
+        is RecordContentModel.Entry.Fail -> RecordContentEntity.Entry.Fail
+        is RecordContentModel.Entry.Skip -> RecordContentEntity.Entry.Skip
+    }

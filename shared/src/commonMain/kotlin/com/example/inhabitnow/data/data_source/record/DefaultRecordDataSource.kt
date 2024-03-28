@@ -18,6 +18,16 @@ class DefaultRecordDataSource(
         recordDao.selectRecordsByDate(targetEpochDay)
     }
 
+    override fun readRecordByTaskIdAndDate(
+        taskId: String,
+        targetEpochDay: Long
+    ): Flow<RecordTable?> = readOneOrNullQuery {
+        recordDao.selectRecordByTaskIdAndDate(
+            taskId = taskId,
+            targetEpochDay = targetEpochDay
+        )
+    }
+
     override suspend fun insertRecord(recordTable: RecordTable): ResultModel<Unit> = runQuery {
         recordDao.insertRecord(recordTable)
     }

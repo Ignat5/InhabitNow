@@ -4,6 +4,8 @@ import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifi
 import com.example.inhabitnow.data.repository.record.RecordRepository
 import com.example.inhabitnow.domain.use_case.record.read_records_by_date.DefaultReadRecordsByDateUseCase
 import com.example.inhabitnow.domain.use_case.record.read_records_by_date.ReadRecordsByDateUseCase
+import com.example.inhabitnow.domain.use_case.record.save_record.DefaultSaveRecordUseCase
+import com.example.inhabitnow.domain.use_case.record.save_record.SaveRecordUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,6 +24,15 @@ object RecordDomainModule {
         return DefaultReadRecordsByDateUseCase(
             recordRepository = recordRepository,
             defaultDispatcher = defaultDispatcher
+        )
+    }
+
+    @Provides
+    fun provideSaveRecordUseCase(
+        recordRepository: RecordRepository
+    ): SaveRecordUseCase {
+        return DefaultSaveRecordUseCase(
+            recordRepository = recordRepository
         )
     }
 

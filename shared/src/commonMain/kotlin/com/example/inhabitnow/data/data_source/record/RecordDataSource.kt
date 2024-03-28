@@ -6,5 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface RecordDataSource {
     fun readRecordsByDate(targetEpochDay: Long): Flow<List<RecordTable>>
+    fun readRecordByTaskIdAndDate(taskId: String, targetEpochDay: Long): Flow<RecordTable?>
     suspend fun insertRecord(recordTable: RecordTable): ResultModel<Unit>
 }

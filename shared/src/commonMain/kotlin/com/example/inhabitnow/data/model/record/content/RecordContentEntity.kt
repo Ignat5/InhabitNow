@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 @SerialName("RecordContent")
 @Serializable
 sealed interface RecordContentEntity {
+    @Serializable
+    @SerialName("RecordContent.Entry")
     sealed interface Entry : RecordContentEntity {
         @SerialName("RecordContent.Entry.Done")
         @Serializable
