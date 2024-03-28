@@ -22,8 +22,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -39,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -64,6 +67,7 @@ import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
 import com.example.inhabitnow.android.ui.toMonthDay
 import com.example.inhabitnow.android.ui.toShortMonthDayYear
+import com.example.inhabitnow.core.type.ProgressLimitType
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.record.content.RecordContentModel
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
@@ -143,25 +147,31 @@ private fun ViewScheduleScreenStateless(
                         onEvent(ViewScheduleScreenEvent.OnNextWeekClick)
                     }
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     when (state.allTasksWithRecord) {
                         is UIResultModel.Loading, is UIResultModel.Data -> {
-                            items(
-                                items = state.allTasksWithRecord.data ?: emptyList(),
-                                key = { it.taskWithRecordModel.task.id }
-                            ) { item ->
-                                ItemTaskWithRecord(
-                                    item = item,
-                                    isLocked = state.isLocked,
-                                    onClick = {
-                                        onEvent(ViewScheduleScreenEvent.OnTaskClick(item.taskWithRecordModel.task.id))
-                                    },
-                                    onLongClick = {
-                                        onEvent(ViewScheduleScreenEvent.OnTaskLongClick(item.taskWithRecordModel.task.id))
-                                    },
-                                    modifier = Modifier.animateItemPlacement()
-                                )
+                            val items = state.allTasksWithRecord.data ?: emptyList()
+                            itemsIndexed(
+                                items = items,
+                                key = { _, item -> item.taskWithRecordModel.task.id }
+                            ) { index, item ->
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    ItemTaskWithRecord(
+                                        item = item,
+                                        isLocked = state.isLocked,
+                                        onClick = {
+                                            onEvent(ViewScheduleScreenEvent.OnTaskClick(item.taskWithRecordModel.task.id))
+                                        },
+                                        onLongClick = {
+                                            onEvent(ViewScheduleScreenEvent.OnTaskLongClick(item.taskWithRecordModel.task.id))
+                                        },
+                                        modifier = Modifier.animateItemPlacement()
+                                    )
+                                    if (index != items.lastIndex) {
+                                        HorizontalDivider(modifier = Modifier.alpha(0.2f))
+                                    }
+                                }
                             }
                         }
 
@@ -225,7 +235,15 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
                             when (val entry = taskWithRecord.recordEntry) {
                                 is RecordContentModel.Entry.Number -> {
                                     val progressContent = taskWithRecord.task.progressContent
-                                    (entry.number / progressContent.limitNumber).toFloat()
+                                    when (progressContent.limitType) {
+                                        ProgressLimitType.AtLeast -> {
+                                            (entry.number / progressContent.limitNumber).toFloat()
+                                        }
+                                        ProgressLimitType.Exactly -> {
+                                            if (entry.number == progressContent.limitNumber) PROGRESS_FULL
+                                            else PROGRESS_EMPTY
+                                        }
+                                    }
                                 }
 
                                 else -> PROGRESS_EMPTY
@@ -394,7 +412,7 @@ private fun ItemDetailContainer(content: @Composable () -> Unit) {
 
 private fun getProgressTextOrNull(taskWithRecord: TaskWithRecordModel): String? {
     return when (taskWithRecord.statusType) {
-        is TaskScheduleStatusType.InProgress -> {
+        is TaskScheduleStatusType.Done, is TaskScheduleStatusType.InProgress -> {
             when (taskWithRecord) {
                 is TaskWithRecordModel.Habit.HabitContinuous.HabitNumber -> {
                     val progressContent = taskWithRecord.task.progressContent

@@ -414,25 +414,19 @@ class ViewScheduleViewModel @Inject constructor(
     }
 
     private fun List<FullTaskWithRecordModel>.sortTasks() = this.let { allTasks ->
-        val finishedStatuses = setOf(
-            TaskScheduleStatusType.Done,
-            TaskScheduleStatusType.Skipped,
-            TaskScheduleStatusType.Failed
-        )
-        val maxTime = LocalTime(hour = 23, minute = 59, second = 59)
         allTasks.sortedWith(
             compareBy<FullTaskWithRecordModel> { fullTaskWithRecord ->
-                if (fullTaskWithRecord.taskWithRecordModel.statusType in finishedStatuses) {
-                    FINISHED_WEIGHT
-                } else {
-                    PENDING_WEIGHT
-                }
-            }.then(compareBy { fullTaskWithRecord ->
-                fullTaskWithRecord.allReminders.minByOrNull { it.time }?.time ?: maxTime
-            }).then(compareByDescending { fullTaskWithRecord ->
-                fullTaskWithRecord.taskWithRecordModel.task.priority
-            })
+                when (fullTaskWithRecord.taskWithRecordModel.statusType) {
+                    TaskScheduleStatusType.Done, TaskScheduleStatusType.Skipped, TaskScheduleStatusType.Failed ->
+                        FINISHED_WEIGHT
 
+                    else -> PENDING_WEIGHT
+                }
+            }.thenBy { fullTaskWithRecord ->
+                fullTaskWithRecord.allReminders.minByOrNull { it.time }?.time ?: defaultReminderTime
+            }.thenBy { fullTaskWithRecord ->
+                -fullTaskWithRecord.taskWithRecordModel.task.priority
+            }
         )
     }
 
@@ -457,6 +451,10 @@ class ViewScheduleViewModel @Inject constructor(
 
     private val nowDate: LocalDate
         get() = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+    private val defaultReminderTime by lazy {
+        LocalTime(hour = 23, minute = 59, second = 59)
+    }
 
     companion object {
         private const val FINISHED_WEIGHT = 1
