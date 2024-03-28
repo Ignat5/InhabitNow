@@ -55,6 +55,7 @@ import com.example.inhabitnow.android.presentation.view_schedule.components.View
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenState
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.EnterTaskNumberRecordDialog
 import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskWithRecordModel
 import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
@@ -153,12 +154,17 @@ private fun ViewScheduleScreenStateless(
                                 ItemTaskWithRecord(
                                     item = item,
                                     isLocked = state.isLocked,
-                                    onClick = {},
-                                    onLongClick = {},
+                                    onClick = {
+                                        onEvent(ViewScheduleScreenEvent.OnTaskClick(item.taskWithRecordModel.task.id))
+                                    },
+                                    onLongClick = {
+                                        onEvent(ViewScheduleScreenEvent.OnTaskLongClick(item.taskWithRecordModel.task.id))
+                                    },
                                     modifier = Modifier.animateItemPlacement()
                                 )
                             }
                         }
+
                         else -> Unit
                     }
                 }
@@ -549,6 +555,11 @@ private fun ViewScheduleConfigStateless(
         is ViewScheduleScreenConfig.PickDate -> {
             PickDateDialog(stateHolder = config.stateHolder) {
                 onResultEvent(ViewScheduleScreenEvent.ResultEvent.PickDate(it))
+            }
+        }
+        is ViewScheduleScreenConfig.EnterTaskNumberRecord -> {
+            EnterTaskNumberRecordDialog(stateHolder = config.stateHolder) {
+                onResultEvent(ViewScheduleScreenEvent.ResultEvent.EnterTaskNumberRecord(it))
             }
         }
     }

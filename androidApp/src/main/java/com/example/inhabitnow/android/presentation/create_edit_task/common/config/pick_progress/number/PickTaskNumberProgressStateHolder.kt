@@ -7,6 +7,8 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.ui.limitNumberToString
 import com.example.inhabitnow.core.type.ProgressLimitType
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
+import com.example.inhabitnow.domain.util.DomainConst
+import com.example.inhabitnow.domain.util.DomainUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,7 +32,7 @@ class PickTaskNumberProgressStateHolder(
         MutableStateFlow<String>(initProgressContent.limitUnit)
 
     private val limitNumberValidator: (value: String) -> Boolean = { value ->
-        value.isEmpty() || validateNumber(value)
+        value.isEmpty() || DomainUtil.validateInputLimitNumber(value)
     }
 
     override val uiScreenState: StateFlow<PickTaskNumberProgressScreenState> =
@@ -116,18 +118,7 @@ class PickTaskNumberProgressStateHolder(
             limitNumber = limitNumber,
             limitNumberValidator = limitNumberValidator,
             limitUnit = limitUnit,
-            canSave = validateNumber(limitNumber)
+            canSave = DomainUtil.validateInputLimitNumber(limitNumber)
         )
     }
-
-    private fun validateNumber(limitNumber: String) =
-        limitNumber.length <= MAX_CHAR_COUNT && limitNumber.toDoubleOrNull()
-            ?.let { it in MIN_LIMIT_NUMBER..MAX_LIMIT_NUMBER } ?: false
-
-    companion object {
-        private const val MIN_LIMIT_NUMBER: Double = 0.0
-        private const val MAX_LIMIT_NUMBER: Double = 1_000_000.0
-        private val MAX_CHAR_COUNT = MAX_LIMIT_NUMBER.toString().count()
-    }
-
 }

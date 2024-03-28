@@ -18,4 +18,6 @@ object DomainConst {
         get() = LocalTime(0, 0, 0)
     const val DEFAULT_LIMIT_UNIT = ""
     const val DEFAULT_IS_ARCHIVED = false
+    const val MIN_LIMIT_NUMBER: Double = 0.0
+    const val MAX_LIMIT_NUMBER: Double = 1_000_000.0
 }

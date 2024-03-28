@@ -12,6 +12,7 @@ import com.example.inhabitnow.android.presentation.view_schedule.components.View
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenState
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.EnterTaskNumberRecordStateHolder
 import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskWithRecordModel
 import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
@@ -136,6 +137,15 @@ class ViewScheduleViewModel @Inject constructor(
 
     override fun onEvent(event: ViewScheduleScreenEvent) {
         when (event) {
+            is ViewScheduleScreenEvent.OnTaskClick ->
+                onTaskClick(event)
+
+            is ViewScheduleScreenEvent.OnTaskLongClick ->
+                onTaskLongClick(event)
+
+            is ViewScheduleScreenEvent.ResultEvent ->
+                onResultEvent(event)
+
             is ViewScheduleScreenEvent.OnDateClick ->
                 onDateClick(event)
 
@@ -150,9 +160,6 @@ class ViewScheduleViewModel @Inject constructor(
 
             is ViewScheduleScreenEvent.OnPickDateClick ->
                 onPickDateClick()
-
-            is ViewScheduleScreenEvent.ResultEvent ->
-                onResultEvent(event)
         }
     }
 
@@ -160,6 +167,15 @@ class ViewScheduleViewModel @Inject constructor(
         when (event) {
             is ViewScheduleScreenEvent.ResultEvent.PickDate ->
                 onPickDateResultEvent(event)
+
+            is ViewScheduleScreenEvent.ResultEvent.EnterTaskNumberRecord ->
+                onEnterTaskNumberRecordResultEvent(event)
+        }
+    }
+
+    private fun onEnterTaskNumberRecordResultEvent(event: ViewScheduleScreenEvent.ResultEvent.EnterTaskNumberRecord) {
+        onIdleToAction {
+            // TODO()
         }
     }
 
@@ -175,6 +191,53 @@ class ViewScheduleViewModel @Inject constructor(
     private fun onConfirmPickDate(result: PickDateScreenResult.Confirm) {
         currentDateState.update { result.date }
         currentStartOfWeekDateState.update { result.date.firstDayOfWeek }
+    }
+
+    private fun onTaskClick(event: ViewScheduleScreenEvent.OnTaskClick) {
+        allTasksState.value.data?.find { it.taskWithRecordModel.task.id == event.taskId }?.taskWithRecordModel?.let { taskWithRecord ->
+            when (taskWithRecord) {
+                is TaskWithRecordModel.Habit -> onHabitClick(taskWithRecord)
+                is TaskWithRecordModel.Task -> onTaskClick(taskWithRecord)
+            }
+        }
+    }
+
+    private fun onHabitClick(taskWithRecordModel: TaskWithRecordModel.Habit) {
+        when (taskWithRecordModel) {
+            is TaskWithRecordModel.Habit.HabitContinuous -> {
+                when (taskWithRecordModel) {
+                    is TaskWithRecordModel.Habit.HabitContinuous.HabitNumber -> {
+                        onHabitNumberClick(taskWithRecordModel)
+                    }
+                    is TaskWithRecordModel.Habit.HabitContinuous.HabitTime -> {
+
+                    }
+                }
+            }
+            is TaskWithRecordModel.Habit.HabitYesNo -> {
+
+            }
+        }
+    }
+
+    private fun onHabitNumberClick(taskWithRecordModel: TaskWithRecordModel.Habit.HabitContinuous.HabitNumber) {
+        setUpConfigState(
+            ViewScheduleScreenConfig.EnterTaskNumberRecord(
+                stateHolder = EnterTaskNumberRecordStateHolder(
+                    taskWithRecord = taskWithRecordModel,
+                    date = currentDateState.value,
+                    holderScope = provideChildScope()
+                )
+            )
+        )
+    }
+
+    private fun onTaskClick(taskWithRecordModel: TaskWithRecordModel.Task) {
+
+    }
+
+    private fun onTaskLongClick(event: ViewScheduleScreenEvent.OnTaskLongClick) {
+
     }
 
     private fun onPickDateClick() {
