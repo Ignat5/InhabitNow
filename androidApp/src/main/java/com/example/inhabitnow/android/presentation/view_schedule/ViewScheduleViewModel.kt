@@ -4,6 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
+import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStateHolder
+import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
+import com.example.inhabitnow.android.presentation.common.pick_date.model.PickDateRequestModel
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenConfig
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
@@ -138,7 +141,57 @@ class ViewScheduleViewModel @Inject constructor(
 
             is ViewScheduleScreenEvent.OnNextWeekClick ->
                 onNextWeekClick()
+
+            is ViewScheduleScreenEvent.OnSearchClick ->
+                onSearchClick()
+
+            is ViewScheduleScreenEvent.OnPickDateClick ->
+                onPickDateClick()
+
+            is ViewScheduleScreenEvent.ResultEvent ->
+                onResultEvent(event)
         }
+    }
+
+    private fun onResultEvent(event: ViewScheduleScreenEvent.ResultEvent) {
+        when (event) {
+            is ViewScheduleScreenEvent.ResultEvent.PickDate ->
+                onPickDateResultEvent(event)
+        }
+    }
+
+    private fun onPickDateResultEvent(event: ViewScheduleScreenEvent.ResultEvent.PickDate) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickDateScreenResult.Confirm -> onConfirmPickDate(result)
+                is PickDateScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickDate(result: PickDateScreenResult.Confirm) {
+        currentDateState.update { result.date }
+        currentStartOfWeekDateState.update { result.date.firstDayOfWeek }
+    }
+
+    private fun onPickDateClick() {
+        currentDateState.value.let { currentDate ->
+            setUpConfigState(ViewScheduleScreenConfig.PickDate(
+                stateHolder = PickDateStateHolder(
+                    requestModel = PickDateRequestModel(
+                        currentDate = currentDate,
+                        minDate = currentDate.minus(1, DateTimeUnit.YEAR),
+                        maxDate = currentDate.plus(1, DateTimeUnit.YEAR)
+                    ),
+                    holderScope = provideChildScope(),
+                    defaultDispatcher = defaultDispatcher
+                )
+            ))
+        }
+    }
+
+    private fun onSearchClick() {
+        setUpNavigationState(ViewScheduleScreenNavigation.Search)
     }
 
     private fun onDateClick(event: ViewScheduleScreenEvent.OnDateClick) {

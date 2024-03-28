@@ -72,6 +72,8 @@ fun DayOfWeek.toDisplay() = when (this) {
     DayOfWeek.SUNDAY -> "Sunday"
 }
 
+fun DayOfWeek.toDisplayShort(length: Int = 3) = this.toDisplay().take(length)
+
 fun Month.toDisplay() = when (this) {
     Month.JANUARY -> "January"
     Month.FEBRUARY -> "February"
@@ -111,6 +113,19 @@ fun LocalDate.toMonthYear(): String {
     val month = this.month.toDisplay()
     val year = this.year
     return "$month $year"
+}
+
+fun LocalDate.toMonthDay(): String {
+    val month = this.month.toDisplay()
+    val dayOfMonth = this.dayOfMonth
+    return "$month $dayOfMonth"
+}
+
+fun LocalDate.toShortMonthDayYear(): String {
+    val month = this.month.toDisplay().take(3)
+    val dayOfMonth = this.dayOfMonth
+    val year = this.year
+    return "$month $dayOfMonth, $year"
 }
 
 private fun Int.insertZeroIfRequired(): String = this.let { number ->

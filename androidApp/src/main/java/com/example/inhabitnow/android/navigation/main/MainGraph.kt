@@ -1,6 +1,10 @@
 package com.example.inhabitnow.android.navigation.main
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -17,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -40,7 +45,9 @@ import com.example.inhabitnow.android.presentation.main.config.pick_task_progres
 import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeDialog
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
+import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun NavGraphBuilder.mainGraph(
     onNavigateToCreateTask: (taskId: String) -> Unit,
     onNavigateToSearchTasks: () -> Unit
@@ -57,6 +64,7 @@ fun NavGraphBuilder.mainGraph(
                     is MainScreenNavigation.CreateTask -> {
                         onNavigateToCreateTask(destination.taskId)
                     }
+
                     is MainScreenNavigation.SearchTasks -> {
                         onNavigateToSearchTasks()
                     }
@@ -73,7 +81,7 @@ fun NavGraphBuilder.mainGraph(
                     }
                 )
             },
-            screenContent = { state, onEvent ->
+            screenContent = { _, onEvent ->
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val onNavDestClick = remember {
                     val callback: (MainNavDest) -> Unit = { mainNavDest ->
@@ -92,19 +100,6 @@ fun NavGraphBuilder.mainGraph(
                     callback
                 }
                 Scaffold(
-                    topBar = {
-                        val titleText = remember(currentBackStackEntry?.destination?.route) {
-                            (findMainNavDestByRoute(currentBackStackEntry?.destination?.route)
-                                ?: MainNavDest.startDestination).toTitleText()
-                        }
-                        ScreenAppBar(
-                            titleText = titleText,
-                            onMenuClick = { /*TODO*/ },
-                            onSearchClick = {
-                                onEvent(MainScreenEvent.OnSearchTasksClick)
-                            }
-                        )
-                    },
                     bottomBar = {
                         ScreenBottomBar(
                             currentBackStackEntry = currentBackStackEntry,
@@ -115,14 +110,22 @@ fun NavGraphBuilder.mainGraph(
                         ScreenFAB(onClick = { onEvent(MainScreenEvent.OnCreateTaskClick) })
                     },
                     floatingActionButtonPosition = FabPosition.End
-                ) {
+                ) { innerPadding ->
                     NavHost(
                         navController = navController,
                         startDestination = MainNavDest.ViewScheduleDestination.route,
                         route = AppNavDest.MainGraphDestination.route,
-                        modifier = Modifier.padding(it)
                     ) {
-                        viewScheduleScreen()
+                        viewScheduleScreen(
+                            onMenuClick = {},
+                            onNavigate = { destination ->
+                                when (destination) {
+                                    is ViewScheduleScreenNavigation.Search -> {
+                                        onNavigateToSearchTasks()
+                                    }
+                                }
+                            }
+                        )
                         viewAllHabits()
                         viewAllTasks()
                     }
@@ -252,7 +255,7 @@ private fun ScreenFAB(onClick: () -> Unit) {
 }
 
 private fun MainNavDest.toTitleText() = when (this) {
-    is MainNavDest.ViewScheduleDestination -> "Schedule"
+    is MainNavDest.ViewScheduleDestination -> "Today"
     is MainNavDest.ViewAllHabitsDestination -> "Habits"
     is MainNavDest.ViewAllTasksDestination -> "Tasks"
 }

@@ -18,18 +18,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -38,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -48,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
+import com.example.inhabitnow.android.presentation.common.pick_date.PickDateDialog
+import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenConfig
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenState
@@ -57,12 +58,12 @@ import com.example.inhabitnow.android.presentation.view_schedule.model.TaskSched
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskWithRecordModel
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
-import com.example.inhabitnow.core.type.ProgressLimitType
+import com.example.inhabitnow.android.ui.toMonthDay
+import com.example.inhabitnow.android.ui.toShortMonthDayYear
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.record.content.RecordContentModel
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
 import com.example.inhabitnow.domain.model.tag.TagModel
-import com.example.inhabitnow.domain.model.task.TaskModel
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
@@ -71,6 +72,7 @@ private const val PROGRESS_EMPTY = 0f
 
 @Composable
 fun ViewScheduleScreen(
+    onMenuClick: () -> Unit,
     onNavigate: (ViewScheduleScreenNavigation) -> Unit
 ) {
     val viewModel: ViewScheduleViewModel = hiltViewModel()
@@ -78,44 +80,68 @@ fun ViewScheduleScreen(
         viewModel = viewModel,
         onNavigation = onNavigate,
         configContent = { config, onEvent ->
-
+            ViewScheduleConfigStateless(config = config) {
+                onEvent(it)
+            }
         }
     ) { state, onEvent ->
-        ViewScheduleScreenStateless(state, onEvent)
+        ViewScheduleScreenStateless(onMenuClick, state, onEvent)
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun ViewScheduleScreenStateless(
+    onMenuClick: () -> Unit,
     state: ViewScheduleScreenState,
     onEvent: (ViewScheduleScreenEvent) -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            WeekRow(
-                allDateItems = state.allDaysOfWeek,
-                onDateClick = {
-                    onEvent(ViewScheduleScreenEvent.OnDateClick(it))
+    Scaffold(
+        topBar = {
+            ScreenTopAppBar(
+                currentDate = state.currentDate,
+                onMenuClick = onMenuClick,
+                onSearchClick = {
+                    onEvent(ViewScheduleScreenEvent.OnSearchClick)
                 },
-                onPrevClick = {
-                    onEvent(ViewScheduleScreenEvent.OnPrevWeekClick)
-                },
-                onNextClick = {
-                    onEvent(ViewScheduleScreenEvent.OnNextWeekClick)
+                onPickDateClick = {
+                    onEvent(ViewScheduleScreenEvent.OnPickDateClick)
                 }
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(
-                    items = state.allTasksWithRecord,
-                    key = { it.taskWithRecordModel.task.id }
-                ) { item ->
-                    ItemTaskWithRecord(
-                        item = item,
-                        isLocked = state.isLocked,
-                        onClick = {},
-                        onLongClick = {}
-                    )
+        }
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                WeekRow(
+                    allDateItems = state.allDaysOfWeek,
+                    onDateClick = {
+                        onEvent(ViewScheduleScreenEvent.OnDateClick(it))
+                    },
+                    onPrevClick = {
+                        onEvent(ViewScheduleScreenEvent.OnPrevWeekClick)
+                    },
+                    onNextClick = {
+                        onEvent(ViewScheduleScreenEvent.OnNextWeekClick)
+                    }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(
+                        items = state.allTasksWithRecord,
+                        key = { it.taskWithRecordModel.task.id }
+                    ) { item ->
+                        ItemTaskWithRecord(
+                            item = item,
+                            isLocked = state.isLocked,
+                            onClick = {},
+                            onLongClick = {},
+                            modifier = Modifier.animateItemPlacement()
+                        )
+                    }
                 }
             }
         }
@@ -128,16 +154,16 @@ private fun ItemTaskWithRecord(
     item: FullTaskWithRecordModel,
     isLocked: Boolean,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             )
-            .alpha(if (isLocked) 0.7f else 1f)
     ) {
         Row(
             modifier = Modifier
@@ -177,7 +203,7 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
                                     (entry.number / progressContent.limitNumber).toFloat()
                                 }
 
-                                else -> 0f
+                                else -> PROGRESS_EMPTY
                             }
                         }
 
@@ -189,13 +215,13 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
                                         .toFloat()
                                 }
 
-                                else -> 0f
+                                else -> PROGRESS_EMPTY
                             }
                         }
                     }
                 }
 
-                else -> 0f
+                else -> PROGRESS_EMPTY
             }
         }
     }
@@ -375,50 +401,6 @@ private fun getProgressTextOrNull(taskWithRecord: TaskWithRecordModel): String? 
         is TaskScheduleStatusType.Failed -> "failed"
         else -> null
     }
-//    return when (taskWithRecord) {
-//        is TaskWithRecordModel.Habit -> {
-//            when (taskWithRecord) {
-//                is TaskWithRecordModel.Habit.HabitContinuous -> {
-//                    when (taskWithRecord) {
-//                        is TaskWithRecordModel.Habit.HabitContinuous.HabitNumber -> {
-//                            when (val entry = taskWithRecord.recordEntry) {
-//                                null -> null
-//                                is RecordContentModel.Entry.Number -> {
-//                                    "${entry.number}/${taskWithRecord.task.progressContent.limitNumber} ${taskWithRecord.task.progressContent.limitUnit}"
-//                                }
-//
-//                                is RecordContentModel.Entry.Skip -> getSkippedText()
-//                                is RecordContentModel.Entry.Fail -> getFailedText()
-//                            }
-//                        }
-//
-//                        is TaskWithRecordModel.Habit.HabitContinuous.HabitTime -> {
-//                            when (val entry = taskWithRecord.recordEntry) {
-//                                null -> null
-//                                is RecordContentModel.Entry.Time -> {
-//                                    "${entry.time.toHourMinute()}/${taskWithRecord.task.progressContent.limitTime.toHourMinute()}"
-//                                }
-//
-//                                is RecordContentModel.Entry.Skip -> getSkippedText()
-//                                is RecordContentModel.Entry.Fail -> getFailedText()
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                is TaskWithRecordModel.Habit.HabitYesNo -> {
-//                    when (val entry = taskWithRecord.recordEntry) {
-//                        null -> null
-//                        is RecordContentModel.Entry.Done -> null
-//                        is RecordContentModel.Entry.Skip -> getSkippedText()
-//                        is RecordContentModel.Entry.Fail -> getFailedText()
-//                    }
-//                }
-//            }
-//        }
-//
-//        else -> null
-//    }
 }
 
 @Composable
@@ -540,6 +522,20 @@ private fun NextPrevButton(
 }
 
 @Composable
+private fun ViewScheduleConfigStateless(
+    config: ViewScheduleScreenConfig,
+    onResultEvent: (ViewScheduleScreenEvent.ResultEvent) -> Unit
+) {
+    when (config) {
+        is ViewScheduleScreenConfig.PickDate -> {
+            PickDateDialog(stateHolder = config.stateHolder) {
+                onResultEvent(ViewScheduleScreenEvent.ResultEvent.PickDate(it))
+            }
+        }
+    }
+}
+
+@Composable
 private fun ProvideContentColorTextStyle(
     contentColor: Color,
     textStyle: TextStyle,
@@ -550,5 +546,39 @@ private fun ProvideContentColorTextStyle(
         LocalContentColor provides contentColor,
         LocalTextStyle provides mergedStyle,
         content = content
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ScreenTopAppBar(
+    currentDate: LocalDate,
+    onMenuClick: () -> Unit,
+    onSearchClick: () -> Unit,
+    onPickDateClick: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Text(text = currentDate.toShortMonthDayYear())
+        },
+        navigationIcon = {
+            IconButton(onClick = onMenuClick) {
+                Icon(painter = painterResource(id = R.drawable.ic_menu), contentDescription = null)
+            }
+        },
+        actions = {
+            IconButton(onClick = onSearchClick) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_search),
+                    contentDescription = null
+                )
+            }
+            IconButton(onClick = onPickDateClick) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_pick_date),
+                    contentDescription = null
+                )
+            }
+        }
     )
 }
