@@ -1,6 +1,7 @@
 package com.example.inhabitnow.android.ui
 
 import com.example.inhabitnow.android.R
+import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
 import com.example.inhabitnow.core.type.ProgressLimitType
 import com.example.inhabitnow.core.type.ReminderType
 import com.example.inhabitnow.core.type.TaskType
@@ -159,4 +160,12 @@ fun Double.limitNumberToString(): String = this.let { number ->
     if (number.rem(DEFAULT_DELIMITER) == DEFAULT_REMINDER) {
         "${number.toInt()}"
     } else "$number"
+}
+
+fun TaskScheduleStatusType.toDisplay() = when (this) {
+    is TaskScheduleStatusType.Pending -> "pending"
+    is TaskScheduleStatusType.InProgress -> "in progress"
+    is TaskScheduleStatusType.Done -> "done"
+    is TaskScheduleStatusType.Skipped -> "skipped"
+    is TaskScheduleStatusType.Failed -> "failed"
 }

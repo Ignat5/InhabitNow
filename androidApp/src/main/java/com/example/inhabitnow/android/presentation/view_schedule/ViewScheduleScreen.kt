@@ -62,6 +62,7 @@ import com.example.inhabitnow.android.presentation.view_schedule.components.View
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenState
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.EnterTaskNumberRecordDialog
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.EnterTaskTimeRecordDialog
+import com.example.inhabitnow.android.presentation.view_schedule.config.view_habit_record_actions.ViewHabitRecordActionsDialog
 import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskWithRecordModel
 import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
@@ -614,6 +615,12 @@ private fun ViewScheduleConfigStateless(
         is ViewScheduleScreenConfig.EnterTaskTimeRecord -> {
             EnterTaskTimeRecordDialog(stateHolder = config.stateHolder) {
                 onResultEvent(ViewScheduleScreenEvent.ResultEvent.EnterTaskTimeRecord(it))
+            }
+        }
+
+        is ViewScheduleScreenConfig.ViewHabitRecordActions -> {
+            ViewHabitRecordActionsDialog(stateHolder = config.stateHolder) {
+                onResultEvent(ViewScheduleScreenEvent.ResultEvent.ViewHabitRecordActions(it))
             }
         }
     }

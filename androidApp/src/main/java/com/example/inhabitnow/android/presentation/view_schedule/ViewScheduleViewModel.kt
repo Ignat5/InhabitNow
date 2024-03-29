@@ -16,6 +16,8 @@ import com.example.inhabitnow.android.presentation.view_schedule.config.enter_nu
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.components.EnterTaskNumberRecordScreenResult
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.EnterTaskTimeRecordStateHolder
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.components.EnterTaskTimeRecordScreenResult
+import com.example.inhabitnow.android.presentation.view_schedule.config.view_habit_record_actions.ViewHabitRecordActionsStateHolder
+import com.example.inhabitnow.android.presentation.view_schedule.config.view_habit_record_actions.components.ViewHabitRecordActionsScreenResult
 import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskWithRecordModel
 import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
@@ -179,6 +181,30 @@ class ViewScheduleViewModel @Inject constructor(
 
             is ViewScheduleScreenEvent.ResultEvent.EnterTaskTimeRecord ->
                 onEnterTaskTimeRecordResultEvent(event)
+
+            is ViewScheduleScreenEvent.ResultEvent.ViewHabitRecordActions ->
+                onViewHabitRecordActionsResultEvent(event)
+        }
+    }
+
+    private fun onViewHabitRecordActionsResultEvent(event: ViewScheduleScreenEvent.ResultEvent.ViewHabitRecordActions) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is ViewHabitRecordActionsScreenResult.Confirm ->
+                    onConfirmViewHabitRecordActions(result)
+
+                is ViewHabitRecordActionsScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmViewHabitRecordActions(result: ViewHabitRecordActionsScreenResult.Confirm) {
+        when (result.action) {
+            is ViewHabitRecordActionsScreenResult.Action.Edit -> Unit
+            is ViewHabitRecordActionsScreenResult.Action.EnterRecord -> Unit
+            is ViewHabitRecordActionsScreenResult.Action.Fail -> Unit
+            is ViewHabitRecordActionsScreenResult.Action.Skip -> Unit
+            is ViewHabitRecordActionsScreenResult.Action.ResetEntry -> Unit
         }
     }
 
@@ -316,7 +342,27 @@ class ViewScheduleViewModel @Inject constructor(
     }
 
     private fun onTaskLongClick(event: ViewScheduleScreenEvent.OnTaskLongClick) {
+        allTasksState.value.data?.find { it.taskWithRecordModel.task.id == event.taskId }?.taskWithRecordModel?.let { taskWithRecord ->
+            when (taskWithRecord) {
+                is TaskWithRecordModel.Habit -> {
+                    onHabitLongClick(taskWithRecord)
+                }
 
+                is TaskWithRecordModel.Task -> {}
+            }
+        }
+    }
+
+    private fun onHabitLongClick(taskWIthRecordModel: TaskWithRecordModel.Habit) {
+        setUpConfigState(
+            ViewScheduleScreenConfig.ViewHabitRecordActions(
+                stateHolder = ViewHabitRecordActionsStateHolder(
+                    taskWithRecord = taskWIthRecordModel,
+                    date = currentDateState.value,
+                    holderScope = provideChildScope()
+                )
+            )
+        )
     }
 
     private fun onPickDateClick() {
