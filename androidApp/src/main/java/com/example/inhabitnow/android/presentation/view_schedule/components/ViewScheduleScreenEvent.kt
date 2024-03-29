@@ -4,6 +4,7 @@ import com.example.inhabitnow.android.presentation.base.components.event.ScreenE
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.components.EnterTaskNumberRecordScreenResult
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.components.EnterTaskTimeRecordScreenResult
 import kotlinx.datetime.LocalDate
 
 sealed interface ViewScheduleScreenEvent : ScreenEvent {
@@ -21,6 +22,10 @@ sealed interface ViewScheduleScreenEvent : ScreenEvent {
         data class PickDate(override val result: PickDateScreenResult) : ResultEvent
         data class EnterTaskNumberRecord(
             override val result: EnterTaskNumberRecordScreenResult
+        ) : ResultEvent
+
+        data class EnterTaskTimeRecord(
+            override val result: EnterTaskTimeRecordScreenResult
         ) : ResultEvent
     }
 }

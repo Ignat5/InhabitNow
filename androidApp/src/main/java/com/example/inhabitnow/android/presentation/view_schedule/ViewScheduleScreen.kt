@@ -1,7 +1,9 @@
 package com.example.inhabitnow.android.presentation.view_schedule
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -59,10 +61,12 @@ import com.example.inhabitnow.android.presentation.view_schedule.components.View
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenState
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.EnterTaskNumberRecordDialog
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.EnterTaskTimeRecordDialog
 import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskWithRecordModel
 import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskWithRecordModel
+import com.example.inhabitnow.android.ui.limitNumberToString
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
 import com.example.inhabitnow.android.ui.toMonthDay
@@ -239,6 +243,7 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
                                         ProgressLimitType.AtLeast -> {
                                             (entry.number / progressContent.limitNumber).toFloat()
                                         }
+
                                         ProgressLimitType.Exactly -> {
                                             if (entry.number == progressContent.limitNumber) PROGRESS_FULL
                                             else PROGRESS_EMPTY
@@ -253,9 +258,27 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
                         is TaskWithRecordModel.Habit.HabitContinuous.HabitTime -> {
                             when (val entry = taskWithRecord.recordEntry) {
                                 is RecordContentModel.Entry.Time -> {
-                                    val progressContent = taskWithRecord.task.progressContent
-                                    (entry.time.toSecondOfDay() / progressContent.limitTime.toSecondOfDay())
-                                        .toFloat()
+                                    val pc = taskWithRecord.task.progressContent
+                                    when (pc.limitType) {
+                                        ProgressLimitType.AtLeast -> {
+                                            entry.time.toSecondOfDay().toFloat()
+                                                .let { entrySeconds ->
+                                                    pc.limitTime.toSecondOfDay().toFloat()
+                                                        .let { limitSeconds ->
+                                                            (entrySeconds / limitSeconds).toFloat()
+                                                        }
+                                                }
+                                        }
+
+                                        ProgressLimitType.Exactly -> {
+                                            entry.time.toSecondOfDay().let { entrySeconds ->
+                                                pc.limitTime.toSecondOfDay().let { limitSeconds ->
+                                                    if (entrySeconds == limitSeconds) PROGRESS_FULL
+                                                    else PROGRESS_EMPTY
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
 
                                 else -> PROGRESS_EMPTY
@@ -280,7 +303,11 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
         is TaskScheduleStatusType.Failed -> MaterialTheme.colorScheme.onErrorContainer
         else -> MaterialTheme.colorScheme.onPrimaryContainer
     }
-    val progressState by animateFloatAsState(targetValue = progress, label = "")
+    val progressState by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = spring<Float>(stiffness = Spring.StiffnessVeryLow),
+        label = ""
+    )
     CircularProgressIndicator(
         progress = {
             progressState
@@ -418,7 +445,8 @@ private fun getProgressTextOrNull(taskWithRecord: TaskWithRecordModel): String? 
                     val progressContent = taskWithRecord.task.progressContent
                     when (val entry = taskWithRecord.recordEntry) {
                         is RecordContentModel.Entry.Number -> {
-                            "${entry.number}/${progressContent.limitNumber} ${progressContent.limitUnit}"
+                            "${entry.number.limitNumberToString()} ${progressContent.limitUnit}"
+//                            "${entry.number}/${progressContent.limitNumber} ${progressContent.limitUnit}"
                         }
 
                         else -> null
@@ -429,7 +457,8 @@ private fun getProgressTextOrNull(taskWithRecord: TaskWithRecordModel): String? 
                     val progressContent = taskWithRecord.task.progressContent
                     when (val entry = taskWithRecord.recordEntry) {
                         is RecordContentModel.Entry.Time -> {
-                            "${entry.time.toHourMinute()}/${progressContent.limitTime.toHourMinute()}"
+                            entry.time.toHourMinute()
+//                            "${entry.time.toHourMinute()}/${progressContent.limitTime.toHourMinute()}"
                         }
 
                         else -> null
@@ -575,9 +604,16 @@ private fun ViewScheduleConfigStateless(
                 onResultEvent(ViewScheduleScreenEvent.ResultEvent.PickDate(it))
             }
         }
+
         is ViewScheduleScreenConfig.EnterTaskNumberRecord -> {
             EnterTaskNumberRecordDialog(stateHolder = config.stateHolder) {
                 onResultEvent(ViewScheduleScreenEvent.ResultEvent.EnterTaskNumberRecord(it))
+            }
+        }
+
+        is ViewScheduleScreenConfig.EnterTaskTimeRecord -> {
+            EnterTaskTimeRecordDialog(stateHolder = config.stateHolder) {
+                onResultEvent(ViewScheduleScreenEvent.ResultEvent.EnterTaskTimeRecord(it))
             }
         }
     }

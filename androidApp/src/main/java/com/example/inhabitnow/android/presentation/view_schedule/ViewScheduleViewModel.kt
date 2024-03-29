@@ -14,6 +14,8 @@ import com.example.inhabitnow.android.presentation.view_schedule.components.View
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenState
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.EnterTaskNumberRecordStateHolder
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.components.EnterTaskNumberRecordScreenResult
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.EnterTaskTimeRecordStateHolder
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.components.EnterTaskTimeRecordScreenResult
 import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskWithRecordModel
 import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
@@ -174,6 +176,30 @@ class ViewScheduleViewModel @Inject constructor(
 
             is ViewScheduleScreenEvent.ResultEvent.EnterTaskNumberRecord ->
                 onEnterTaskNumberRecordResultEvent(event)
+
+            is ViewScheduleScreenEvent.ResultEvent.EnterTaskTimeRecord ->
+                onEnterTaskTimeRecordResultEvent(event)
+        }
+    }
+
+    private fun onEnterTaskTimeRecordResultEvent(event: ViewScheduleScreenEvent.ResultEvent.EnterTaskTimeRecord) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is EnterTaskTimeRecordScreenResult.Confirm ->
+                    onConfirmEnterTaskTimeRecord(result)
+
+                is EnterTaskTimeRecordScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmEnterTaskTimeRecord(result: EnterTaskTimeRecordScreenResult.Confirm) {
+        viewModelScope.launch {
+            saveRecordUseCase(
+                taskId = result.taskId,
+                targetDate = result.date,
+                entry = RecordContentModel.Entry.Time(result.time)
+            )
         }
     }
 
@@ -230,7 +256,7 @@ class ViewScheduleViewModel @Inject constructor(
                     }
 
                     is TaskWithRecordModel.Habit.HabitContinuous.HabitTime -> {
-
+                        onHabitTimeClick(taskWithRecordModel)
                     }
                 }
             }
@@ -246,6 +272,18 @@ class ViewScheduleViewModel @Inject constructor(
             ViewScheduleScreenConfig.EnterTaskNumberRecord(
                 stateHolder = EnterTaskNumberRecordStateHolder(
                     taskWithRecord = taskWithRecordModel,
+                    date = currentDateState.value,
+                    holderScope = provideChildScope()
+                )
+            )
+        )
+    }
+
+    private fun onHabitTimeClick(taskWithRecordModel: TaskWithRecordModel.Habit.HabitContinuous.HabitTime) {
+        setUpConfigState(
+            ViewScheduleScreenConfig.EnterTaskTimeRecord(
+                stateHolder = EnterTaskTimeRecordStateHolder(
+                    taskWithRecordModel = taskWithRecordModel,
                     date = currentDateState.value,
                     holderScope = provideChildScope()
                 )

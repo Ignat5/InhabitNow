@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record
+package com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,38 +18,40 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.components.EnterTaskNumberRecordScreenEvent
-import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.components.EnterTaskNumberRecordScreenResult
-import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.components.EnterTaskNumberRecordScreenState
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.components.EnterTaskTimeRecordScreenEvent
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.components.EnterTaskTimeRecordScreenResult
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.components.EnterTaskTimeRecordScreenState
 import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
 import com.example.inhabitnow.android.ui.base.BaseTextFiledBuilder
+import com.example.inhabitnow.android.ui.base.BaseTimeInput
 import com.example.inhabitnow.android.ui.limitNumberToString
 import com.example.inhabitnow.android.ui.toDisplay
+import com.example.inhabitnow.android.ui.toHourMinute
 import com.example.inhabitnow.android.ui.toShortMonthDayYear
 
 @Composable
-fun EnterTaskNumberRecordDialog(
-    stateHolder: EnterTaskNumberRecordStateHolder,
-    onResult: (EnterTaskNumberRecordScreenResult) -> Unit
+fun EnterTaskTimeRecordDialog(
+    stateHolder: EnterTaskTimeRecordStateHolder,
+    onResult: (EnterTaskTimeRecordScreenResult) -> Unit
 ) {
     BaseScreen(stateHolder = stateHolder, onResult = onResult) { state, onEvent ->
-        EnterTaskNumberRecordDialogStateless(state, onEvent)
+        EnterTaskTimeRecordDialogStateless(state, onEvent)
     }
 }
 
 @Composable
-private fun EnterTaskNumberRecordDialogStateless(
-    state: EnterTaskNumberRecordScreenState,
-    onEvent: (EnterTaskNumberRecordScreenEvent) -> Unit
+private fun EnterTaskTimeRecordDialogStateless(
+    state: EnterTaskTimeRecordScreenState,
+    onEvent: (EnterTaskTimeRecordScreenEvent) -> Unit
 ) {
     BaseDialogBuilder.BaseDialog(
-        onDismissRequest = { onEvent(EnterTaskNumberRecordScreenEvent.OnDismissRequest) },
+        onDismissRequest = { onEvent(EnterTaskTimeRecordScreenEvent.OnDismissRequest) },
         actionButtons = BaseDialogBuilder.ActionButtons(
             confirmButton = {
                 BaseDialogBuilder.BaseActionButton(
                     text = "Confirm",
-                    enabled = state.canConfirm,
                     onClick = {
-                        onEvent(EnterTaskNumberRecordScreenEvent.OnConfirmClick)
+                        onEvent(EnterTaskTimeRecordScreenEvent.OnConfirmClick)
                     }
                 )
             },
@@ -57,7 +59,7 @@ private fun EnterTaskNumberRecordDialogStateless(
                 BaseDialogBuilder.BaseActionButton(
                     text = "Cancel",
                     onClick = {
-                        onEvent(EnterTaskNumberRecordScreenEvent.OnDismissRequest)
+                        onEvent(EnterTaskTimeRecordScreenEvent.OnDismissRequest)
                     }
                 )
             }
@@ -79,40 +81,31 @@ private fun EnterTaskNumberRecordDialogStateless(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        val focusRequester = remember { FocusRequester() }
-        BaseTextFiledBuilder.BaseOutlinedTextField(
-            value = state.inputNumber,
-            onValueChange = { onEvent(EnterTaskNumberRecordScreenEvent.InputUpdateNumber(it)) },
+        Spacer(modifier = Modifier.height(16.dp))
+
+        BaseTimeInput(
+            hours = state.inputHours,
+            minutes = state.inputMinutes,
+            onInputUpdateHours = { onEvent(EnterTaskTimeRecordScreenEvent.OnInputUpdateHours(it)) },
+            onInputUpdateMinutes = { onEvent(EnterTaskTimeRecordScreenEvent.OnInputUpdateMinutes(it)) },
             modifier = Modifier
                 .fillMaxWidth()
-                .focusRequester(focusRequester),
-            valueValidator = state.inputValidator,
-            label = {
-                Text(text = "number")
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            )
         )
+
         val goalText = remember {
             state.task.progressContent.let { pc ->
-                val limitNumber = pc.limitNumber.limitNumberToString()
+                val limitTime = pc.limitTime.toHourMinute()
                 val limitType = pc.limitType.toDisplay()
-                "$limitType $limitNumber ${pc.limitUnit}"
+                "$limitType $limitTime"
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Goal: $goalText",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(vertical = 4.dp),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
-        }
     }
 }

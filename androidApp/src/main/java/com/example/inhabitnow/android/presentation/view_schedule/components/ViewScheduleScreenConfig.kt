@@ -3,6 +3,7 @@ package com.example.inhabitnow.android.presentation.view_schedule.components
 import com.example.inhabitnow.android.presentation.base.components.config.ScreenConfig
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStateHolder
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.EnterTaskNumberRecordStateHolder
+import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.EnterTaskTimeRecordStateHolder
 
 sealed interface ViewScheduleScreenConfig : ScreenConfig {
     data class PickDate(
@@ -11,5 +12,9 @@ sealed interface ViewScheduleScreenConfig : ScreenConfig {
 
     data class EnterTaskNumberRecord(
         val stateHolder: EnterTaskNumberRecordStateHolder
+    ) : ViewScheduleScreenConfig
+
+    data class EnterTaskTimeRecord(
+        val stateHolder: EnterTaskTimeRecordStateHolder
     ) : ViewScheduleScreenConfig
 }
