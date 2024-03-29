@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -66,7 +65,7 @@ class ViewScheduleViewModel @Inject constructor(
 ) : BaseViewModel<ViewScheduleScreenEvent, ViewScheduleScreenState, ViewScheduleScreenNavigation, ViewScheduleScreenConfig>() {
     private val todayDateState = MutableStateFlow(nowDate)
     private val currentDateState = MutableStateFlow<LocalDate>(todayDateState.value)
-    private val currentStartOfWeekDateState = MutableStateFlow(todayDateState.value.firstDayOfWeek)
+    private val startOfWeekDateState = MutableStateFlow(todayDateState.value.firstDayOfWeek)
 
     private val allTasksState: StateFlow<UIResultModel<List<FullTaskWithRecordModel>>> =
         currentDateState.flatMapLatest { date ->
@@ -94,24 +93,6 @@ class ViewScheduleViewModel @Inject constructor(
             UIResultModel.Loading(emptyList())
         )
 
-    private val allDaysOfWeekState = combine(
-        currentDateState,
-        currentStartOfWeekDateState,
-        todayDateState,
-    ) { currentDate, currentStartOfWeekDate, todayDate ->
-        withContext(defaultDispatcher) {
-            provideDateItems(
-                targetDate = currentStartOfWeekDate,
-                currentDate = currentDate,
-                todayDate = todayDate
-            )
-        }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        emptyList()
-    )
-
     private val isLockedState =
         combine(currentDateState, todayDateState) { currentDate, todayDate ->
             currentDate > todayDate
@@ -125,13 +106,15 @@ class ViewScheduleViewModel @Inject constructor(
         combine(
             allTasksState,
             currentDateState,
-            allDaysOfWeekState,
+            startOfWeekDateState,
+            todayDateState,
             isLockedState
-        ) { allTasks, currentDate, allDaysOfWeek, isLocked ->
+        ) { allTasks, currentDate, startOfWeekDate, todayDate, isLocked ->
             ViewScheduleScreenState(
                 allTasksWithRecord = allTasks,
                 currentDate = currentDate,
-                allDaysOfWeek = allDaysOfWeek,
+                startOfWeekDate = startOfWeekDate,
+                todayDate = todayDate,
                 isLocked = isLocked
             )
         }.stateIn(
@@ -140,7 +123,8 @@ class ViewScheduleViewModel @Inject constructor(
             ViewScheduleScreenState(
                 currentDate = currentDateState.value,
                 allTasksWithRecord = allTasksState.value,
-                allDaysOfWeek = allDaysOfWeekState.value,
+                startOfWeekDate = startOfWeekDateState.value,
+                todayDate = todayDateState.value,
                 isLocked = isLockedState.value
             )
         )
@@ -368,7 +352,7 @@ class ViewScheduleViewModel @Inject constructor(
 
     private fun onConfirmPickDate(result: PickDateScreenResult.Confirm) {
         currentDateState.update { result.date }
-        currentStartOfWeekDateState.update { result.date.firstDayOfWeek }
+        startOfWeekDateState.update { result.date.firstDayOfWeek }
     }
 
     private fun onTaskClick(event: ViewScheduleScreenEvent.OnTaskClick) {
@@ -515,13 +499,13 @@ class ViewScheduleViewModel @Inject constructor(
     }
 
     private fun onPrevWeekClick() {
-        currentStartOfWeekDateState.update { oldDate ->
+        startOfWeekDateState.update { oldDate ->
             oldDate.minus(1, DateTimeUnit.WEEK)
         }
     }
 
     private fun onNextWeekClick() {
-        currentStartOfWeekDateState.update { oldDate ->
+        startOfWeekDateState.update { oldDate ->
             oldDate.plus(1, DateTimeUnit.WEEK)
         }
     }

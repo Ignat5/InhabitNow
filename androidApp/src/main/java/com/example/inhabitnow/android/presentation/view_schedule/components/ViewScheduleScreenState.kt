@@ -11,6 +11,7 @@ import kotlinx.datetime.LocalDate
 data class ViewScheduleScreenState(
     val allTasksWithRecord: UIResultModel<List<FullTaskWithRecordModel>>,
     val currentDate: LocalDate,
-    val allDaysOfWeek: List<ItemDayOfWeek>,
+    val startOfWeekDate: LocalDate,
+    val todayDate: LocalDate,
     val isLocked: Boolean
 ) : ScreenState

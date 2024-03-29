@@ -91,7 +91,7 @@ fun NavGraphBuilder.mainGraph(
                                 route = mainNavDest.route,
                                 navOptions = navOptions {
                                     this.launchSingleTop = true
-                                    this.popUpTo(AppNavDest.MainGraphDestination.route) {
+                                    this.popUpTo(MainNavDest.ViewScheduleDestination.route) {
                                         this.inclusive = false
                                     }
                                 }

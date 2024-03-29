@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -77,8 +78,10 @@ import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.record.content.RecordContentModel
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
 import com.example.inhabitnow.domain.model.tag.TagModel
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 
 private const val PROGRESS_FULL = 1f
 private const val PROGRESS_EMPTY = 0f
@@ -141,7 +144,9 @@ private fun ViewScheduleScreenStateless(
             }
             Column(modifier = Modifier.fillMaxSize()) {
                 WeekRow(
-                    allDateItems = state.allDaysOfWeek,
+                    startOfWeekDate = state.startOfWeekDate,
+                    currentDate = state.currentDate,
+                    todayDate = state.todayDate,
                     onDateClick = {
                         onEvent(ViewScheduleScreenEvent.OnDateClick(it))
                     },
@@ -476,33 +481,51 @@ private fun getProgressTextOrNull(taskWithRecord: TaskWithRecordModel): String? 
 
 @Composable
 private fun WeekRow(
-    allDateItems: List<ItemDayOfWeek>,
+    startOfWeekDate: LocalDate,
+    currentDate: LocalDate,
+    todayDate: LocalDate,
     onDateClick: (LocalDate) -> Unit,
     onPrevClick: () -> Unit,
     onNextClick: () -> Unit
 ) {
+    val weekDaysCount = remember { DayOfWeek.entries.size }
     Row(modifier = Modifier.fillMaxWidth()) {
         NextPrevButton(
             iconId = R.drawable.ic_previous,
             onClick = onPrevClick
         )
         LazyVerticalGrid(
-            columns = GridCells.Fixed(DayOfWeek.entries.size),
+            columns = GridCells.Fixed(weekDaysCount),
             modifier = Modifier
                 .weight(1f)
                 .height(48.dp)
         ) {
-            items(
-                items = allDateItems,
-                key = { it.date.toEpochDays() }
-            ) { item ->
+            items(weekDaysCount) { offset ->
+                val itemDate = remember(startOfWeekDate) {
+                    startOfWeekDate.plus(offset, DateTimeUnit.DAY)
+                }
                 ItemWeekDay(
-                    item = item,
+                    item = when (itemDate) {
+                        currentDate -> ItemDayOfWeek.Current(itemDate)
+                        todayDate -> ItemDayOfWeek.Today(itemDate)
+                        else -> ItemDayOfWeek.Day(itemDate)
+                    },
                     onClick = {
-                        onDateClick(item.date)
+                        onDateClick(itemDate)
                     }
                 )
             }
+//            items(
+//                items = allDateItems,
+//                key = { it.date.toEpochDays() }
+//            ) { item ->
+//                ItemWeekDay(
+//                    item = item,
+//                    onClick = {
+//                        onDateClick(item.date)
+//                    }
+//                )
+//            }
         }
         NextPrevButton(
             iconId = R.drawable.ic_next,
