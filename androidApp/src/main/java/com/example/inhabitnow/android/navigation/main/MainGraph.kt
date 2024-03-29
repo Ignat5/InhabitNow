@@ -123,6 +123,9 @@ fun NavGraphBuilder.mainGraph(
                                     is ViewScheduleScreenNavigation.Search -> {
                                         onNavigateToSearchTasks()
                                     }
+                                    else -> {
+                                        /* TODO */
+                                    }
                                 }
                             }
                         )

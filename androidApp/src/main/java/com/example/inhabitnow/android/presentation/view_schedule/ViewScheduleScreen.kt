@@ -294,14 +294,12 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
     }
 
     val containerColor = when (taskWithRecord.statusType) {
-        is TaskScheduleStatusType.Skipped -> MaterialTheme.colorScheme.surfaceContainerHigh
-        is TaskScheduleStatusType.Failed -> MaterialTheme.colorScheme.errorContainer
         else -> MaterialTheme.colorScheme.primaryContainer
     }
 
     val progressColor = when (taskWithRecord.statusType) {
-        is TaskScheduleStatusType.Skipped -> MaterialTheme.colorScheme.onSurface
-        is TaskScheduleStatusType.Failed -> MaterialTheme.colorScheme.onErrorContainer
+        is TaskScheduleStatusType.Skipped -> MaterialTheme.colorScheme.surfaceContainerHigh
+        is TaskScheduleStatusType.Failed -> MaterialTheme.colorScheme.errorContainer
         else -> MaterialTheme.colorScheme.onPrimaryContainer
     }
     val progressState by animateFloatAsState(

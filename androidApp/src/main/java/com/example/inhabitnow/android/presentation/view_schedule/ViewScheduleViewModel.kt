@@ -200,11 +200,112 @@ class ViewScheduleViewModel @Inject constructor(
 
     private fun onConfirmViewHabitRecordActions(result: ViewHabitRecordActionsScreenResult.Confirm) {
         when (result.action) {
-            is ViewHabitRecordActionsScreenResult.Action.Edit -> Unit
-            is ViewHabitRecordActionsScreenResult.Action.EnterRecord -> Unit
-            is ViewHabitRecordActionsScreenResult.Action.Fail -> Unit
-            is ViewHabitRecordActionsScreenResult.Action.Skip -> Unit
-            is ViewHabitRecordActionsScreenResult.Action.ResetEntry -> Unit
+            is ViewHabitRecordActionsScreenResult.Action.Edit ->
+                onEditTaskClick(result.taskId)
+
+            is ViewHabitRecordActionsScreenResult.Action.EnterRecord ->
+                onEnterRecordClick(result.taskId)
+
+            is ViewHabitRecordActionsScreenResult.Action.Fail ->
+                onFailTaskClick(result.taskId)
+
+            is ViewHabitRecordActionsScreenResult.Action.Skip ->
+                onSkipTaskClick(result.taskId)
+
+            is ViewHabitRecordActionsScreenResult.Action.ResetEntry ->
+                onResetTaskEntryClick(result.taskId)
+        }
+    }
+
+    private fun onFailTaskClick(taskId: String) {
+        viewModelScope.launch {
+            saveRecordUseCase(
+                taskId = taskId,
+                targetDate = currentDateState.value,
+                requestType = SaveRecordUseCase.RequestType.EntryFail
+            )
+        }
+    }
+
+    private fun onSkipTaskClick(taskId: String) {
+        viewModelScope.launch {
+            saveRecordUseCase(
+                taskId = taskId,
+                targetDate = currentDateState.value,
+                requestType = SaveRecordUseCase.RequestType.EntrySkip
+            )
+        }
+    }
+
+    private fun onResetTaskEntryClick(taskId: String) {
+        viewModelScope.launch {
+            saveRecordUseCase(
+                taskId = taskId,
+                targetDate = currentDateState.value,
+                requestType = SaveRecordUseCase.RequestType.EntryReset
+            )
+        }
+    }
+
+    private fun onEditTaskClick(taskId: String) {
+        setUpNavigationState(ViewScheduleScreenNavigation.EditTask(taskId))
+    }
+
+    private fun onEnterRecordClick(taskId: String) {
+        allTasksState.value.data?.find { it.taskWithRecordModel.task.id == taskId }?.taskWithRecordModel?.let { taskWithRecord ->
+            when (taskWithRecord) {
+                is TaskWithRecordModel.Habit.HabitContinuous -> {
+                    when (taskWithRecord) {
+                        is TaskWithRecordModel.Habit.HabitContinuous.HabitNumber -> {
+                            onEnterHabitNumberRecordClick(taskWithRecord)
+                        }
+
+                        is TaskWithRecordModel.Habit.HabitContinuous.HabitTime -> {
+                            onEnterHabitTimeRecordClick(taskWithRecord)
+                        }
+                    }
+                }
+
+                is TaskWithRecordModel.Habit.HabitYesNo -> {
+                    onEnterHabitYesNoRecordClick(taskWithRecord)
+                }
+
+                else -> Unit
+            }
+        }
+    }
+
+    private fun onEnterHabitNumberRecordClick(taskWithRecord: TaskWithRecordModel.Habit.HabitContinuous.HabitNumber) {
+        setUpConfigState(
+            ViewScheduleScreenConfig.EnterTaskNumberRecord(
+                stateHolder = EnterTaskNumberRecordStateHolder(
+                    taskWithRecord = taskWithRecord,
+                    date = currentDateState.value,
+                    holderScope = provideChildScope()
+                )
+            )
+        )
+    }
+
+    private fun onEnterHabitTimeRecordClick(taskWithRecord: TaskWithRecordModel.Habit.HabitContinuous.HabitTime) {
+        setUpConfigState(
+            ViewScheduleScreenConfig.EnterTaskTimeRecord(
+                stateHolder = EnterTaskTimeRecordStateHolder(
+                    taskWithRecordModel = taskWithRecord,
+                    date = currentDateState.value,
+                    holderScope = provideChildScope()
+                )
+            )
+        )
+    }
+
+    private fun onEnterHabitYesNoRecordClick(taskWithRecord: TaskWithRecordModel.Habit.HabitYesNo) {
+        viewModelScope.launch {
+            saveRecordUseCase(
+                taskId = taskWithRecord.task.id,
+                targetDate = currentDateState.value,
+                requestType = SaveRecordUseCase.RequestType.EntryYesNo
+            )
         }
     }
 

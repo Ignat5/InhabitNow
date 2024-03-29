@@ -168,7 +168,7 @@ private fun ItemProgress(
                     val limitUnit = item.taskWithRecord.task.progressContent.limitUnit
                     val suffix = recordNumber?.let {
                         "$recordNumber $limitUnit"
-                    } ?: "no record"
+                    } ?: item.taskWithRecord.statusType.toDisplay()
                     "Progress: $suffix"
                 }
 
@@ -178,7 +178,7 @@ private fun ItemProgress(
                             ?.time
                     val suffix = recordTime?.let {
                         recordTime.toHourMinute()
-                    } ?: "no record"
+                    } ?: item.taskWithRecord.statusType.toDisplay()
                     "Progress: $suffix"
                 }
             }
@@ -310,16 +310,16 @@ private fun TaskTitleBlock(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                val statusText = remember { taskWithRecord.statusType.toDisplay() }
-                Text(
-                    text = statusText,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Start,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+//                val statusText = remember { taskWithRecord.statusType.toDisplay() }
+//                Text(
+//                    text = statusText,
+//                    style = MaterialTheme.typography.labelMedium,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+//                    modifier = Modifier.weight(1f),
+//                    textAlign = TextAlign.Start,
+//                    maxLines = 1,
+//                    overflow = TextOverflow.Ellipsis
+//                )
             }
             Text(
                 text = date.toShortMonthDayYear(),
