@@ -50,6 +50,7 @@ import com.example.inhabitnow.android.presentation.view_schedule.components.View
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun NavGraphBuilder.mainGraph(
     onNavigateToCreateTask: (taskId: String) -> Unit,
+    onNavigateToEditTask: (taskId: String) -> Unit,
     onNavigateToSearchTasks: () -> Unit
 ) {
     composable(
@@ -123,8 +124,8 @@ fun NavGraphBuilder.mainGraph(
                                     is ViewScheduleScreenNavigation.Search -> {
                                         onNavigateToSearchTasks()
                                     }
-                                    else -> {
-                                        /* TODO */
+                                    is ViewScheduleScreenNavigation.EditTask -> {
+                                        onNavigateToEditTask(destination.taskId)
                                     }
                                 }
                             }

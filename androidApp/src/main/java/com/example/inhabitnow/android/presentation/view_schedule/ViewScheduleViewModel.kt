@@ -68,22 +68,6 @@ class ViewScheduleViewModel @Inject constructor(
     private val currentDateState = MutableStateFlow<LocalDate>(todayDateState.value)
     private val currentStartOfWeekDateState = MutableStateFlow(todayDateState.value.firstDayOfWeek)
 
-    private val allDaysOfWeekState = combine(
-        currentDateState,
-        currentStartOfWeekDateState,
-        todayDateState,
-    ) { currentDate, currentStartOfWeekDate, todayDate ->
-        provideDateItems(
-            targetDate = currentStartOfWeekDate,
-            currentDate = currentDate,
-            todayDate = todayDate
-        )
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        emptyList()
-    )
-
     private val allTasksState: StateFlow<UIResultModel<List<FullTaskWithRecordModel>>> =
         currentDateState.flatMapLatest { date ->
             combine(
@@ -109,6 +93,24 @@ class ViewScheduleViewModel @Inject constructor(
             SharingStarted.Eagerly,
             UIResultModel.Loading(emptyList())
         )
+
+    private val allDaysOfWeekState = combine(
+        currentDateState,
+        currentStartOfWeekDateState,
+        todayDateState,
+    ) { currentDate, currentStartOfWeekDate, todayDate ->
+        withContext(defaultDispatcher) {
+            provideDateItems(
+                targetDate = currentStartOfWeekDate,
+                currentDate = currentDate,
+                todayDate = todayDate
+            )
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        emptyList()
+    )
 
     private val isLockedState =
         combine(currentDateState, todayDateState) { currentDate, todayDate ->
@@ -371,9 +373,17 @@ class ViewScheduleViewModel @Inject constructor(
 
     private fun onTaskClick(event: ViewScheduleScreenEvent.OnTaskClick) {
         allTasksState.value.data?.find { it.taskWithRecordModel.task.id == event.taskId }?.taskWithRecordModel?.let { taskWithRecord ->
-            when (taskWithRecord) {
-                is TaskWithRecordModel.Habit -> onHabitClick(taskWithRecord)
-                is TaskWithRecordModel.Task -> onTaskClick(taskWithRecord)
+            if (!isLockedState.value) {
+                when (taskWithRecord) {
+                    is TaskWithRecordModel.Habit -> onHabitClick(taskWithRecord)
+                    is TaskWithRecordModel.Task -> onTaskClick(taskWithRecord)
+                }
+            } else {
+                setUpNavigationState(
+                    ViewScheduleScreenNavigation.EditTask(
+                        taskWithRecord.task.id
+                    )
+                )
             }
         }
     }
@@ -444,13 +454,17 @@ class ViewScheduleViewModel @Inject constructor(
 
     private fun onTaskLongClick(event: ViewScheduleScreenEvent.OnTaskLongClick) {
         allTasksState.value.data?.find { it.taskWithRecordModel.task.id == event.taskId }?.taskWithRecordModel?.let { taskWithRecord ->
-            when (taskWithRecord) {
-                is TaskWithRecordModel.Habit -> {
-                    onHabitLongClick(taskWithRecord)
-                }
+            if (!isLockedState.value) {
+                when (taskWithRecord) {
+                    is TaskWithRecordModel.Habit -> {
+                        onHabitLongClick(taskWithRecord)
+                    }
 
-                is TaskWithRecordModel.Task -> {}
-            }
+                    is TaskWithRecordModel.Task -> {
+                        onTaskLongClick(taskWithRecord)
+                    }
+                }
+            } else setUpNavigationState(ViewScheduleScreenNavigation.EditTask(taskWithRecord.task.id))
         }
     }
 
@@ -462,6 +476,14 @@ class ViewScheduleViewModel @Inject constructor(
                     date = currentDateState.value,
                     holderScope = provideChildScope()
                 )
+            )
+        )
+    }
+
+    private fun onTaskLongClick(taskWithRecord: TaskWithRecordModel.Task) {
+        setUpNavigationState(
+            ViewScheduleScreenNavigation.EditTask(
+                taskWithRecord.task.id
             )
         )
     }
