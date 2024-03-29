@@ -306,7 +306,13 @@ class ViewScheduleViewModel @Inject constructor(
     }
 
     private fun onTaskClick(taskWithRecordModel: TaskWithRecordModel.Task) {
-
+        viewModelScope.launch {
+            saveRecordUseCase(
+                taskId = taskWithRecordModel.task.id,
+                targetDate = currentDateState.value,
+                requestType = SaveRecordUseCase.RequestType.EntryYesNo
+            )
+        }
     }
 
     private fun onTaskLongClick(event: ViewScheduleScreenEvent.OnTaskLongClick) {
