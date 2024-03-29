@@ -32,4 +32,16 @@ class DefaultRecordDataSource(
         recordDao.insertRecord(recordTable)
     }
 
+    override suspend fun updateRecordEntryById(recordId: String, entry: String): ResultModel<Unit> =
+        runQuery {
+            recordDao.updateRecordEntryById(
+                recordId = recordId,
+                entry = entry
+            )
+        }
+
+    override suspend fun deleteRecordById(recordId: String): ResultModel<Unit> = runQuery {
+        recordDao.deleteRecordById(recordId)
+    }
+
 }

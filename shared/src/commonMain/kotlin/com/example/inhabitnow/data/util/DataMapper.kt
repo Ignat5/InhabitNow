@@ -182,10 +182,10 @@ fun RecordEntity.toRecordTable(json: Json) = RecordTable(
     createdAt = createdAt
 )
 
-private fun RecordContentEntity.Entry.toJson(json: Json) =
+internal fun RecordContentEntity.Entry.toJson(json: Json) =
     json.encodeToString<RecordContentEntity.Entry>(this)
 
-private fun String.fromJsonRecordEntry(json: Json) =
+internal fun String.fromJsonRecordEntry(json: Json) =
     json.decodeFromString<RecordContentEntity.Entry>(this)
 
 /** tag model **/

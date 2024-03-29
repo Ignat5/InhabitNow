@@ -9,6 +9,7 @@ import com.example.inhabitnow.data.util.toEpochDay
 import com.example.inhabitnow.data.util.toJson
 import com.example.inhabitnow.data.util.toRecordEntity
 import com.example.inhabitnow.data.util.toRecordTable
+import database.RecordTable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -31,30 +32,43 @@ class DefaultRecordRepository(
             } else emptyList()
         }
 
+    override fun readRecordByTaskIdAndDate(
+        taskId: String,
+        targetDate: LocalDate
+    ): Flow<RecordEntity?> = recordDataSource.readRecordByTaskIdAndDate(
+        taskId = taskId,
+        targetEpochDay = targetDate.toEpochDay()
+    ).map { recordTable ->
+        recordTable?.let {
+            withContext(defaultDispatcher) {
+                recordTable.toRecordEntity(json)
+            }
+        }
+    }
+
     override suspend fun saveRecord(
         taskId: String,
         targetDate: LocalDate,
         entry: RecordContentEntity.Entry
-    ): ResultModel<Unit> = recordDataSource.readRecordByTaskIdAndDate(
-        taskId = taskId,
-        targetEpochDay = targetDate.toEpochDay()
-    ).firstOrNull()?.toRecordEntity(json)?.let { recordEntity ->
-        recordDataSource.insertRecord(
-            recordEntity.copy(
-                entry = entry,
-                createdAt = Clock.System.now().toEpochMilliseconds()
-            ).toRecordTable(json)
-        )
-    } ?: run {
-        recordDataSource.insertRecord(
-            RecordEntity(
-                id = randomUUID(),
-                taskId = taskId,
-                date = targetDate,
-                entry = entry,
-                createdAt = Clock.System.now().toEpochMilliseconds()
-            ).toRecordTable(json)
-        )
-    }
+    ): ResultModel<Unit> = recordDataSource.insertRecord(
+        RecordEntity(
+            id = randomUUID(),
+            taskId = taskId,
+            date = targetDate,
+            entry = entry,
+            createdAt = Clock.System.now().toEpochMilliseconds()
+        ).toRecordTable(json)
+    )
+
+    override suspend fun updateRecordEntryById(
+        recordId: String,
+        entry: RecordContentEntity.Entry
+    ): ResultModel<Unit> = recordDataSource.updateRecordEntryById(
+        recordId = recordId,
+        entry = entry.toJson(json)
+    )
+
+    override suspend fun deleteRecordById(recordId: String): ResultModel<Unit> =
+        recordDataSource.deleteRecordById(recordId)
 
 }

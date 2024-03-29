@@ -198,7 +198,9 @@ class ViewScheduleViewModel @Inject constructor(
             saveRecordUseCase(
                 taskId = result.taskId,
                 targetDate = result.date,
-                entry = RecordContentModel.Entry.Time(result.time)
+                requestType = SaveRecordUseCase.RequestType.EntryContinuous(
+                    entry = RecordContentModel.Entry.Time(result.time)
+                ),
             )
         }
     }
@@ -219,7 +221,9 @@ class ViewScheduleViewModel @Inject constructor(
             saveRecordUseCase(
                 taskId = result.taskId,
                 targetDate = result.date,
-                entry = RecordContentModel.Entry.Number(result.number)
+                requestType = SaveRecordUseCase.RequestType.EntryContinuous(
+                    entry = RecordContentModel.Entry.Number(result.number)
+                )
             )
         }
     }
@@ -262,7 +266,7 @@ class ViewScheduleViewModel @Inject constructor(
             }
 
             is TaskWithRecordModel.Habit.HabitYesNo -> {
-
+                onHabitYesNoClick(taskWithRecordModel)
             }
         }
     }
@@ -289,6 +293,16 @@ class ViewScheduleViewModel @Inject constructor(
                 )
             )
         )
+    }
+
+    private fun onHabitYesNoClick(taskWithRecordModel: TaskWithRecordModel.Habit.HabitYesNo) {
+        viewModelScope.launch {
+            saveRecordUseCase(
+                taskId = taskWithRecordModel.task.id,
+                targetDate = currentDateState.value,
+                requestType = SaveRecordUseCase.RequestType.EntryYesNo
+            )
+        }
     }
 
     private fun onTaskClick(taskWithRecordModel: TaskWithRecordModel.Task) {

@@ -8,6 +8,18 @@ interface SaveRecordUseCase {
     suspend operator fun invoke(
         taskId: String,
         targetDate: LocalDate,
-        entry: RecordContentModel.Entry
+        requestType: RequestType
     ): ResultModel<Unit>
+
+    sealed interface RequestType {
+        data class EntryContinuous(
+            val entry: RecordContentModel.Entry.HabitEntry.HabitContinuousEntry
+        ) : RequestType
+
+        data object EntryYesNo : RequestType
+        data object EntrySkip : RequestType
+        data object EntryFail : RequestType
+        data object EntryReset : RequestType
+    }
+
 }

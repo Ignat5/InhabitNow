@@ -11,3 +11,11 @@ tRecord.epochDay = :targetEpochDay;
 insertRecord:
 INSERT OR REPLACE INTO RecordTable
 VALUES ?;
+
+updateRecordEntryById:
+UPDATE RecordTable SET entry = :entry
+WHERE id = :recordId;
+
+deleteRecordById:
+DELETE FROM RecordTable
+WHERE id = :recordId;
