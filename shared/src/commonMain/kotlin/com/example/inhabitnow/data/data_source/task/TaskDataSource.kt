@@ -2,6 +2,7 @@ package com.example.inhabitnow.data.data_source.task
 
 import com.example.inhabitnow.core.model.ResultModel
 import database.SelectFullTasksByDate
+import database.SelectFullTasksByType
 import database.SelectTaskWithContentById
 import database.SelectTasksWithContentBySearchQuery
 import database.TaskContentTable
@@ -15,6 +16,8 @@ interface TaskDataSource {
     fun readTasksWithContentBySearchQuery(searchQuery: String): Flow<List<SelectTasksWithContentBySearchQuery>>
 
     fun readFullTasksByDate(targetEpochDay: Long): Flow<List<SelectFullTasksByDate>>
+
+    fun readFullTasksByType(allTaskTypes: Set<String>): Flow<List<SelectFullTasksByType>>
 
     suspend fun insertTaskWithContent(
         taskTable: TaskTable,

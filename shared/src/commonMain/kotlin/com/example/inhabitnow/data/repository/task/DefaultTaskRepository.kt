@@ -1,15 +1,18 @@
 package com.example.inhabitnow.data.repository.task
 
 import com.example.inhabitnow.core.model.ResultModel
+import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.core.util.randomUUID
 import com.example.inhabitnow.data.data_source.task.TaskDataSource
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import com.example.inhabitnow.data.model.task.derived.FullTaskEntity
+import com.example.inhabitnow.data.model.task.derived.SelectFullTasksQuery
 import com.example.inhabitnow.data.util.toEpochDay
 import com.example.inhabitnow.data.util.toJson
 import com.example.inhabitnow.data.util.toReminderEntity
 import com.example.inhabitnow.data.util.toReminderTable
+import com.example.inhabitnow.data.util.toSelectFullTasksQuery
 import com.example.inhabitnow.data.util.toTagEntity
 import com.example.inhabitnow.data.util.toTagTable
 import com.example.inhabitnow.data.util.toTaskContentTable
@@ -20,6 +23,7 @@ import database.TaskContentTable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -79,62 +83,20 @@ class DefaultTaskRepository(
         taskDataSource.readFullTasksByDate(targetDate.toEpochDay()).map { queryList ->
             if (queryList.isNotEmpty()) {
                 withContext(defaultDispatcher) {
-                    val allTaskIds = queryList.distinctBy { it.task_id }.map { it.task_id }
-                    allTaskIds.map { taskId ->
-                        async {
-
-                            val taskWithContentEntityDef = async {
-                                kotlin.run {
-                                    val tTask = queryList
-                                        .find { it.task_id == taskId }
-                                        ?.toTaskTable()
-                                        ?: return@run null
-
-                                    val allTaskContent = queryList
-                                        .asSequence()
-                                        .filter { it.taskContent_taskId == taskId }
-                                        .distinctBy { it.taskContent_id }
-                                        .map { it.toTaskContentTable() }
-                                        .toList()
-
-                                    tTask.toTaskWithContentEntity(
-                                        allTaskContent = allTaskContent,
-                                        json = json
-                                    )
-                                }
-                            }
-
-                            val allRemindersDef = async {
-                                queryList
-                                    .asSequence()
-                                    .filter { it.reminder_taskId == taskId }
-                                    .distinctBy { it.reminder_id }
-                                    .mapNotNull { it.toReminderTable() }
-                                    .map { it.toReminderEntity(json) }
-                                    .toList()
-                            }
-
-                            val allTagsDef = async {
-                                queryList
-                                    .asSequence()
-                                    .filter { it.tagCross_taskId == taskId }
-                                    .distinctBy { it.tagCross_tagId }
-                                    .mapNotNull { it.toTagTable() }
-                                    .map { it.toTagEntity() }
-                                    .toList()
-                            }
-
-                            FullTaskEntity(
-                                taskWithContentEntity = taskWithContentEntityDef.await()
-                                    ?: return@async null,
-                                allReminders = allRemindersDef.await(),
-                                allTags = allTagsDef.await()
-                            )
-                        }
-                    }.awaitAll().filterNotNull()
+                    queryList.map { it.toSelectFullTasksQuery() }.toFullTaskEntityList()
                 }
             } else emptyList()
         }
+
+    override fun readFullTasksByType(allTaskTypes: Set<TaskType>): Flow<List<FullTaskEntity>> =
+        taskDataSource.readFullTasksByType(allTaskTypes.map { it.toJson(json) }.toSet())
+            .map { queryList ->
+                if (queryList.isNotEmpty()) {
+                    withContext(defaultDispatcher) {
+                        queryList.map { it.toSelectFullTasksQuery() }.toFullTaskEntityList()
+                    }
+                } else emptyList()
+            }
 
     override suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {
@@ -274,6 +236,63 @@ class DefaultTaskRepository(
                 )
             }
         } ?: ResultModel.Error(IllegalStateException())
+    }
+
+    private suspend fun List<SelectFullTasksQuery>.toFullTaskEntityList() = this.let { queryList ->
+        coroutineScope {
+            val allTaskIds = queryList.distinctBy { it.task_id }.map { it.task_id }
+            allTaskIds.map { taskId ->
+                async {
+                    val taskWithContentEntityDef = async {
+                        kotlin.run {
+                            val tTask = queryList
+                                .find { it.task_id == taskId }
+                                ?.toTaskTable()
+                                ?: return@run null
+
+                            val allTaskContent = queryList
+                                .asSequence()
+                                .filter { it.taskContent_taskId == taskId }
+                                .distinctBy { it.taskContent_id }
+                                .map { it.toTaskContentTable() }
+                                .toList()
+
+                            tTask.toTaskWithContentEntity(
+                                allTaskContent = allTaskContent,
+                                json = json
+                            )
+                        }
+                    }
+
+                    val allRemindersDef = async {
+                        queryList
+                            .asSequence()
+                            .filter { it.reminder_taskId == taskId }
+                            .distinctBy { it.reminder_id }
+                            .mapNotNull { it.toReminderTable() }
+                            .map { it.toReminderEntity(json) }
+                            .toList()
+                    }
+
+                    val allTagsDef = async {
+                        queryList
+                            .asSequence()
+                            .filter { it.tagCross_taskId == taskId }
+                            .distinctBy { it.tagCross_tagId }
+                            .mapNotNull { it.toTagTable() }
+                            .map { it.toTagEntity() }
+                            .toList()
+                    }
+
+                    FullTaskEntity(
+                        taskWithContentEntity = taskWithContentEntityDef.await()
+                            ?: return@async null,
+                        allReminders = allRemindersDef.await(),
+                        allTags = allTagsDef.await()
+                    )
+                }
+            }.awaitAll().filterNotNull()
+        }
     }
 
 }

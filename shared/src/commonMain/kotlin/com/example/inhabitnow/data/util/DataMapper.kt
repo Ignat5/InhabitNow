@@ -15,9 +15,11 @@ import com.example.inhabitnow.data.model.task.content.BaseTaskContentEntity
 import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
 import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
+import com.example.inhabitnow.data.model.task.derived.SelectFullTasksQuery
 import database.RecordTable
 import database.ReminderTable
 import database.SelectFullTasksByDate
+import database.SelectFullTasksByType
 import database.SelectTaskWithContentById
 import database.SelectTasksWithContentBySearchQuery
 import database.TagTable
@@ -283,10 +285,70 @@ fun SelectTaskWithContentById.toTaskContentTable(): TaskContentTable {
     )
 }
 
-//
+// other
+
+internal fun SelectFullTasksByDate.toSelectFullTasksQuery() = SelectFullTasksQuery(
+    task_id = task_id,
+    task_type = task_type,
+    task_progressType = task_progressType,
+    task_title = task_title,
+    task_description = task_description,
+    task_startEpochDay = task_startEpochDay,
+    task_endEpochDay = task_endEpochDay,
+    task_priority = task_priority,
+    task_createdAt = task_createdAt,
+    task_deletedAt = task_deletedAt,
+    taskContent_id = taskContent_id,
+    taskContent_taskId = taskContent_taskId,
+    taskContent_contentType = taskContent_contentType,
+    taskContent_content = taskContent_content,
+    taskContent_startEpochDay = taskContent_startEpochDay,
+    taskContent_createdAt = taskContent_createdAt,
+    reminder_id = reminder_id,
+    reminder_taskId = reminder_taskId,
+    reminder_time = reminder_time,
+    reminder_type = reminder_type,
+    reminder_schedule = reminder_schedule,
+    reminder_createdAt = reminder_createdAt,
+    tagCross_taskId = tagCross_taskId,
+    tagCross_tagId = tagCross_tagId,
+    tag_id = tag_id,
+    tag_title = tag_title,
+    tag_createdAt = tag_createdAt
+)
+
+internal fun SelectFullTasksByType.toSelectFullTasksQuery() = SelectFullTasksQuery(
+    task_id = task_id,
+    task_type = task_type,
+    task_progressType = task_progressType,
+    task_title = task_title,
+    task_description = task_description,
+    task_startEpochDay = task_startEpochDay,
+    task_endEpochDay = task_endEpochDay,
+    task_priority = task_priority,
+    task_createdAt = task_createdAt,
+    task_deletedAt = task_deletedAt,
+    taskContent_id = taskContent_id,
+    taskContent_taskId = taskContent_taskId,
+    taskContent_contentType = taskContent_contentType,
+    taskContent_content = taskContent_content,
+    taskContent_startEpochDay = taskContent_startEpochDay,
+    taskContent_createdAt = taskContent_createdAt,
+    reminder_id = reminder_id,
+    reminder_taskId = reminder_taskId,
+    reminder_time = reminder_time,
+    reminder_type = reminder_type,
+    reminder_schedule = reminder_schedule,
+    reminder_createdAt = reminder_createdAt,
+    tagCross_taskId = tagCross_taskId,
+    tagCross_tagId = tagCross_tagId,
+    tag_id = tag_id,
+    tag_title = tag_title,
+    tag_createdAt = tag_createdAt
+)
 
 /** query mappings  **/
-fun SelectFullTasksByDate.toTaskTable(): TaskTable {
+fun SelectFullTasksQuery.toTaskTable(): TaskTable {
     return TaskTable(
         id = task_id,
         type = task_type,
@@ -301,7 +363,7 @@ fun SelectFullTasksByDate.toTaskTable(): TaskTable {
     )
 }
 
-fun SelectFullTasksByDate.toTaskContentTable(): TaskContentTable {
+fun SelectFullTasksQuery.toTaskContentTable(): TaskContentTable {
     return TaskContentTable(
         id = taskContent_id,
         taskId = taskContent_taskId,
@@ -312,7 +374,7 @@ fun SelectFullTasksByDate.toTaskContentTable(): TaskContentTable {
     )
 }
 
-fun SelectFullTasksByDate.toReminderTable(): ReminderTable? {
+fun SelectFullTasksQuery.toReminderTable(): ReminderTable? {
     return ReminderTable(
         id = reminder_id ?: return null,
         taskId = reminder_taskId ?: return null,
@@ -323,7 +385,7 @@ fun SelectFullTasksByDate.toReminderTable(): ReminderTable? {
     )
 }
 
-fun SelectFullTasksByDate.toTagTable(): TagTable? {
+fun SelectFullTasksQuery.toTagTable(): TagTable? {
     return TagTable(
         id = tag_id ?: return null,
         title = tag_title ?: return null,

@@ -4,6 +4,7 @@ import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.data.data_source.base.BaseDataSource
 import com.example.inhabitnow.database.InhabitNowDatabase
 import database.SelectFullTasksByDate
+import database.SelectFullTasksByType
 import database.SelectTaskWithContentById
 import database.SelectTasksWithContentBySearchQuery
 import database.TaskContentTable
@@ -35,6 +36,11 @@ class DefaultTaskDataSource(
             taskDao.selectFullTasksByDate(
                 targetEpochDay = targetEpochDay
             )
+        }
+
+    override fun readFullTasksByType(allTaskTypes: Set<String>): Flow<List<SelectFullTasksByType>> =
+        readQueryList {
+            taskDao.selectFullTasksByType(allTaskTypes)
         }
 
     override suspend fun insertTaskWithContent(

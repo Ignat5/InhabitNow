@@ -165,11 +165,24 @@ internal fun TaskContentModel.FrequencyContent.toFrequencyContentEntity(): TaskC
 //    return TaskContentModel.ArchiveContent(this.isArchived)
 //}
 
-internal fun FullTaskEntity.toFullTaskModel() = FullTaskModel(
-    taskModel = taskWithContentEntity.toTaskModel(),
-    allReminders = allReminders.map { it.toReminderModel() },
-    allTags = allTags.map { it.toTagModel() }
-)
+internal fun FullTaskEntity.toFullTaskModel(): FullTaskModel =
+    when (val taskModel = this.taskWithContentEntity.toTaskModel()) {
+        is TaskModel.Habit -> {
+            FullTaskModel.FullHabit(
+                taskModel = taskModel,
+                allReminders = this.allReminders.map { it.toReminderModel() },
+                allTags = this.allTags.map { it.toTagModel() }
+            )
+        }
+
+        is TaskModel.Task -> {
+            FullTaskModel.FullTask(
+                taskModel = taskModel,
+                allReminders = this.allReminders.map { it.toReminderModel() },
+                allTags = this.allTags.map { it.toTagModel() }
+            )
+        }
+    }
 
 // reminder
 
