@@ -6,6 +6,8 @@ import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskById
 import com.example.inhabitnow.domain.use_case.archive_task_by_id.DefaultArchiveTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.delete_task_by_id.DefaultDeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.read_full_tasks_by_date.DefaultReadFullTasksByDateUseCase
+import com.example.inhabitnow.domain.use_case.read_full_tasks_by_date.ReadFullTasksByDateUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.DefaultReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_tasks_by_search_query.DefaultReadTasksBySearchQueryUseCase
@@ -65,6 +67,17 @@ object TaskDomainModule {
         @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher
     ): ReadTasksBySearchQueryUseCase {
         return DefaultReadTasksBySearchQueryUseCase(
+            taskRepository = taskRepository,
+            defaultDispatcher = defaultDispatcher
+        )
+    }
+
+    @Provides
+    fun provideReadFullTasksByDateUseCase(
+        taskRepository: TaskRepository,
+        @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher
+    ): ReadFullTasksByDateUseCase {
+        return DefaultReadFullTasksByDateUseCase(
             taskRepository = taskRepository,
             defaultDispatcher = defaultDispatcher
         )

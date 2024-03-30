@@ -1,13 +1,11 @@
 package com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit
 
-import com.example.inhabitnow.android.presentation.model.UIReminderContent
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.BaseCreateEditReminderStateHolder
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.components.EditReminderScreenEvent
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.components.EditReminderScreenResult
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.components.EditReminderScreenState
-import com.example.inhabitnow.android.ui.toUIScheduleContent
 import com.example.inhabitnow.core.type.ReminderType
-import com.example.inhabitnow.domain.model.reminder.ReminderModel
+import com.example.inhabitnow.domain.model.reminder.content.ReminderContentModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +17,7 @@ class EditReminderStateHolder(
     private val reminderId: String,
     reminderTime: LocalTime,
     reminderType: ReminderType,
-    reminderSchedule: UIReminderContent.Schedule,
+    reminderSchedule: ReminderContentModel.ScheduleContent,
     holderScope: CoroutineScope
 ) : BaseCreateEditReminderStateHolder<EditReminderScreenEvent, EditReminderScreenState, EditReminderScreenResult>(
     initTime = reminderTime,

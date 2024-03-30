@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 @SerialName("RecordContent")
 @Serializable
 sealed interface RecordContentEntity {
+    @Serializable
+    @SerialName("RecordContent.Entry")
     sealed interface Entry : RecordContentEntity {
         @SerialName("RecordContent.Entry.Done")
         @Serializable
@@ -22,7 +24,7 @@ sealed interface RecordContentEntity {
 
         @SerialName("RecordContent.Entry.Number")
         @Serializable
-        data class Number(val number: String) : Entry
+        data class Number(val number: Double) : Entry
 
         @SerialName("RecordContent.Entry.Time")
         @Serializable

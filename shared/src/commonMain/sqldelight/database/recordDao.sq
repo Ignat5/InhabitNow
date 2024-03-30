@@ -1,3 +1,21 @@
+
+selectRecordsByDate:
+SELECT * FROM RecordTable tRecord
+WHERE tRecord.epochDay = :targetEpochDay;
+
+selectRecordByTaskIdAndDate:
+SELECT * FROM RecordTable tRecord
+WHERE tRecord.taskId = :taskId AND
+tRecord.epochDay = :targetEpochDay;
+
 insertRecord:
 INSERT OR REPLACE INTO RecordTable
 VALUES ?;
+
+updateRecordEntryById:
+UPDATE RecordTable SET entry = :entry
+WHERE id = :recordId;
+
+deleteRecordById:
+DELETE FROM RecordTable
+WHERE id = :recordId;

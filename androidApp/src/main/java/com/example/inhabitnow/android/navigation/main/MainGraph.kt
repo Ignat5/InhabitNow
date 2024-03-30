@@ -1,6 +1,10 @@
 package com.example.inhabitnow.android.navigation.main
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -17,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -28,7 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.navigation.AppNavDest
-import com.example.inhabitnow.android.navigation.all_scheduled_tasks.allScheduledTasks
+import com.example.inhabitnow.android.navigation.view_schedule.viewScheduleScreen
 import com.example.inhabitnow.android.navigation.view_all_habits.viewAllHabits
 import com.example.inhabitnow.android.navigation.view_all_tasks.viewAllTasks
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
@@ -40,9 +45,12 @@ import com.example.inhabitnow.android.presentation.main.config.pick_task_progres
 import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeDialog
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
+import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun NavGraphBuilder.mainGraph(
     onNavigateToCreateTask: (taskId: String) -> Unit,
+    onNavigateToEditTask: (taskId: String) -> Unit,
     onNavigateToSearchTasks: () -> Unit
 ) {
     composable(
@@ -57,6 +65,7 @@ fun NavGraphBuilder.mainGraph(
                     is MainScreenNavigation.CreateTask -> {
                         onNavigateToCreateTask(destination.taskId)
                     }
+
                     is MainScreenNavigation.SearchTasks -> {
                         onNavigateToSearchTasks()
                     }
@@ -73,7 +82,7 @@ fun NavGraphBuilder.mainGraph(
                     }
                 )
             },
-            screenContent = { state, onEvent ->
+            screenContent = { _, onEvent ->
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val onNavDestClick = remember {
                     val callback: (MainNavDest) -> Unit = { mainNavDest ->
@@ -82,7 +91,7 @@ fun NavGraphBuilder.mainGraph(
                                 route = mainNavDest.route,
                                 navOptions = navOptions {
                                     this.launchSingleTop = true
-                                    this.popUpTo(AppNavDest.MainGraphDestination.route) {
+                                    this.popUpTo(MainNavDest.ViewScheduleDestination.route) {
                                         this.inclusive = false
                                     }
                                 }
@@ -92,19 +101,6 @@ fun NavGraphBuilder.mainGraph(
                     callback
                 }
                 Scaffold(
-                    topBar = {
-                        val titleText = remember(currentBackStackEntry?.destination?.route) {
-                            (findMainNavDestByRoute(currentBackStackEntry?.destination?.route)
-                                ?: MainNavDest.startDestination).toTitleText()
-                        }
-                        ScreenAppBar(
-                            titleText = titleText,
-                            onMenuClick = { /*TODO*/ },
-                            onSearchClick = {
-                                onEvent(MainScreenEvent.OnSearchTasksClick)
-                            }
-                        )
-                    },
                     bottomBar = {
                         ScreenBottomBar(
                             currentBackStackEntry = currentBackStackEntry,
@@ -115,14 +111,25 @@ fun NavGraphBuilder.mainGraph(
                         ScreenFAB(onClick = { onEvent(MainScreenEvent.OnCreateTaskClick) })
                     },
                     floatingActionButtonPosition = FabPosition.End
-                ) {
+                ) { innerPadding ->
                     NavHost(
                         navController = navController,
-                        startDestination = MainNavDest.AllScheduledTasksDestination.route,
+                        startDestination = MainNavDest.ViewScheduleDestination.route,
                         route = AppNavDest.MainGraphDestination.route,
-                        modifier = Modifier.padding(it)
                     ) {
-                        allScheduledTasks()
+                        viewScheduleScreen(
+                            onMenuClick = {},
+                            onNavigate = { destination ->
+                                when (destination) {
+                                    is ViewScheduleScreenNavigation.Search -> {
+                                        onNavigateToSearchTasks()
+                                    }
+                                    is ViewScheduleScreenNavigation.EditTask -> {
+                                        onNavigateToEditTask(destination.taskId)
+                                    }
+                                }
+                            }
+                        )
                         viewAllHabits()
                         viewAllTasks()
                     }
@@ -252,19 +259,19 @@ private fun ScreenFAB(onClick: () -> Unit) {
 }
 
 private fun MainNavDest.toTitleText() = when (this) {
-    is MainNavDest.AllScheduledTasksDestination -> "Today"
+    is MainNavDest.ViewScheduleDestination -> "Today"
     is MainNavDest.ViewAllHabitsDestination -> "Habits"
     is MainNavDest.ViewAllTasksDestination -> "Tasks"
 }
 
 private fun MainNavDest.toIconResId() = when (this) {
-    is MainNavDest.AllScheduledTasksDestination -> R.drawable.ic_today
+    is MainNavDest.ViewScheduleDestination -> R.drawable.ic_today
     is MainNavDest.ViewAllHabitsDestination -> R.drawable.ic_habit
     is MainNavDest.ViewAllTasksDestination -> R.drawable.ic_task
 }
 
 private fun findMainNavDestByRoute(route: String?): MainNavDest? = when (route) {
-    MainNavDest.AllScheduledTasksDestination.route -> MainNavDest.AllScheduledTasksDestination
+    MainNavDest.ViewScheduleDestination.route -> MainNavDest.ViewScheduleDestination
     MainNavDest.ViewAllHabitsDestination.route -> MainNavDest.ViewAllHabitsDestination
     MainNavDest.ViewAllTasksDestination.route -> MainNavDest.ViewAllTasksDestination
     else -> null

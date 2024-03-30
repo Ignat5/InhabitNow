@@ -5,9 +5,15 @@ import com.example.inhabitnow.core.util.randomUUID
 import com.example.inhabitnow.data.data_source.task.TaskDataSource
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
+import com.example.inhabitnow.data.model.task.derived.FullTaskEntity
 import com.example.inhabitnow.data.util.toEpochDay
 import com.example.inhabitnow.data.util.toJson
+import com.example.inhabitnow.data.util.toReminderEntity
+import com.example.inhabitnow.data.util.toReminderTable
+import com.example.inhabitnow.data.util.toTagEntity
+import com.example.inhabitnow.data.util.toTagTable
 import com.example.inhabitnow.data.util.toTaskContentTable
+import com.example.inhabitnow.data.util.toTaskEntity
 import com.example.inhabitnow.data.util.toTaskTable
 import com.example.inhabitnow.data.util.toTaskWithContentEntity
 import database.TaskContentTable
@@ -69,6 +75,67 @@ class DefaultTaskRepository(
             } else emptyList()
         }
 
+    override fun readFullTasksByDate(targetDate: LocalDate): Flow<List<FullTaskEntity>> =
+        taskDataSource.readFullTasksByDate(targetDate.toEpochDay()).map { queryList ->
+            if (queryList.isNotEmpty()) {
+                withContext(defaultDispatcher) {
+                    val allTaskIds = queryList.distinctBy { it.task_id }.map { it.task_id }
+                    allTaskIds.map { taskId ->
+                        async {
+
+                            val taskWithContentEntityDef = async {
+                                kotlin.run {
+                                    val tTask = queryList
+                                        .find { it.task_id == taskId }
+                                        ?.toTaskTable()
+                                        ?: return@run null
+
+                                    val allTaskContent = queryList
+                                        .asSequence()
+                                        .filter { it.taskContent_taskId == taskId }
+                                        .distinctBy { it.taskContent_id }
+                                        .map { it.toTaskContentTable() }
+                                        .toList()
+
+                                    tTask.toTaskWithContentEntity(
+                                        allTaskContent = allTaskContent,
+                                        json = json
+                                    )
+                                }
+                            }
+
+                            val allRemindersDef = async {
+                                queryList
+                                    .asSequence()
+                                    .filter { it.reminder_taskId == taskId }
+                                    .distinctBy { it.reminder_id }
+                                    .mapNotNull { it.toReminderTable() }
+                                    .map { it.toReminderEntity(json) }
+                                    .toList()
+                            }
+
+                            val allTagsDef = async {
+                                queryList
+                                    .asSequence()
+                                    .filter { it.tagCross_taskId == taskId }
+                                    .distinctBy { it.tagCross_tagId }
+                                    .mapNotNull { it.toTagTable() }
+                                    .map { it.toTagEntity() }
+                                    .toList()
+                            }
+
+                            FullTaskEntity(
+                                taskWithContentEntity = taskWithContentEntityDef.await()
+                                    ?: return@async null,
+                                allReminders = allRemindersDef.await(),
+                                allTags = allTagsDef.await()
+                            )
+                        }
+                    }.awaitAll().filterNotNull()
+                }
+            } else emptyList()
+        }
+
     override suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {
             taskDataSource.insertTaskWithContent(
@@ -99,10 +166,10 @@ class DefaultTaskRepository(
 
     override suspend fun updateTaskPriorityById(
         taskId: String,
-        priority: String
+        priority: Int
     ): ResultModel<Unit> = taskDataSource.updateTaskPriorityById(
         taskId = taskId,
-        priority = priority
+        priority = priority.toLong()
     )
 
     override suspend fun saveTaskById(taskId: String): ResultModel<Unit> =
@@ -116,7 +183,6 @@ class DefaultTaskRepository(
             taskId = taskId,
             deletedAt = Clock.System.now().toEpochMilliseconds()
         )
-//        taskDataSource.deleteTaskById(taskId = taskId)
 
     override suspend fun updateTaskStartDateById(
         taskId: String,

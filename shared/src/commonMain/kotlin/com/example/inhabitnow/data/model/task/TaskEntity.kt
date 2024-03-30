@@ -12,7 +12,7 @@ data class TaskEntity(
     val description: String,
     val startDate: LocalDate,
     val endDate: LocalDate?,
-    val priority: String,
+    val priority: Int,
     val createdAt: Long,
     val deletedAt: Long?
 )

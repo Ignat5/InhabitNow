@@ -51,7 +51,7 @@ class CreateReminderStateHolder(
             CreateReminderScreenResult.Confirm(
                 time = LocalTime(hour = inputHoursState.value, minute = inputMinutesState.value),
                 type = inputTypeState.value,
-                uiScheduleContent = inputScheduleState.value
+                schedule = inputScheduleState.value
             )
         )
     }

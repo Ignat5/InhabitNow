@@ -4,7 +4,7 @@ import com.example.inhabitnow.android.presentation.base.state_holder.BaseResultS
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenState
-import com.example.inhabitnow.android.presentation.model.UITaskContent
+import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.DayOfWeek
 
 class PickTaskFrequencyStateHolder(
-    initFrequency: UITaskContent.Frequency,
+    initFrequency: TaskContentModel.FrequencyContent,
     override val holderScope: CoroutineScope
 ) : BaseResultStateHolder<PickTaskFrequencyScreenEvent, PickTaskFrequencyScreenState, PickTaskFrequencyScreenResult>() {
 
@@ -23,14 +23,19 @@ class PickTaskFrequencyStateHolder(
 
     override val uiScreenState: StateFlow<PickTaskFrequencyScreenState> =
         uiFrequencyContentState.map { uiFrequencyContent ->
-            provideScreenState(
-                uiFrequencyContent = uiFrequencyContent
+            PickTaskFrequencyScreenState(
+                uiFrequencyContent = uiFrequencyContent,
+                canConfirm = when (uiFrequencyContent) {
+                    is TaskContentModel.FrequencyContent.EveryDay -> true
+                    is TaskContentModel.FrequencyContent.DaysOfWeek -> uiFrequencyContent.daysOfWeek.isNotEmpty()
+                }
             )
         }.stateIn(
             holderScope,
             SharingStarted.WhileSubscribed(5000L),
-            provideScreenState(
-                uiFrequencyContent = uiFrequencyContentState.value
+            PickTaskFrequencyScreenState(
+                uiFrequencyContent = uiFrequencyContentState.value,
+                canConfirm = false
             )
         )
 
@@ -56,7 +61,7 @@ class PickTaskFrequencyStateHolder(
     }
 
     private fun onDayOfWeekClick(event: PickTaskFrequencyScreenEvent.OnDayOfWeekClick) {
-        (uiFrequencyContentState.value as? UITaskContent.Frequency.DaysOfWeek)?.let { prev ->
+        (uiFrequencyContentState.value as? TaskContentModel.FrequencyContent.DaysOfWeek)?.let { prev ->
             uiFrequencyContentState.update {
                 val clickedDayOfWeek = event.dayOfWeek
                 val oldSet = prev.daysOfWeek
@@ -64,7 +69,7 @@ class PickTaskFrequencyStateHolder(
                 newSet.addAll(oldSet)
                 if (newSet.contains(clickedDayOfWeek)) newSet.remove(clickedDayOfWeek)
                 else newSet.add(clickedDayOfWeek)
-                UITaskContent.Frequency.DaysOfWeek(newSet)
+                TaskContentModel.FrequencyContent.DaysOfWeek(newSet)
             }
         }
     }
@@ -74,28 +79,15 @@ class PickTaskFrequencyStateHolder(
         if (uiFrequencyContentState.value.type != clickedType) {
             uiFrequencyContentState.update {
                 when (clickedType) {
-                    UITaskContent.Frequency.Type.EveryDay -> {
-                        UITaskContent.Frequency.EveryDay
+                    TaskContentModel.FrequencyContent.Type.EveryDay -> {
+                        TaskContentModel.FrequencyContent.EveryDay
                     }
 
-                    UITaskContent.Frequency.Type.DaysOfWeek -> {
-                        UITaskContent.Frequency.DaysOfWeek(emptySet())
+                    TaskContentModel.FrequencyContent.Type.DaysOfWeek -> {
+                        TaskContentModel.FrequencyContent.DaysOfWeek(emptySet())
                     }
                 }
             }
         }
     }
-
-    private fun provideScreenState(
-        uiFrequencyContent: UITaskContent.Frequency
-    ): PickTaskFrequencyScreenState {
-        return PickTaskFrequencyScreenState(
-            uiFrequencyContent = uiFrequencyContent,
-            canConfirm = when (uiFrequencyContent) {
-                is UITaskContent.Frequency.EveryDay -> true
-                is UITaskContent.Frequency.DaysOfWeek -> uiFrequencyContent.daysOfWeek.isNotEmpty()
-            }
-        )
-    }
-
 }

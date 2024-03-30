@@ -9,7 +9,7 @@ class DefaultUpdateTaskPriorityByIdUseCase(
 
     override suspend operator fun invoke(
         taskId: String,
-        priority: String
+        priority: Int
     ): ResultModel<Unit> = taskRepository.updateTaskPriorityById(
         taskId = taskId,
         priority = priority

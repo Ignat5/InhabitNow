@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import com.example.inhabitnow.android.presentation.model.UIReminderContent
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.components.BaseCreateEditReminderScreenEvent
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.base.components.BaseCreateEditReminderScreenState
 import com.example.inhabitnow.android.ui.base.BaseDaysOfWeekInput
@@ -26,6 +25,7 @@ import com.example.inhabitnow.android.ui.base.BaseItemOptionBuilder
 import com.example.inhabitnow.android.ui.base.BaseTimePicker
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.core.type.ReminderType
+import com.example.inhabitnow.domain.model.reminder.content.ReminderContentModel
 import kotlinx.datetime.DayOfWeek
 
 private const val SCREEN_FRACTION = 0.75f
@@ -70,7 +70,7 @@ fun BaseCreateEditReminderDialog(
             ReminderType.entries
         }
         val allScheduleTypes = remember {
-            UIReminderContent.Schedule.Type.entries
+            ReminderContentModel.ScheduleContent.Type.entries
         }
         val lazyListState = rememberLazyListState()
 
@@ -174,9 +174,9 @@ private fun LazyListScope.itemsReminderType(
 }
 
 private fun LazyListScope.itemsReminderSchedule(
-    allScheduleTypes: List<UIReminderContent.Schedule.Type>,
-    currentScheduleContent: UIReminderContent.Schedule,
-    onScheduleTypeClick: (UIReminderContent.Schedule.Type) -> Unit,
+    allScheduleTypes: List<ReminderContentModel.ScheduleContent.Type>,
+    currentScheduleContent: ReminderContentModel.ScheduleContent,
+    onScheduleTypeClick: (ReminderContentModel.ScheduleContent.Type) -> Unit,
     onDayOfWeekClick: (DayOfWeek) -> Unit
 ) {
     items(
@@ -194,7 +194,7 @@ private fun LazyListScope.itemsReminderSchedule(
             callback
         }
         when (item) {
-            UIReminderContent.Schedule.Type.EveryDay -> {
+            ReminderContentModel.ScheduleContent.Type.EveryDay -> {
                 BaseItemOptionBuilder.BaseItemRadioButton(
                     titleText = "Always enabled",
                     isSelected = isSelected,
@@ -202,7 +202,7 @@ private fun LazyListScope.itemsReminderSchedule(
                 )
             }
 
-            UIReminderContent.Schedule.Type.DaysOfWeek -> {
+            ReminderContentModel.ScheduleContent.Type.DaysOfWeek -> {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     BaseItemOptionBuilder.BaseItemRadioButton(
                         titleText = "Specific days of week",
@@ -210,7 +210,7 @@ private fun LazyListScope.itemsReminderSchedule(
                         onClick = onClick
                     )
                     if (isSelected) {
-                        (currentScheduleContent as? UIReminderContent.Schedule.DaysOfWeek)?.let { sc ->
+                        (currentScheduleContent as? ReminderContentModel.ScheduleContent.DaysOfWeek)?.let { sc ->
                             Spacer(modifier = Modifier.height(8.dp))
                             BaseDaysOfWeekInput(
                                 selectedDaysOfWeek = sc.daysOfWeek,

@@ -16,10 +16,10 @@ import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_frequency.components.PickTaskFrequencyScreenState
-import com.example.inhabitnow.android.presentation.model.UITaskContent
 import com.example.inhabitnow.android.ui.base.BaseDaysOfWeekInput
 import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
 import com.example.inhabitnow.android.ui.base.BaseItemOptionBuilder
+import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 
 @Composable
 fun PickTaskFrequencyDialog(
@@ -65,25 +65,26 @@ private fun PickTaskFrequencyDialogStateless(
         )
     ) {
         val onItemClick = remember {
-            val callback: (UITaskContent.Frequency.Type) -> Unit = {
+            val callback: (TaskContentModel.FrequencyContent.Type) -> Unit = {
                 onEvent(PickTaskFrequencyScreenEvent.OnFrequencyTypeClick(it))
             }
             callback
         }
+        val allTypes = remember { TaskContentModel.FrequencyContent.Type.entries }
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
             items(
-                items = UITaskContent.Frequency.Type.entries,
-                key = { it.ordinal }
+                items = allTypes,
+                key = { it }
             ) { item ->
                 val isSelected = remember(state.uiFrequencyContent.type) {
                     item == state.uiFrequencyContent.type
                 }
                 when (item) {
-                    UITaskContent.Frequency.Type.EveryDay -> {
+                    TaskContentModel.FrequencyContent.Type.EveryDay -> {
                         ItemFrequency(
                             title = "Every day",
                             isSelected = isSelected,
@@ -93,7 +94,7 @@ private fun PickTaskFrequencyDialogStateless(
                         )
                     }
 
-                    UITaskContent.Frequency.Type.DaysOfWeek -> {
+                    TaskContentModel.FrequencyContent.Type.DaysOfWeek -> {
                         Column(modifier = Modifier.fillMaxWidth()) {
                             ItemFrequency(
                                 title = "Days of week",
@@ -103,7 +104,7 @@ private fun PickTaskFrequencyDialogStateless(
                                 }
                             )
                             if (isSelected) {
-                                (state.uiFrequencyContent as? UITaskContent.Frequency.DaysOfWeek)?.let { fc ->
+                                (state.uiFrequencyContent as? TaskContentModel.FrequencyContent.DaysOfWeek)?.let { fc ->
                                     Spacer(modifier = Modifier.height(8.dp))
                                     BaseDaysOfWeekInput(
                                         selectedDaysOfWeek = fc.daysOfWeek,

@@ -14,11 +14,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 class PickTaskPriorityStateHolder(
-    initPriority: String,
+    initPriority: Int,
     override val holderScope: CoroutineScope
 ) : BaseResultStateHolder<PickTaskPriorityScreenEvent, PickTaskPriorityScreenState, PickTaskPriorityScreenResult>() {
 
-    private val inputPriorityState = MutableStateFlow(initPriority)
+    private val inputPriorityState = MutableStateFlow<String>(initPriority.toString())
 
     private val valueValidator: (String) -> Boolean = { input ->
         input.isEmpty() || validate(input)
@@ -65,7 +65,7 @@ class PickTaskPriorityStateHolder(
 
     private fun onConfirmClick() {
         if (canConfirmState.value) {
-            inputPriorityState.value.toIntOrNull()?.toString()?.let { priority ->
+            inputPriorityState.value.toIntOrNull()?.let { priority ->
                 setUpResult(PickTaskPriorityScreenResult.Confirm(priority))
             }
         }

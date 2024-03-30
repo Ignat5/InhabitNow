@@ -39,7 +39,7 @@ import com.example.inhabitnow.android.presentation.search_tasks.components.Searc
 import com.example.inhabitnow.android.presentation.search_tasks.components.SearchTasksScreenState
 import com.example.inhabitnow.android.ui.toDatePeriodDisplay
 import com.example.inhabitnow.android.ui.toDisplay
-import com.example.inhabitnow.domain.model.task.TaskWithContentModel
+import com.example.inhabitnow.domain.model.task.TaskModel
 
 @Composable
 fun SearchTasksScreen(onNavigation: (SearchTasksScreenNavigation) -> Unit) {
@@ -96,12 +96,12 @@ private fun SearchTasksScreenStateless(
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(
                     items = state.allTasksWithContent,
-                    key = { it.task.id }
+                    key = { it.id }
                 ) { item ->
                     ItemTask(
                         item = item,
                         onClick = {
-                            onEvent(SearchTasksScreenEvent.OnTaskClick(item.task.id))
+                            onEvent(SearchTasksScreenEvent.OnTaskClick(item.id))
                         },
                         modifier = Modifier.animateItemPlacement()
                     )
@@ -116,7 +116,7 @@ private fun SearchTasksScreenStateless(
 
 @Composable
 private fun ItemTask(
-    item: TaskWithContentModel,
+    item: TaskModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -143,20 +143,20 @@ private fun ItemTask(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = item.task.title,
+                        text = item.title,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        text = item.task.toDatePeriodDisplay(),
+                        text = item.dateContent.toDatePeriodDisplay(),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Text(
-                    text = item.task.type.toDisplay(),
+                    text = item.type.toDisplay(),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth()

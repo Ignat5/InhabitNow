@@ -27,12 +27,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.components.PickTaskTagsScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.PickTaskTitleStateHolder
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_task_title.components.PickTaskTitleScreenResult
-import com.example.inhabitnow.android.presentation.model.UITaskContent
-import com.example.inhabitnow.android.ui.toFrequencyContent
-import com.example.inhabitnow.android.ui.toUIDateContent
-import com.example.inhabitnow.android.ui.toUIFrequencyContent
-import com.example.inhabitnow.android.ui.toUIProgressContent
-import com.example.inhabitnow.domain.model.task.TaskWithContentModel
+import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
@@ -77,7 +72,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
 
     private val todayDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
-    protected val taskWithContentState = readTaskWithContentByIdUseCase(taskId)
+    protected val taskModelState = readTaskWithContentByIdUseCase(taskId)
         .stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
@@ -115,12 +110,12 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
         )
 
     protected val allTaskConfigItemsState = combine(
-        taskWithContentState,
+        taskModelState,
         taskRemindersCountState,
         taskTagsCountState
-    ) { taskWithContent, taskRemindersCount, taskTagsCount ->
+    ) { taskModel, taskRemindersCount, taskTagsCount ->
         provideBaseTaskConfigItems(
-            taskWithContentModel = taskWithContent,
+            taskModel = taskModel,
             taskRemindersCount = taskRemindersCount,
             taskTagsCount = taskTagsCount
         )
@@ -137,7 +132,6 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
 
             is BaseCreateEditTaskScreenEvent.ResultEvent ->
                 onResultEvent(event)
-
         }
     }
 
@@ -176,7 +170,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onConfigTaskPriorityClick() {
-        taskWithContentState.value?.task?.priority?.let { priority ->
+        taskModelState.value?.priority?.let { priority ->
             setUpBaseConfigState(
                 BaseCreateEditTaskScreenConfig.PickTaskPriority(
                     stateHolder = PickTaskPriorityStateHolder(
@@ -197,14 +191,14 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onConfigOneDayDateClick() {
-        taskWithContentState.value?.task?.let { task ->
+        (taskModelState.value?.dateContent as? TaskContentModel.DateContent.Day)?.date?.let { date ->
             setUpBaseConfigState(
                 BaseCreateEditTaskScreenConfig.PickDate.OneDayDate(
                     stateHolder = PickDateStateHolder(
                         requestModel = PickDateRequestModel(
-                            currentDate = task.startDate,
-                            minDate = minOf(task.startDate, todayDate),
-                            maxDate = task.startDate.plus(1, DateTimeUnit.YEAR)
+                            currentDate = date,
+                            minDate = minOf(date, todayDate),
+                            maxDate = date.plus(1, DateTimeUnit.YEAR)
                         ),
                         holderScope = provideChildScope(),
                         defaultDispatcher = defaultDispatcher
@@ -215,8 +209,8 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onConfigEndDateClick() {
-        taskWithContentState.value?.task?.let { task ->
-            if (task.endDate != null) {
+        (taskModelState.value?.dateContent as? TaskContentModel.DateContent.Period)?.let { periodDate ->
+            if (periodDate.endDate != null) {
                 viewModelScope.launch {
                     updateTaskDateUseCase(
                         taskId = taskId,
@@ -227,13 +221,11 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
                 setUpBaseConfigState(
                     BaseCreateEditTaskScreenConfig.PickDate.EndDate(
                         stateHolder = PickDateStateHolder(
-                            requestModel = (task.startDate).let { currentDate ->
-                                PickDateRequestModel(
-                                    currentDate = currentDate,
-                                    minDate = task.startDate,
-                                    maxDate = currentDate.plus(1, DateTimeUnit.YEAR)
-                                )
-                            },
+                            requestModel = PickDateRequestModel(
+                                currentDate = periodDate.startDate,
+                                minDate = periodDate.startDate,
+                                maxDate = periodDate.startDate.plus(1, DateTimeUnit.YEAR)
+                            ),
                             holderScope = provideChildScope(),
                             defaultDispatcher = defaultDispatcher
                         )
@@ -244,14 +236,17 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onConfigStartDateClick() {
-        taskWithContentState.value?.task?.let { task ->
+        (taskModelState.value?.dateContent as? TaskContentModel.DateContent.Period)?.let { periodDate ->
             setUpBaseConfigState(
                 BaseCreateEditTaskScreenConfig.PickDate.StartDate(
                     stateHolder = PickDateStateHolder(
                         requestModel = PickDateRequestModel(
-                            currentDate = task.startDate,
-                            minDate = minOf(task.startDate, todayDate),
-                            maxDate = task.endDate ?: task.startDate.plus(1, DateTimeUnit.YEAR)
+                            currentDate = periodDate.startDate,
+                            minDate = minOf(periodDate.startDate, todayDate),
+                            maxDate = periodDate.endDate ?: periodDate.startDate.plus(
+                                1,
+                                DateTimeUnit.YEAR
+                            )
                         ),
                         holderScope = provideChildScope(),
                         defaultDispatcher = defaultDispatcher
@@ -262,7 +257,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onConfigTaskFrequencyClick() {
-        taskWithContentState.value?.frequencyContent?.toUIFrequencyContent()?.let { fc ->
+        (taskModelState.value as? TaskModel.RecurringActivity)?.frequencyContent?.let { fc ->
             setUpBaseConfigState(
                 BaseCreateEditTaskScreenConfig.PickTaskFrequency(
                     stateHolder = PickTaskFrequencyStateHolder(
@@ -275,7 +270,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onConfigTaskTimeProgressClick() {
-        (taskWithContentState.value?.progressContent as? TaskContentModel.ProgressContent.Time)?.let { pc ->
+        (taskModelState.value as? TaskModel.Habit.HabitContinuous.HabitTime)?.progressContent?.let { pc ->
             setUpBaseConfigState(
                 BaseCreateEditTaskScreenConfig.PickTaskTimeProgress(
                     stateHolder = PickTaskTimeProgressStateHolder(
@@ -288,7 +283,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onConfigTaskNumberProgressClick() {
-        (taskWithContentState.value?.progressContent as? TaskContentModel.ProgressContent.Number)?.let { pc ->
+        (taskModelState.value as? TaskModel.Habit.HabitContinuous.HabitNumber)?.progressContent?.let { pc ->
             setUpBaseConfigState(
                 BaseCreateEditTaskScreenConfig.PickTaskNumberProgress(
                     stateHolder = PickTaskNumberProgressStateHolder(
@@ -301,7 +296,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onConfigTaskDescriptionClick() {
-        taskWithContentState.value?.task?.description?.let { description ->
+        taskModelState.value?.description?.let { description ->
             setUpBaseConfigState(
                 BaseCreateEditTaskScreenConfig.PickTaskDescription(
                     stateHolder = PickTaskDescriptionStateHolder(
@@ -314,7 +309,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     }
 
     private fun onConfigTaskTitleClick() {
-        taskWithContentState.value?.task?.title?.let { title ->
+        taskModelState.value?.title?.let { title ->
             setUpBaseConfigState(
                 BaseCreateEditTaskScreenConfig.PickTaskTitle(
                     stateHolder = PickTaskTitleStateHolder(
@@ -462,7 +457,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
         viewModelScope.launch {
             updateTaskFrequencyByIdUseCase(
                 taskId = taskId,
-                content = result.uiFrequencyContent.toFrequencyContent()
+                content = result.frequencyContent
             )
         }
     }
@@ -545,55 +540,49 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     protected abstract fun setUpBaseNavigationState(baseSN: BaseCreateEditTaskScreenNavigation)
 
     private suspend fun provideBaseTaskConfigItems(
-        taskWithContentModel: TaskWithContentModel?,
+        taskModel: TaskModel?,
         taskRemindersCount: Int,
         taskTagsCount: Int
     ): List<BaseItemTaskConfig> =
         withContext(defaultDispatcher) {
-            if (taskWithContentModel != null) {
+            if (taskModel != null) {
                 mutableListOf<BaseItemTaskConfig>().apply {
-                    add(BaseItemTaskConfig.Title(taskWithContentModel.task.title))
-                    add(BaseItemTaskConfig.Description(taskWithContentModel.task.description))
-                    when (val pc = taskWithContentModel.progressContent.toUIProgressContent()) {
-                        is UITaskContent.Progress.Number -> {
+                    add(BaseItemTaskConfig.Title(taskModel.title))
+                    add(BaseItemTaskConfig.Description(taskModel.description))
+                    when (taskModel) {
+                        is TaskModel.Habit.HabitContinuous.HabitNumber -> {
                             add(
-                                BaseItemTaskConfig.Progress.Number(pc)
+                                BaseItemTaskConfig.Progress.Number(taskModel.progressContent)
                             )
                         }
 
-                        is UITaskContent.Progress.Time -> {
+                        is TaskModel.Habit.HabitContinuous.HabitTime -> {
                             add(
-                                BaseItemTaskConfig.Progress.Time(pc)
-                            )
-                        }
-
-                        else -> Unit
-                    }
-
-                    when (val fc = taskWithContentModel.frequencyContent.toUIFrequencyContent()) {
-                        is UITaskContent.Frequency -> {
-                            add(
-                                BaseItemTaskConfig.Frequency(fc)
+                                BaseItemTaskConfig.Progress.Time(taskModel.progressContent)
                             )
                         }
 
                         else -> Unit
                     }
-
-                    when (val dc = taskWithContentModel.task.toUIDateContent()) {
-                        is UITaskContent.Date.OneDay -> add(
-                            BaseItemTaskConfig.Date.OneDayDate(dc.date)
+                    if (taskModel is TaskModel.RecurringActivity) {
+                        add(
+                            BaseItemTaskConfig.Frequency(taskModel.frequencyContent)
                         )
+                    }
 
-                        is UITaskContent.Date.Period -> {
+                    when (val dc = taskModel.dateContent) {
+                        is TaskContentModel.DateContent.Day -> {
+                            add(BaseItemTaskConfig.Date.OneDayDate(dc.date))
+                        }
+
+                        is TaskContentModel.DateContent.Period -> {
                             add(BaseItemTaskConfig.Date.StartDate(dc.startDate))
                             add(BaseItemTaskConfig.Date.EndDate(dc.endDate))
                         }
                     }
-
                     add(BaseItemTaskConfig.Reminders(taskRemindersCount))
                     add(BaseItemTaskConfig.Tags(taskTagsCount))
-                    add(BaseItemTaskConfig.Priority(taskWithContentModel.task.priority))
+                    add(BaseItemTaskConfig.Priority(taskModel.priority))
 
                 }.sortedBy { it.key.ordinal }
             } else emptyList()

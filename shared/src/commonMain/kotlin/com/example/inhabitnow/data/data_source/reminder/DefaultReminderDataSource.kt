@@ -18,7 +18,7 @@ class DefaultReminderDataSource(
         reminderDao.selectRemindersByTaskId(taskId)
     }
 
-    override fun readRemindersCountByTaskId(taskId: String): Flow<Long> = readQuery {
+    override fun readRemindersCountByTaskId(taskId: String): Flow<Long> = readOneQuery {
         reminderDao.selectRemindersCountByTaskId(taskId)
     }
 

@@ -4,11 +4,21 @@ import kotlinx.datetime.LocalTime
 
 sealed interface RecordContentModel {
     sealed interface Entry : RecordContentModel {
-        data object Done : Entry
-        data object Skip : Entry
-        data object Fail : Entry
+        data object Done : HabitEntry.HabitYesNoEntry, TaskEntry
+        data object Skip : HabitEntry.HabitYesNoEntry, HabitEntry.HabitContinuousEntry.Number, HabitEntry.HabitContinuousEntry.Time
+        data object Fail : HabitEntry.HabitYesNoEntry, HabitEntry.HabitContinuousEntry.Number, HabitEntry.HabitContinuousEntry.Time
 
-        data class Number(val number: String) : Entry
-        data class Time(val time: LocalTime) : Entry
+        data class Number(val number: Double) : HabitEntry.HabitContinuousEntry.Number
+        data class Time(val time: LocalTime) : HabitEntry.HabitContinuousEntry.Time
+
+        sealed interface HabitEntry : Entry {
+            sealed interface HabitContinuousEntry : HabitEntry {
+                sealed interface Number : HabitContinuousEntry
+                sealed interface Time : HabitContinuousEntry
+            }
+            sealed interface HabitYesNoEntry : HabitEntry
+        }
+
+        sealed interface TaskEntry : Entry
     }
 }

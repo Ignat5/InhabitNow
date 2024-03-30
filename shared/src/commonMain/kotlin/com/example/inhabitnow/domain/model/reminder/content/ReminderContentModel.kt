@@ -3,8 +3,10 @@ package com.example.inhabitnow.domain.model.reminder.content
 import kotlinx.datetime.DayOfWeek
 
 sealed interface ReminderContentModel {
-    sealed interface ScheduleContent : ReminderContentModel {
-        data object EveryDay : ScheduleContent
-        data class DaysOfWeek(val daysOfWeek: Set<DayOfWeek>) : ScheduleContent
+    sealed class ScheduleContent(val type: Type) : ReminderContentModel {
+        enum class Type { EveryDay, DaysOfWeek }
+
+        data object EveryDay : ScheduleContent(Type.EveryDay)
+        data class DaysOfWeek(val daysOfWeek: Set<DayOfWeek>) : ScheduleContent(Type.DaysOfWeek)
     }
 }

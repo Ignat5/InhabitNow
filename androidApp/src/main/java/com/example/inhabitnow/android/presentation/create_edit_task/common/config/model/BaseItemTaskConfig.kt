@@ -1,6 +1,6 @@
 package com.example.inhabitnow.android.presentation.create_edit_task.common.config.model
 
-import com.example.inhabitnow.android.presentation.model.UITaskContent
+import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import kotlinx.datetime.LocalDate
 
 sealed class BaseItemTaskConfig(val key: Key, val contentType: ContentType) {
@@ -12,9 +12,9 @@ sealed class BaseItemTaskConfig(val key: Key, val contentType: ContentType) {
         val description: String
     ) : BaseItemTaskConfig(Key.Description, ContentType.Basic)
 
-    data class Priority(val priority: String) : BaseItemTaskConfig(Key.Priority, ContentType.Basic)
+    data class Priority(val priority: Int) : BaseItemTaskConfig(Key.Priority, ContentType.Basic)
     data class Frequency(
-        val uiFrequencyContent: UITaskContent.Frequency
+        val frequencyContent: TaskContentModel.FrequencyContent
     ) : BaseItemTaskConfig(Key.Frequency, ContentType.Basic)
 
     data class Reminders(val count: Int) : BaseItemTaskConfig(Key.Reminders, ContentType.Basic)
@@ -36,15 +36,16 @@ sealed class BaseItemTaskConfig(val key: Key, val contentType: ContentType) {
         ) : Date(Key.EndDate, ContentType.Switch)
     }
 
-    sealed class Progress(key: Key, contentType: ContentType) : BaseItemTaskConfig(key, contentType) {
-        abstract val uiProgressContent: UITaskContent.Progress
+    sealed class Progress(key: Key, contentType: ContentType) :
+        BaseItemTaskConfig(key, contentType) {
+        abstract val progressContent: TaskContentModel.ProgressContent
 
         data class Number(
-            override val uiProgressContent: UITaskContent.Progress.Number
+            override val progressContent: TaskContentModel.ProgressContent.Number
         ) : Progress(Key.Progress, ContentType.Basic)
 
         data class Time(
-            override val uiProgressContent: UITaskContent.Progress.Time
+            override val progressContent: TaskContentModel.ProgressContent.Time
         ) : Progress(Key.Progress, ContentType.Basic)
     }
 }

@@ -1,5 +1,7 @@
 package com.example.inhabitnow.android.navigation.edit_task
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
