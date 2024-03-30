@@ -79,17 +79,31 @@ object BaseTaskItemBuilder {
 
     @Composable
     fun ChipTaskTags(allTags: List<TagModel>) {
-        LazyRow(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            items(
-                items = allTags,
-                key = { it.id }
-            ) { item ->
-                ItemTag(tagModel = item)
+        val aStr = remember (allTags) {
+            buildAnnotatedString {
+                allTags.forEachIndexed { index, tagModel ->
+                    append(tagModel.title)
+                    if (index != allTags.lastIndex) {
+                        append(" | ")
+                    }
+                }
             }
         }
+        BaseIconDataItem(
+            iconResId = R.drawable.ic_tag,
+            text = aStr.text
+        )
+//        LazyRow(
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.spacedBy(4.dp)
+//        ) {
+//            items(
+//                items = allTags,
+//                key = { it.id }
+//            ) { item ->
+//                ItemTag(tagModel = item)
+//            }
+//        }
     }
 
     @Composable
@@ -99,24 +113,6 @@ object BaseTaskItemBuilder {
             text = tagModel.title
         )
     }
-
-//    @Composable
-//    fun ChipTaskTags(allTags: List<TagModel>) {
-//        val aStr = remember(allTags) {
-//            buildAnnotatedString {
-//                allTags.forEachIndexed { index, tag ->
-//                    append(tag.title)
-//                    if (index != allTags.lastIndex) {
-//                        append(" | ")
-//                    }
-//                }
-//            }
-//        }
-//        BaseIconDataItem(
-//            iconResId = R.drawable.ic_tag,
-//            text = aStr.text
-//        )
-//    }
 
     @Composable
     fun ChipTaskPriority(priority: Int) {

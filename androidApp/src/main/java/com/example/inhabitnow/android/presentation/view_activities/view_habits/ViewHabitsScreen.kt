@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
@@ -34,10 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
+import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenConfig
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenEvent
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenState
+import com.example.inhabitnow.android.ui.base.BaseFilterSortBuilder
 import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.android.ui.toDatePeriodDisplay
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
@@ -86,6 +90,30 @@ private fun ViewHabitsScreenStateless(
                 .padding(it)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        BaseFilterSortBuilder.ChipFilterByTags(
+                            allTags = state.allTags,
+                            filterByTagsIds = state.filterByTagsIds,
+                            onTagClick = { tagId ->
+                                onEvent(ViewHabitsScreenEvent.OnFilterTagClick(tagId))
+                            }
+                        )
+                    }
+                    item {
+                        BaseFilterSortBuilder.ChipFilterByStatus(
+                            currentFilter = state.filterByStatus,
+                            allFilters = TaskFilterByStatus.allHabitFilters,
+                            onFilterClick = { filter ->
+                                onEvent(ViewHabitsScreenEvent.OnFilterByStatusClick(filter))
+                            }
+                        )
+                    }
+                }
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     itemsIndexed(
                         items = state.allHabits,

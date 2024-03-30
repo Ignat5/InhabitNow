@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -92,6 +93,48 @@ class ViewHabitsViewModel @Inject constructor(
         )
 
     override fun onEvent(event: ViewHabitsScreenEvent) {
+        when (event) {
+            is ViewHabitsScreenEvent.OnHabitClick ->
+                onHabitClick(event)
+
+            is ViewHabitsScreenEvent.OnFilterTagClick ->
+                onFilterTagClick(event)
+
+            is ViewHabitsScreenEvent.OnFilterByStatusClick ->
+                onFilterByStatusClick(event)
+
+            is ViewHabitsScreenEvent.OnSearchTasksClick ->
+                onSearchTasksClick()
+        }
+    }
+
+    private fun onHabitClick(event: ViewHabitsScreenEvent.OnHabitClick) {
+
+    }
+
+    private fun onFilterTagClick(event: ViewHabitsScreenEvent.OnFilterTagClick) {
+        val clickedTagId = event.tagId
+        filterByTagsIdsState.update { oldSet ->
+            val newSet = mutableSetOf<String>()
+            newSet.addAll(oldSet)
+            if (newSet.contains(clickedTagId)) {
+                newSet.remove(clickedTagId)
+            } else newSet.add(clickedTagId)
+            newSet
+        }
+    }
+
+    private fun onFilterByStatusClick(event: ViewHabitsScreenEvent.OnFilterByStatusClick) {
+        val clickedFilter = event.filterByStatus
+        val currentFilter = filterByStatusState.value
+        filterByStatusState.update {
+            if (clickedFilter != currentFilter) {
+                clickedFilter
+            } else null
+        }
+    }
+
+    private fun onSearchTasksClick() {
 
     }
 
