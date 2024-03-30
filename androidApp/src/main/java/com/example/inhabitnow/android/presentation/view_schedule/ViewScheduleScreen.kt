@@ -68,6 +68,7 @@ import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskW
 import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskWithRecordModel
+import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.android.ui.limitNumberToString
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
@@ -356,12 +357,15 @@ private fun DetailRow(fullTaskWithRecord: FullTaskWithRecordModel) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        ItemTaskType(fullTaskWithRecord.taskWithRecordModel.task.type)
-        if (fullTaskWithRecord.allReminders.isNotEmpty()) {
-            ItemTaskReminders(fullTaskWithRecord.allReminders)
-        }
+        BaseTaskItemBuilder.ChipTaskType(taskType = fullTaskWithRecord.taskWithRecordModel.task.type)
+        BaseTaskItemBuilder.ChipTaskPriority(priority = fullTaskWithRecord.taskWithRecordModel.task.priority)
+        BaseTaskItemBuilder.ChipTaskReminders(allReminders = fullTaskWithRecord.allReminders)
+//        ItemTaskType(fullTaskWithRecord.taskWithRecordModel.task.type)
+//        if (fullTaskWithRecord.allReminders.isNotEmpty()) {
+//            ItemTaskReminders(fullTaskWithRecord.allReminders)
+//        }
 //        if (fullTaskWithRecord.allTags.isNotEmpty()) {
 //            ItemTaskTags(fullTaskWithRecord.allTags)
 //        }
