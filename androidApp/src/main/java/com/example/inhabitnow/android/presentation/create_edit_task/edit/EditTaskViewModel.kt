@@ -13,6 +13,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.edit.compone
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenState
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_restart.ConfirmRestartHabitScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.model.ItemTaskAction
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.task.TaskModel
@@ -20,6 +21,7 @@ import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskById
 import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
+import com.example.inhabitnow.domain.use_case.restart_habit_by_id.RestartHabitByIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tag_ids_by_task_id.ReadTagIdsByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import com.example.inhabitnow.domain.use_case.tag.save_tag_cross_by_task_id.SaveTagCrossByTaskIdUseCase
@@ -55,6 +57,7 @@ class EditTaskViewModel @Inject constructor(
     saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
     private val archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
     private val deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
+    private val restartHabitByIdUseCase: RestartHabitByIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher,
 ) : BaseCreateEditTaskViewModel<EditTaskScreenEvent, EditTaskScreenState, EditTaskScreenNavigation, EditTaskScreenConfig>(
     taskId = checkNotNull(savedStateHandle.get<String>(AppNavDest.TASK_ID_KEY)),
@@ -126,6 +129,24 @@ class EditTaskViewModel @Inject constructor(
 
             is EditTaskScreenEvent.ResultEvent.ConfirmDeleteTask ->
                 onConfirmDeleteTask(event)
+
+            is EditTaskScreenEvent.ResultEvent.ConfirmRestartHabit ->
+                onConfirmRestartHabitResultEvent(event)
+        }
+    }
+
+    private fun onConfirmRestartHabitResultEvent(event: EditTaskScreenEvent.ResultEvent.ConfirmRestartHabit) {
+        onIdleToAction {
+            when (event.result) {
+                is ConfirmRestartHabitScreenResult.Confirm -> onConfirmRestartHabit()
+                is ConfirmRestartHabitScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmRestartHabit() {
+        viewModelScope.launch {
+            restartHabitByIdUseCase(taskId)
         }
     }
 

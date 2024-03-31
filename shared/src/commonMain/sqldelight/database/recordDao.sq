@@ -19,3 +19,7 @@ WHERE id = :recordId;
 deleteRecordById:
 DELETE FROM RecordTable
 WHERE id = :recordId;
+
+deleteRecordsByTaskId:
+DELETE FROM RecordTable
+WHERE taskId = :taskId;

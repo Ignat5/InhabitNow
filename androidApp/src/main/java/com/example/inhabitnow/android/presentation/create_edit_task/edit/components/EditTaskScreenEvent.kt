@@ -5,6 +5,7 @@ import com.example.inhabitnow.android.presentation.base.components.result.Screen
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenEvent
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_restart.ConfirmRestartHabitScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.model.ItemTaskAction
 
 sealed interface EditTaskScreenEvent : ScreenEvent {
@@ -21,6 +22,10 @@ sealed interface EditTaskScreenEvent : ScreenEvent {
 
         data class ConfirmDeleteTask(
             override val result: ConfirmDeleteTaskScreenResult
+        ) : ResultEvent
+
+        data class ConfirmRestartHabit(
+            override val result: ConfirmRestartHabitScreenResult
         ) : ResultEvent
     }
 }

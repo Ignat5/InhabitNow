@@ -68,6 +68,7 @@ import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskW
 import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskWithRecordModel
+import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.android.ui.limitNumberToString
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
@@ -356,88 +357,12 @@ private fun DetailRow(fullTaskWithRecord: FullTaskWithRecordModel) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        ItemTaskType(fullTaskWithRecord.taskWithRecordModel.task.type)
-        if (fullTaskWithRecord.allReminders.isNotEmpty()) {
-            ItemTaskReminders(fullTaskWithRecord.allReminders)
-        }
-//        if (fullTaskWithRecord.allTags.isNotEmpty()) {
-//            ItemTaskTags(fullTaskWithRecord.allTags)
-//        }
-    }
-}
-
-@Composable
-private fun ItemTaskTags(allTags: List<TagModel>) {
-    ItemDetailContainer {
-        val text = remember(allTags) {
-            buildAnnotatedString {
-                allTags.forEachIndexed { index, tag ->
-                    append(tag.title)
-                    if (index != allTags.lastIndex) {
-                        append(" | ")
-                    }
-                }
-            }
-        }
-        Text(
-            text = text,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-private fun ItemTaskReminders(allReminders: List<ReminderModel>) {
-    val text = remember(allReminders) {
-        buildAnnotatedString {
-            allReminders.forEachIndexed { index, reminder ->
-                append(reminder.time.toHourMinute())
-                if (index != allReminders.lastIndex) {
-                    append(" | ")
-                }
-            }
-        }
-    }
-    ItemDetailContainer {
-        Text(
-            text = text,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-private fun ItemTaskType(taskType: TaskType) {
-    ItemDetailContainer {
-        Text(text = taskType.toDisplay())
-    }
-}
-
-@Composable
-private fun ItemDetailContainer(content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .background(
-                MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = MaterialTheme.shapes.extraSmall
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier.padding(4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            ProvideContentColorTextStyle(
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                textStyle = MaterialTheme.typography.labelMedium
-            ) {
-                content()
-            }
-        }
+        BaseTaskItemBuilder.ChipTaskType(taskType = fullTaskWithRecord.taskWithRecordModel.task.type)
+        BaseTaskItemBuilder.ChipTaskProgressType(taskProgressType = fullTaskWithRecord.taskWithRecordModel.task.progressType)
+        BaseTaskItemBuilder.ChipTaskPriority(priority = fullTaskWithRecord.taskWithRecordModel.task.priority)
+        BaseTaskItemBuilder.ChipTaskReminders(allReminders = fullTaskWithRecord.allReminders)
     }
 }
 
@@ -450,7 +375,6 @@ private fun getProgressTextOrNull(taskWithRecord: TaskWithRecordModel): String? 
                     when (val entry = taskWithRecord.recordEntry) {
                         is RecordContentModel.Entry.Number -> {
                             "${entry.number.limitNumberToString()} ${progressContent.limitUnit}"
-//                            "${entry.number}/${progressContent.limitNumber} ${progressContent.limitUnit}"
                         }
 
                         else -> null
@@ -458,11 +382,9 @@ private fun getProgressTextOrNull(taskWithRecord: TaskWithRecordModel): String? 
                 }
 
                 is TaskWithRecordModel.Habit.HabitContinuous.HabitTime -> {
-                    val progressContent = taskWithRecord.task.progressContent
                     when (val entry = taskWithRecord.recordEntry) {
                         is RecordContentModel.Entry.Time -> {
                             entry.time.toHourMinute()
-//                            "${entry.time.toHourMinute()}/${progressContent.limitTime.toHourMinute()}"
                         }
 
                         else -> null
@@ -515,17 +437,6 @@ private fun WeekRow(
                     }
                 )
             }
-//            items(
-//                items = allDateItems,
-//                key = { it.date.toEpochDays() }
-//            ) { item ->
-//                ItemWeekDay(
-//                    item = item,
-//                    onClick = {
-//                        onDateClick(item.date)
-//                    }
-//                )
-//            }
         }
         NextPrevButton(
             iconId = R.drawable.ic_next,

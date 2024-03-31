@@ -44,4 +44,8 @@ class DefaultRecordDataSource(
         recordDao.deleteRecordById(recordId)
     }
 
+    override suspend fun deleteRecordsByTaskId(taskId: String): ResultModel<Unit> = runQuery {
+        recordDao.deleteRecordsByTaskId(taskId)
+    }
+
 }

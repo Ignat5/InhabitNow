@@ -10,4 +10,5 @@ interface RecordDataSource {
     suspend fun insertRecord(recordTable: RecordTable): ResultModel<Unit>
     suspend fun updateRecordEntryById(recordId: String, entry: String): ResultModel<Unit>
     suspend fun deleteRecordById(recordId: String): ResultModel<Unit>
+    suspend fun deleteRecordsByTaskId(taskId: String): ResultModel<Unit>
 }

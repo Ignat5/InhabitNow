@@ -1,6 +1,7 @@
 package com.example.inhabitnow.data.repository.task
 
 import com.example.inhabitnow.core.model.ResultModel
+import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import com.example.inhabitnow.data.model.task.derived.FullTaskEntity
@@ -11,6 +12,7 @@ interface TaskRepository {
     fun readTaskWithContentById(taskId: String): Flow<TaskWithContentEntity?>
     fun readTasksWithContentBySearchQuery(searchQuery: String): Flow<List<TaskWithContentEntity>>
     fun readFullTasksByDate(targetDate: LocalDate): Flow<List<FullTaskEntity>>
+    fun readFullTasksByType(allTaskTypes: Set<TaskType>): Flow<List<FullTaskEntity>>
     suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit>
     suspend fun saveTaskById(taskId: String): ResultModel<Unit>
     suspend fun deleteTaskById(taskId: String): ResultModel<Unit>
@@ -37,7 +39,7 @@ interface TaskRepository {
     suspend fun updateTaskStartEndDateById(
         taskId: String,
         taskStartDate: LocalDate,
-        taskEndDate: LocalDate
+        taskEndDate: LocalDate?
     ): ResultModel<Unit>
     suspend fun saveTaskProgressContent(
         taskId: String,
