@@ -47,6 +47,7 @@ import com.example.inhabitnow.android.presentation.view_activities.view_habits.c
 import com.example.inhabitnow.android.ui.base.BaseFilterSortBuilder
 import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.android.ui.toDatePeriodDisplay
+import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
 
 @Composable
@@ -98,9 +99,11 @@ private fun ViewHabitsScreenStateless(
                         is UIResultModel.NoData -> {
                             "You have no habits"
                         }
-                        is UIResultModel.Data-> {
+
+                        is UIResultModel.Data -> {
                             "No habits matching specified filters"
                         }
+
                         else -> null
                     }
                 }
@@ -170,6 +173,7 @@ private fun ViewHabitsScreenStateless(
                                 }
                             }
                         }
+
                         else -> Unit
                     }
                 }
@@ -205,7 +209,8 @@ private fun ItemHabit(
 private fun TitleRow(item: FullTaskModel.FullHabit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
             text = item.taskModel.title,
@@ -213,13 +218,20 @@ private fun TitleRow(item: FullTaskModel.FullHabit) {
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
         )
-        Text(
-            text = item.taskModel.dateContent.toDatePeriodDisplay(),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (item.allTags.isNotEmpty()) {
+            BaseTaskItemBuilder.ChipTaskTags(allTags = item.allTags)
+        }
+//        val freqText = remember(item.taskModel.frequencyContent) {
+//            item.taskModel.frequencyContent.toDisplay()
+//        }
+//        Text(
+//            text = freqText,
+//            style = MaterialTheme.typography.labelSmall,
+//            color = MaterialTheme.colorScheme.onSurfaceVariant,
+//            modifier = Modifier.weight(1f),
+////            textAlign = TextAlign.End
+//        )
     }
 }
 
@@ -232,10 +244,14 @@ private fun HabitDetailsRow(item: FullTaskModel.FullHabit) {
     ) {
         BaseTaskItemBuilder.ChipTaskType(taskType = item.taskModel.type)
         BaseTaskItemBuilder.ChipTaskProgressType(taskProgressType = item.taskModel.progressType)
-        BaseTaskItemBuilder.ChipTaskPriority(priority = item.taskModel.priority)
-        if (item.allTags.isNotEmpty()) {
-            BaseTaskItemBuilder.ChipTaskTags(allTags = item.allTags)
+        BaseTaskItemBuilder.ChipTaskStartDate(date = item.taskModel.dateContent.startDate)
+        item.taskModel.dateContent.endDate?.let { endDate ->
+            BaseTaskItemBuilder.ChipTaskEndDate(date = endDate)
         }
+        BaseTaskItemBuilder.ChipTaskPriority(priority = item.taskModel.priority)
+//        if (item.allTags.isNotEmpty()) {
+//            BaseTaskItemBuilder.ChipTaskTags(allTags = item.allTags)
+//        }
     }
 }
 

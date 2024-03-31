@@ -30,6 +30,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.inhabitnow.android.R
+import com.example.inhabitnow.android.ui.toDayMonthYear
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
 import com.example.inhabitnow.core.type.ReminderType
@@ -37,6 +38,7 @@ import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
 import com.example.inhabitnow.domain.model.tag.TagModel
+import kotlinx.datetime.LocalDate
 
 object BaseTaskItemBuilder {
 
@@ -93,24 +95,21 @@ object BaseTaskItemBuilder {
             iconResId = R.drawable.ic_tag,
             text = aStr.text
         )
-//        LazyRow(
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.spacedBy(4.dp)
-//        ) {
-//            items(
-//                items = allTags,
-//                key = { it.id }
-//            ) { item ->
-//                ItemTag(tagModel = item)
-//            }
-//        }
     }
 
     @Composable
-    private fun ItemTag(tagModel: TagModel) {
+    fun ChipTaskStartDate(date: LocalDate) {
         BaseIconDataItem(
-            iconResId = R.drawable.ic_tag,
-            text = tagModel.title
+            iconResId = R.drawable.ic_start_date,
+            text = date.toDayMonthYear()
+        )
+    }
+
+    @Composable
+    fun ChipTaskEndDate(date: LocalDate) {
+        BaseIconDataItem(
+            iconResId = R.drawable.ic_end_date,
+            text = date.toDayMonthYear()
         )
     }
 

@@ -50,7 +50,7 @@ class ViewHabitsViewModel @Inject constructor(
                         .asSequence()
                         .let { if (filterByTagsIds.isNotEmpty()) it.filterByTags(filterByTagsIds) else it }
                         .let { if (filterByStatus != null) it.filterByStatus(filterByStatus) else it }
-                        .let { if (sort != null) it.sortHabits(sort) else it }
+                        .sortHabits(sort)
                         .toList()
                 )
             }
@@ -182,7 +182,7 @@ class ViewHabitsViewModel @Inject constructor(
     }
 
     private fun Sequence<FullTaskModel.FullHabit>.sortHabits(
-        sort: TaskSort.HabitsSort
+        sort: TaskSort.HabitsSort?
     ): Sequence<FullTaskModel.FullHabit> = this.let { allHabits ->
         when (sort) {
             is TaskSort.ByStartDate -> {
@@ -195,6 +195,10 @@ class ViewHabitsViewModel @Inject constructor(
 
             is TaskSort.ByTitle -> {
                 allHabits.sortedBy { it.taskModel.title }
+            }
+
+            null -> {
+                allHabits.sortedByDescending { it.taskModel.createdAt }
             }
         }
     }
