@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
+import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskSort
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenConfig
@@ -44,18 +45,20 @@ class ViewHabitsViewModel @Inject constructor(
     ) { allHabits, filterByTagsIds, filterByStatus, sort ->
         if (allHabits.isNotEmpty()) {
             withContext(defaultDispatcher) {
-                allHabits
-                    .asSequence()
-                    .let { if (filterByTagsIds.isNotEmpty()) it.filterByTags(filterByTagsIds) else it }
-                    .let { if (filterByStatus != null) it.filterByStatus(filterByStatus) else it }
-                    .let { if (sort != null) it.sortHabits(sort) else it }
-                    .toList()
+                UIResultModel.Data(
+                    allHabits
+                        .asSequence()
+                        .let { if (filterByTagsIds.isNotEmpty()) it.filterByTags(filterByTagsIds) else it }
+                        .let { if (filterByStatus != null) it.filterByStatus(filterByStatus) else it }
+                        .let { if (sort != null) it.sortHabits(sort) else it }
+                        .toList()
+                )
             }
-        } else emptyList()
+        } else UIResultModel.NoData
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
-        emptyList()
+        UIResultModel.Loading(null)
     )
 
     private val allTagsState = readTagsUseCase()
@@ -103,13 +106,16 @@ class ViewHabitsViewModel @Inject constructor(
             is ViewHabitsScreenEvent.OnFilterByStatusClick ->
                 onFilterByStatusClick(event)
 
+            is ViewHabitsScreenEvent.OnSortClick ->
+                onSortClick(event)
+
             is ViewHabitsScreenEvent.OnSearchTasksClick ->
                 onSearchTasksClick()
         }
     }
 
     private fun onHabitClick(event: ViewHabitsScreenEvent.OnHabitClick) {
-
+        setUpNavigationState(ViewHabitsScreenNavigation.EditTask(event.taskId))
     }
 
     private fun onFilterTagClick(event: ViewHabitsScreenEvent.OnFilterTagClick) {
@@ -134,8 +140,18 @@ class ViewHabitsViewModel @Inject constructor(
         }
     }
 
-    private fun onSearchTasksClick() {
+    private fun onSortClick(event: ViewHabitsScreenEvent.OnSortClick) {
+        val clickedSort = event.sort
+        val currentSort = sortState.value
+        sortState.update {
+            if (clickedSort != currentSort) {
+                clickedSort
+            } else null
+        }
+    }
 
+    private fun onSearchTasksClick() {
+        setUpNavigationState(ViewHabitsScreenNavigation.Search)
     }
 
     private fun Sequence<FullTaskModel.FullHabit>.filterByTags(

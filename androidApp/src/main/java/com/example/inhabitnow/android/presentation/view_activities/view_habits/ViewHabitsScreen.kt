@@ -28,14 +28,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
+import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenConfig
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenEvent
@@ -79,7 +82,7 @@ private fun ViewHabitsScreenStateless(
             ScreenTopBar(
                 onMenuClick = onMenuClick,
                 onSearchClick = {
-
+                    onEvent(ViewHabitsScreenEvent.OnSearchTasksClick)
                 }
             )
         }
@@ -89,6 +92,30 @@ private fun ViewHabitsScreenStateless(
                 .fillMaxSize()
                 .padding(it)
         ) {
+            if (state.allHabits.data?.isEmpty() == true) {
+                val message = remember(state.allHabits) {
+                    when (state.allHabits) {
+                        is UIResultModel.NoData -> {
+                            "You have no habits"
+                        }
+                        is UIResultModel.Data-> {
+                            "No habits matching specified filters"
+                        }
+                        else -> null
+                    }
+                }
+                message?.let {
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Center)
+                    )
+                }
+            }
             Column(modifier = Modifier.fillMaxWidth()) {
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -105,32 +132,45 @@ private fun ViewHabitsScreenStateless(
                         )
                     }
                     item {
-                        BaseFilterSortBuilder.ChipFilterByStatus(
+                        BaseFilterSortBuilder.ChipFilterByHabitStatus(
                             currentFilter = state.filterByStatus,
-                            allFilters = TaskFilterByStatus.allHabitFilters,
                             onFilterClick = { filter ->
                                 onEvent(ViewHabitsScreenEvent.OnFilterByStatusClick(filter))
                             }
                         )
                     }
+                    item {
+                        BaseFilterSortBuilder.ChipHabitSort(
+                            currentSort = state.sort,
+                            onSortClick = { sort ->
+                                onEvent(ViewHabitsScreenEvent.OnSortClick(sort))
+                            }
+                        )
+                    }
                 }
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    itemsIndexed(
-                        items = state.allHabits,
-                        key = { _, item -> item.taskModel.id }
-                    ) { index, item ->
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            ItemHabit(
-                                item = item,
-                                onClick = {
-                                    onEvent(ViewHabitsScreenEvent.OnHabitClick(item.taskModel.id))
-                                },
-                                modifier = Modifier.animateItemPlacement()
-                            )
-                            if (index != state.allHabits.lastIndex) {
-                                BaseTaskItemBuilder.TaskDivider()
+                    when (state.allHabits) {
+                        is UIResultModel.Loading, is UIResultModel.Data -> {
+                            val allHabits = state.allHabits.data ?: emptyList()
+                            itemsIndexed(
+                                items = allHabits,
+                                key = { _, item -> item.taskModel.id }
+                            ) { index, item ->
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    ItemHabit(
+                                        item = item,
+                                        onClick = {
+                                            onEvent(ViewHabitsScreenEvent.OnHabitClick(item.taskModel.id))
+                                        },
+                                        modifier = Modifier.animateItemPlacement()
+                                    )
+                                    if (index != allHabits.lastIndex) {
+                                        BaseTaskItemBuilder.TaskDivider()
+                                    }
+                                }
                             }
                         }
+                        else -> Unit
                     }
                 }
             }
