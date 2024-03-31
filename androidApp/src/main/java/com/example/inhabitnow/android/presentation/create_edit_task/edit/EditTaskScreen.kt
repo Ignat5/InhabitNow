@@ -33,6 +33,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.edit.compone
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.components.EditTaskScreenState
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskDialog
+import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_restart.ConfirmRestartHabitDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.model.ItemTaskAction
 
 @Composable
@@ -125,7 +126,13 @@ private fun EditTaskScreenConfigStateless(
             )
         }
 
-        else -> {}
+        is EditTaskScreenConfig.ConfirmRestartHabit -> {
+            ConfirmRestartHabitDialog(
+                onResult = {
+                    onResultEvent(EditTaskScreenEvent.ResultEvent.ConfirmRestartHabit(it))
+                }
+            )
+        }
     }
 }
 

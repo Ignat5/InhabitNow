@@ -19,4 +19,5 @@ interface RecordRepository {
         entry: RecordContentEntity.Entry
     ): ResultModel<Unit>
     suspend fun deleteRecordById(recordId: String): ResultModel<Unit>
+    suspend fun deleteRecordsByTaskId(taskId: String): ResultModel<Unit>
 }

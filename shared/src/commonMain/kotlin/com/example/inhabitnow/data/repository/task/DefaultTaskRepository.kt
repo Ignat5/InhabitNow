@@ -165,7 +165,7 @@ class DefaultTaskRepository(
     override suspend fun updateTaskStartEndDateById(
         taskId: String,
         taskStartDate: LocalDate,
-        taskEndDate: LocalDate
+        taskEndDate: LocalDate?
     ): ResultModel<Unit> = taskDataSource.updateTaskStartEndDateById(
         taskId = taskId,
         taskStartEpochDay = taskStartDate.toEpochDay(),

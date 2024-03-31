@@ -39,7 +39,7 @@ interface TaskRepository {
     suspend fun updateTaskStartEndDateById(
         taskId: String,
         taskStartDate: LocalDate,
-        taskEndDate: LocalDate
+        taskEndDate: LocalDate?
     ): ResultModel<Unit>
     suspend fun saveTaskProgressContent(
         taskId: String,

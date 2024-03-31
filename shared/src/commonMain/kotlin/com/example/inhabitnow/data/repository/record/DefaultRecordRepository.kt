@@ -71,4 +71,7 @@ class DefaultRecordRepository(
     override suspend fun deleteRecordById(recordId: String): ResultModel<Unit> =
         recordDataSource.deleteRecordById(recordId)
 
+    override suspend fun deleteRecordsByTaskId(taskId: String): ResultModel<Unit> =
+        recordDataSource.deleteRecordsByTaskId(taskId)
+
 }

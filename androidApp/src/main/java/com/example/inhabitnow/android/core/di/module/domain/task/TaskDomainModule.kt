@@ -1,6 +1,7 @@
 package com.example.inhabitnow.android.core.di.module.domain.task
 
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
+import com.example.inhabitnow.data.repository.record.RecordRepository
 import com.example.inhabitnow.data.repository.task.TaskRepository
 import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.archive_task_by_id.DefaultArchiveTaskByIdUseCase
@@ -14,6 +15,8 @@ import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.Defau
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_tasks_by_search_query.DefaultReadTasksBySearchQueryUseCase
 import com.example.inhabitnow.domain.use_case.read_tasks_by_search_query.ReadTasksBySearchQueryUseCase
+import com.example.inhabitnow.domain.use_case.restart_habit_by_id.DefaultRestartHabitByIdUseCase
+import com.example.inhabitnow.domain.use_case.restart_habit_by_id.RestartHabitByIdUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.DefaultSaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.save_task_by_id.DefaultSaveTaskByIdUseCase
@@ -187,6 +190,19 @@ object TaskDomainModule {
     ): ArchiveTaskByIdUseCase {
         return DefaultArchiveTaskByIdUseCase(
             taskRepository = taskRepository,
+            externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideRestartHabitByIdUseCase(
+        taskRepository: TaskRepository,
+        recordRepository: RecordRepository,
+        externalScope: CoroutineScope
+    ): RestartHabitByIdUseCase {
+        return DefaultRestartHabitByIdUseCase(
+            taskRepository = taskRepository,
+            recordRepository = recordRepository,
             externalScope = externalScope
         )
     }
