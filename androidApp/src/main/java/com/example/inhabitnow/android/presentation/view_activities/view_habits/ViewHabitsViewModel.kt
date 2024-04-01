@@ -4,14 +4,21 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
+import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskScreenResult
+import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskScreenResult
 import com.example.inhabitnow.android.presentation.model.UIResultModel
+import com.example.inhabitnow.android.presentation.view_activities.model.ItemTaskAction
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskSort
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenConfig
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenEvent
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenState
+import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.ViewHabitActionsStateHolder
+import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.components.ViewHabitActionsScreenResult
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
+import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_full_habits.ReadFullHabitsUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +30,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -31,14 +39,21 @@ class ViewHabitsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     readFullHabitsUseCase: ReadFullHabitsUseCase,
     readTagsUseCase: ReadTagsUseCase,
+    private val archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
+    private val deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<ViewHabitsScreenEvent, ViewHabitsScreenState, ViewHabitsScreenNavigation, ViewHabitsScreenConfig>() {
     private val filterByTagsIdsState = MutableStateFlow<Set<String>>(emptySet())
     private val filterByStatusState = MutableStateFlow<TaskFilterByStatus.HabitStatus?>(null)
     private val sortState = MutableStateFlow<TaskSort.HabitsSort?>(null)
-    private val allHabitsFlow = readFullHabitsUseCase()
+    private val allHabitsState = readFullHabitsUseCase()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            emptyList()
+        )
     private val allProcessedHabitsState = combine(
-        allHabitsFlow,
+        allHabitsState,
         filterByTagsIdsState,
         filterByStatusState,
         sortState
@@ -100,6 +115,9 @@ class ViewHabitsViewModel @Inject constructor(
             is ViewHabitsScreenEvent.OnHabitClick ->
                 onHabitClick(event)
 
+            is ViewHabitsScreenEvent.ResultEvent ->
+                onResultEvent(event)
+
             is ViewHabitsScreenEvent.OnFilterTagClick ->
                 onFilterTagClick(event)
 
@@ -114,8 +132,126 @@ class ViewHabitsViewModel @Inject constructor(
         }
     }
 
+    private fun onResultEvent(event: ViewHabitsScreenEvent.ResultEvent) {
+        when (event) {
+            is ViewHabitsScreenEvent.ResultEvent.ViewHabitActions ->
+                onViewHabitActionsResult(event)
+
+            is ViewHabitsScreenEvent.ResultEvent.ConfirmArchiveTask ->
+                onConfirmArchiveTaskResultEvent(event)
+
+            is ViewHabitsScreenEvent.ResultEvent.ConfirmDeleteTask ->
+                onConfirmDeleteTaskResultEvent(event)
+        }
+    }
+
+    private fun onConfirmArchiveTaskResultEvent(event: ViewHabitsScreenEvent.ResultEvent.ConfirmArchiveTask) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is ConfirmArchiveTaskScreenResult.Confirm ->
+                    onConfirmArchiveTask(result)
+
+                is ConfirmArchiveTaskScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmArchiveTask(result: ConfirmArchiveTaskScreenResult.Confirm) {
+        viewModelScope.launch {
+            archiveTaskByIdUseCase(
+                taskId = result.taskId,
+                archive = true
+            )
+        }
+    }
+
+    private fun onConfirmDeleteTaskResultEvent(event: ViewHabitsScreenEvent.ResultEvent.ConfirmDeleteTask) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is ConfirmDeleteTaskScreenResult.Confirm ->
+                    onConfirmDeleteTask(result)
+
+                is ConfirmDeleteTaskScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmDeleteTask(result: ConfirmDeleteTaskScreenResult.Confirm) {
+        viewModelScope.launch {
+            deleteTaskByIdUseCase(result.taskId)
+        }
+    }
+
+    private fun onViewHabitActionsResult(event: ViewHabitsScreenEvent.ResultEvent.ViewHabitActions) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is ViewHabitActionsScreenResult.Action ->
+                    onHabitActionResult(result)
+
+                is ViewHabitActionsScreenResult.Edit ->
+                    onEditResult(result)
+
+                is ViewHabitActionsScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onHabitActionResult(result: ViewHabitActionsScreenResult.Action) {
+        when (val action = result.action) {
+            is ItemTaskAction.ViewStatistics ->
+                onViewStatisticsAction(result.taskId)
+
+            is ItemTaskAction.ArchiveUnarchive -> {
+                when (action) {
+                    is ItemTaskAction.ArchiveUnarchive.Archive ->
+                        onArchiveAction(result.taskId)
+
+                    is ItemTaskAction.ArchiveUnarchive.Unarchive ->
+                        onUnarchiveAction(result.taskId)
+                }
+            }
+
+            is ItemTaskAction.Delete ->
+                onDeleteAction(result.taskId)
+        }
+    }
+
+    private fun onViewStatisticsAction(taskId: String) {
+        /* TODO */
+    }
+
+    private fun onArchiveAction(taskId: String) {
+        setUpConfigState(ViewHabitsScreenConfig.ConfirmArchiveTask(taskId))
+    }
+
+    private fun onUnarchiveAction(taskId: String) {
+        viewModelScope.launch {
+            archiveTaskByIdUseCase(
+                taskId = taskId,
+                archive = false
+            )
+        }
+    }
+
+    private fun onDeleteAction(taskId: String) {
+        setUpConfigState(ViewHabitsScreenConfig.ConfirmDeleteTask(taskId))
+    }
+
+    private fun onEditResult(result: ViewHabitActionsScreenResult.Edit) {
+        setUpNavigationState(ViewHabitsScreenNavigation.EditTask(result.taskId))
+    }
+
     private fun onHabitClick(event: ViewHabitsScreenEvent.OnHabitClick) {
-        setUpNavigationState(ViewHabitsScreenNavigation.EditTask(event.taskId))
+        allHabitsState.value.find { it.taskModel.id == event.taskId }?.let { fullHabit ->
+            setUpConfigState(
+                ViewHabitsScreenConfig.ViewHabitActions(
+                    stateHolder = ViewHabitActionsStateHolder(
+                        habitModel = fullHabit.taskModel,
+                        holderScope = provideChildScope()
+                    )
+                )
+            )
+        }
     }
 
     private fun onFilterTagClick(event: ViewHabitsScreenEvent.OnFilterTagClick) {

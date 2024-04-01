@@ -38,12 +38,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
+import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskDialog
+import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskDialog
 import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenConfig
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenEvent
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenState
+import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.ViewHabitActionsDialog
+import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.components.ViewHabitActionsScreenResult
 import com.example.inhabitnow.android.ui.base.BaseFilterSortBuilder
 import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.android.ui.toDatePeriodDisplay
@@ -222,16 +226,6 @@ private fun TitleRow(item: FullTaskModel.FullHabit) {
         if (item.allTags.isNotEmpty()) {
             BaseTaskItemBuilder.ChipTaskTags(allTags = item.allTags)
         }
-//        val freqText = remember(item.taskModel.frequencyContent) {
-//            item.taskModel.frequencyContent.toDisplay()
-//        }
-//        Text(
-//            text = freqText,
-//            style = MaterialTheme.typography.labelSmall,
-//            color = MaterialTheme.colorScheme.onSurfaceVariant,
-//            modifier = Modifier.weight(1f),
-////            textAlign = TextAlign.End
-//        )
     }
 }
 
@@ -289,7 +283,30 @@ private fun ScreenTopBar(
 @Composable
 private fun ViewHabitsScreenConfigStateless(
     config: ViewHabitsScreenConfig,
-    onResultEvent: (ViewHabitsScreenEvent) -> Unit
+    onResultEvent: (ViewHabitsScreenEvent.ResultEvent) -> Unit
 ) {
-
+    when (config) {
+        is ViewHabitsScreenConfig.ViewHabitActions -> {
+            ViewHabitActionsDialog(stateHolder = config.stateHolder) {
+                onResultEvent(ViewHabitsScreenEvent.ResultEvent.ViewHabitActions(it))
+            }
+        }
+        is ViewHabitsScreenConfig.ConfirmArchiveTask -> {
+            ConfirmArchiveTaskDialog(taskId = config.taskId) {
+                onResultEvent(ViewHabitsScreenEvent.ResultEvent.ConfirmArchiveTask(it))
+            }
+        }
+        is ViewHabitsScreenConfig.ConfirmDeleteTask -> {
+            ConfirmDeleteTaskDialog(taskId = config.taskId) {
+                onResultEvent(ViewHabitsScreenEvent.ResultEvent.ConfirmDeleteTask(it))
+            }
+        }
+    }
 }
+
+
+
+
+
+
+

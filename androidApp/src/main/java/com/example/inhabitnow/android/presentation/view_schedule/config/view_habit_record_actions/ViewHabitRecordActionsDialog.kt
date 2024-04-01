@@ -58,10 +58,13 @@ private fun ViewHabitRecordActionsDialogStateless(
     val sheetState = rememberModalBottomSheetState()
     BaseModalBottomSheetDialog(
         sheetState = sheetState,
-        onDismissRequest = { onEvent(ViewHabitRecordActionsScreenEvent.OnDismissRequest) }
+        onDismissRequest = { onEvent(ViewHabitRecordActionsScreenEvent.OnDismissRequest) },
+        dragHandle = null
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             TaskTitleBlock(
