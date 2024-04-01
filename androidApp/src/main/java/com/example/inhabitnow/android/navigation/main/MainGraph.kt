@@ -39,6 +39,7 @@ import com.example.inhabitnow.android.presentation.main.config.pick_task_progres
 import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeDialog
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
+import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenNavigation
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 
@@ -130,12 +131,15 @@ fun NavGraphBuilder.mainGraph(
                             onMenuClick = {},
                             onNavigation = { destination ->
                                 when (destination) {
-                                    is ViewHabitsScreenNavigation.Search -> {
-                                        onNavigateToSearchTasks()
-                                    }
-
-                                    is ViewHabitsScreenNavigation.EditTask -> {
-                                        onNavigateToEditTask(destination.taskId)
+                                    is ViewHabitsScreenNavigation.Base -> {
+                                        when (val baseNS = destination.baseSN) {
+                                            is BaseViewTasksScreenNavigation.EditTask -> {
+                                                onNavigateToEditTask(baseNS.taskId)
+                                            }
+                                            is BaseViewTasksScreenNavigation.Search -> {
+                                                onNavigateToSearchTasks()
+                                            }
+                                        }
                                     }
                                 }
                             }

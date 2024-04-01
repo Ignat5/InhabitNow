@@ -41,6 +41,8 @@ import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskDialog
 import com.example.inhabitnow.android.presentation.model.UIResultModel
+import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenConfig
+import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenEvent
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenConfig
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenEvent
@@ -87,7 +89,7 @@ private fun ViewHabitsScreenStateless(
             ScreenTopBar(
                 onMenuClick = onMenuClick,
                 onSearchClick = {
-                    onEvent(ViewHabitsScreenEvent.OnSearchTasksClick)
+                    onEvent(ViewHabitsScreenEvent.Base(BaseViewTasksScreenEvent.OnSearchClick))
                 }
             )
         }
@@ -97,9 +99,9 @@ private fun ViewHabitsScreenStateless(
                 .fillMaxSize()
                 .padding(it)
         ) {
-            if (state.allHabits.data?.isEmpty() == true) {
-                val message = remember(state.allHabits) {
-                    when (state.allHabits) {
+            if (state.allTasksResult.data?.isEmpty() == true) {
+                val message = remember(state.allTasksResult) {
+                    when (state.allTasksResult) {
                         is UIResultModel.NoData -> {
                             "You have no habits"
                         }
@@ -131,10 +133,13 @@ private fun ViewHabitsScreenStateless(
                 ) {
                     item {
                         BaseFilterSortBuilder.ChipFilterByTags(
-                            allTags = state.allTags,
-                            filterByTagsIds = state.filterByTagsIds,
+                            allSelectableTags = state.allSelectableTags,
                             onTagClick = { tagId ->
-                                onEvent(ViewHabitsScreenEvent.OnFilterTagClick(tagId))
+                                onEvent(
+                                    ViewHabitsScreenEvent.Base(
+                                        BaseViewTasksScreenEvent.OnTagClick(tagId = tagId)
+                                    )
+                                )
                             }
                         )
                     }
@@ -156,9 +161,9 @@ private fun ViewHabitsScreenStateless(
                     }
                 }
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    when (state.allHabits) {
+                    when (state.allTasksResult) {
                         is UIResultModel.Loading, is UIResultModel.Data -> {
-                            val allHabits = state.allHabits.data ?: emptyList()
+                            val allHabits = state.allTasksResult.data ?: emptyList()
                             itemsIndexed(
                                 items = allHabits,
                                 key = { _, item -> item.taskModel.id }
@@ -283,7 +288,7 @@ private fun ScreenTopBar(
 @Composable
 private fun ViewHabitsScreenConfigStateless(
     config: ViewHabitsScreenConfig,
-    onResultEvent: (ViewHabitsScreenEvent.ResultEvent) -> Unit
+    onResultEvent: (ViewHabitsScreenEvent) -> Unit
 ) {
     when (config) {
         is ViewHabitsScreenConfig.ViewHabitActions -> {
@@ -291,14 +296,27 @@ private fun ViewHabitsScreenConfigStateless(
                 onResultEvent(ViewHabitsScreenEvent.ResultEvent.ViewHabitActions(it))
             }
         }
-        is ViewHabitsScreenConfig.ConfirmArchiveTask -> {
-            ConfirmArchiveTaskDialog(taskId = config.taskId) {
-                onResultEvent(ViewHabitsScreenEvent.ResultEvent.ConfirmArchiveTask(it))
-            }
-        }
-        is ViewHabitsScreenConfig.ConfirmDeleteTask -> {
-            ConfirmDeleteTaskDialog(taskId = config.taskId) {
-                onResultEvent(ViewHabitsScreenEvent.ResultEvent.ConfirmDeleteTask(it))
+
+        is ViewHabitsScreenConfig.Base -> {
+            when (val bc = config.baseConfig) {
+                is BaseViewTasksScreenConfig.ConfirmArchiveTask -> {
+                    ConfirmArchiveTaskDialog(bc.taskId) {
+                        onResultEvent(
+                            ViewHabitsScreenEvent.Base(
+                                BaseViewTasksScreenEvent.ResultEvent.ConfirmArchiveTask(it)
+                            )
+                        )
+                    }
+                }
+                is BaseViewTasksScreenConfig.ConfirmDeleteTask -> {
+                    ConfirmDeleteTaskDialog(bc.taskId) {
+                        onResultEvent(
+                            ViewHabitsScreenEvent.Base(
+                                BaseViewTasksScreenEvent.ResultEvent.ConfirmDeleteTask(it)
+                            )
+                        )
+                    }
+                }
             }
         }
     }

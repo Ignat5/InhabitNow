@@ -1,9 +1,10 @@
 package com.example.inhabitnow.android.presentation.view_activities.model
 
 sealed interface TaskFilterByStatus {
-    data object OnlyActive : HabitStatus, TaskStatus
-    data object OnlyArchived : HabitStatus, TaskStatus
+    data object OnlyActive : Common
+    data object OnlyArchived : Common
 
+    sealed interface Common : HabitStatus, TaskStatus
     sealed interface HabitStatus : TaskFilterByStatus
     sealed interface TaskStatus : TaskFilterByStatus
 

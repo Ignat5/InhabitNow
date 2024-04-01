@@ -7,6 +7,9 @@ import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskScreenResult
 import com.example.inhabitnow.android.presentation.model.UIResultModel
+import com.example.inhabitnow.android.presentation.view_activities.base.BaseViewTasksViewModel
+import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenConfig
+import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.model.ItemTaskAction
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskSort
@@ -39,11 +42,15 @@ class ViewHabitsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     readFullHabitsUseCase: ReadFullHabitsUseCase,
     readTagsUseCase: ReadTagsUseCase,
-    private val archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
-    private val deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
+    archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
+    deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
-) : BaseViewModel<ViewHabitsScreenEvent, ViewHabitsScreenState, ViewHabitsScreenNavigation, ViewHabitsScreenConfig>() {
-    private val filterByTagsIdsState = MutableStateFlow<Set<String>>(emptySet())
+) : BaseViewTasksViewModel<ViewHabitsScreenEvent, ViewHabitsScreenState, ViewHabitsScreenNavigation, ViewHabitsScreenConfig>(
+    readTagsUseCase = readTagsUseCase,
+    archiveTaskByIdUseCase = archiveTaskByIdUseCase,
+    deleteTaskByIdUseCase = deleteTaskByIdUseCase,
+    defaultDispatcher = defaultDispatcher
+) {
     private val filterByStatusState = MutableStateFlow<TaskFilterByStatus.HabitStatus?>(null)
     private val sortState = MutableStateFlow<TaskSort.HabitsSort?>(null)
     private val allHabitsState = readFullHabitsUseCase()
@@ -76,25 +83,16 @@ class ViewHabitsViewModel @Inject constructor(
         UIResultModel.Loading(null)
     )
 
-    private val allTagsState = readTagsUseCase()
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            emptyList()
-        )
-
     override val uiScreenState: StateFlow<ViewHabitsScreenState> =
         combine(
             allProcessedHabitsState,
-            allTagsState,
-            filterByTagsIdsState,
+            allSelectableTagsState,
             filterByStatusState,
             sortState
-        ) { allProcessedHabits, allTags, filterByTagsIds, filterByStatus, sort ->
+        ) { allProcessedHabits, allSelectableTags, filterByStatus, sort ->
             ViewHabitsScreenState(
-                allHabits = allProcessedHabits,
-                allTags = allTags,
-                filterByTagsIds = filterByTagsIds,
+                allTasksResult = allProcessedHabits,
+                allSelectableTags = allSelectableTags,
                 filterByStatus = filterByStatus,
                 sort = sort
             )
@@ -102,9 +100,8 @@ class ViewHabitsViewModel @Inject constructor(
             viewModelScope,
             SharingStarted.Eagerly,
             ViewHabitsScreenState(
-                allHabits = allProcessedHabitsState.value,
-                allTags = allTagsState.value,
-                filterByTagsIds = filterByTagsIdsState.value,
+                allTasksResult = allProcessedHabitsState.value,
+                allSelectableTags = allSelectableTagsState.value,
                 filterByStatus = filterByStatusState.value,
                 sort = sortState.value
             )
@@ -112,14 +109,14 @@ class ViewHabitsViewModel @Inject constructor(
 
     override fun onEvent(event: ViewHabitsScreenEvent) {
         when (event) {
+            is ViewHabitsScreenEvent.Base ->
+                onBaseEvent(event.baseEvent)
+
             is ViewHabitsScreenEvent.OnHabitClick ->
                 onHabitClick(event)
 
             is ViewHabitsScreenEvent.ResultEvent ->
                 onResultEvent(event)
-
-            is ViewHabitsScreenEvent.OnFilterTagClick ->
-                onFilterTagClick(event)
 
             is ViewHabitsScreenEvent.OnFilterByStatusClick ->
                 onFilterByStatusClick(event)
@@ -127,8 +124,6 @@ class ViewHabitsViewModel @Inject constructor(
             is ViewHabitsScreenEvent.OnSortClick ->
                 onSortClick(event)
 
-            is ViewHabitsScreenEvent.OnSearchTasksClick ->
-                onSearchTasksClick()
         }
     }
 
@@ -136,49 +131,6 @@ class ViewHabitsViewModel @Inject constructor(
         when (event) {
             is ViewHabitsScreenEvent.ResultEvent.ViewHabitActions ->
                 onViewHabitActionsResult(event)
-
-            is ViewHabitsScreenEvent.ResultEvent.ConfirmArchiveTask ->
-                onConfirmArchiveTaskResultEvent(event)
-
-            is ViewHabitsScreenEvent.ResultEvent.ConfirmDeleteTask ->
-                onConfirmDeleteTaskResultEvent(event)
-        }
-    }
-
-    private fun onConfirmArchiveTaskResultEvent(event: ViewHabitsScreenEvent.ResultEvent.ConfirmArchiveTask) {
-        onIdleToAction {
-            when (val result = event.result) {
-                is ConfirmArchiveTaskScreenResult.Confirm ->
-                    onConfirmArchiveTask(result)
-
-                is ConfirmArchiveTaskScreenResult.Dismiss -> Unit
-            }
-        }
-    }
-
-    private fun onConfirmArchiveTask(result: ConfirmArchiveTaskScreenResult.Confirm) {
-        viewModelScope.launch {
-            archiveTaskByIdUseCase(
-                taskId = result.taskId,
-                archive = true
-            )
-        }
-    }
-
-    private fun onConfirmDeleteTaskResultEvent(event: ViewHabitsScreenEvent.ResultEvent.ConfirmDeleteTask) {
-        onIdleToAction {
-            when (val result = event.result) {
-                is ConfirmDeleteTaskScreenResult.Confirm ->
-                    onConfirmDeleteTask(result)
-
-                is ConfirmDeleteTaskScreenResult.Dismiss -> Unit
-            }
-        }
-    }
-
-    private fun onConfirmDeleteTask(result: ConfirmDeleteTaskScreenResult.Confirm) {
-        viewModelScope.launch {
-            deleteTaskByIdUseCase(result.taskId)
         }
     }
 
@@ -221,24 +173,19 @@ class ViewHabitsViewModel @Inject constructor(
     }
 
     private fun onArchiveAction(taskId: String) {
-        setUpConfigState(ViewHabitsScreenConfig.ConfirmArchiveTask(taskId))
+        super.onArchiveTask(taskId)
     }
 
     private fun onUnarchiveAction(taskId: String) {
-        viewModelScope.launch {
-            archiveTaskByIdUseCase(
-                taskId = taskId,
-                archive = false
-            )
-        }
+        super.onUnarchiveTask(taskId)
     }
 
     private fun onDeleteAction(taskId: String) {
-        setUpConfigState(ViewHabitsScreenConfig.ConfirmDeleteTask(taskId))
+        super.onDeleteTask(taskId)
     }
 
     private fun onEditResult(result: ViewHabitActionsScreenResult.Edit) {
-        setUpNavigationState(ViewHabitsScreenNavigation.EditTask(result.taskId))
+        onEditTask(result.taskId)
     }
 
     private fun onHabitClick(event: ViewHabitsScreenEvent.OnHabitClick) {
@@ -254,19 +201,13 @@ class ViewHabitsViewModel @Inject constructor(
         }
     }
 
-    private fun onFilterTagClick(event: ViewHabitsScreenEvent.OnFilterTagClick) {
-        val clickedTagId = event.tagId
-        filterByTagsIdsState.update { oldSet ->
-            val newSet = mutableSetOf<String>()
-            newSet.addAll(oldSet)
-            if (newSet.contains(clickedTagId)) {
-                newSet.remove(clickedTagId)
-            } else newSet.add(clickedTagId)
-            newSet
-        }
-    }
-
     private fun onFilterByStatusClick(event: ViewHabitsScreenEvent.OnFilterByStatusClick) {
+        filterByStatusState.update { oldStatus ->
+            super.produceFilterByStatus(
+                currentFilter = oldStatus,
+                newFilter = event.filterByStatus
+            )
+        }
         val clickedFilter = event.filterByStatus
         val currentFilter = filterByStatusState.value
         filterByStatusState.update {
@@ -277,43 +218,28 @@ class ViewHabitsViewModel @Inject constructor(
     }
 
     private fun onSortClick(event: ViewHabitsScreenEvent.OnSortClick) {
-        val clickedSort = event.sort
-        val currentSort = sortState.value
-        sortState.update {
-            if (clickedSort != currentSort) {
-                clickedSort
-            } else null
+        sortState.update { oldSort ->
+            super.produceSort(
+                currentSort = oldSort,
+                newSort = event.sort
+            )
         }
     }
 
-    private fun onSearchTasksClick() {
-        setUpNavigationState(ViewHabitsScreenNavigation.Search)
+    override fun setUpBaseConfigState(baseConfig: BaseViewTasksScreenConfig) {
+        setUpConfigState(ViewHabitsScreenConfig.Base(baseConfig))
     }
 
-    private fun Sequence<FullTaskModel.FullHabit>.filterByTags(
-        filterByTagsIds: Set<String>
-    ): Sequence<FullTaskModel.FullHabit> = this.let { allHabits ->
-        if (filterByTagsIds.isEmpty()) allHabits
-        else allHabits.filter { fullHabit ->
-            fullHabit.allTags.any { it.id in filterByTagsIds }
-        }
+    override fun setUpBaseNavigationState(baseSN: BaseViewTasksScreenNavigation) {
+        setUpNavigationState(ViewHabitsScreenNavigation.Base(baseSN))
     }
 
     private fun Sequence<FullTaskModel.FullHabit>.filterByStatus(
         filterByStatus: TaskFilterByStatus.HabitStatus
     ): Sequence<FullTaskModel.FullHabit> = this.let { allHabits ->
         when (filterByStatus) {
-            is TaskFilterByStatus.OnlyActive -> {
-                allHabits.filter { fullHabit ->
-                    !fullHabit.taskModel.isArchived
-                }
-            }
-
-            is TaskFilterByStatus.OnlyArchived -> {
-                allHabits.filter { fullHabit ->
-                    fullHabit.taskModel.isArchived
-                }
-            }
+            is TaskFilterByStatus.OnlyActive -> allHabits.filterByOnlyActive()
+            is TaskFilterByStatus.OnlyArchived -> allHabits.filterByOnlyArchived()
         }
     }
 
@@ -321,21 +247,10 @@ class ViewHabitsViewModel @Inject constructor(
         sort: TaskSort.HabitsSort?
     ): Sequence<FullTaskModel.FullHabit> = this.let { allHabits ->
         when (sort) {
-            is TaskSort.ByStartDate -> {
-                allHabits.sortedByDescending { it.taskModel.dateContent.startDate }
-            }
-
-            is TaskSort.ByPriority -> {
-                allHabits.sortedByDescending { it.taskModel.priority }
-            }
-
-            is TaskSort.ByTitle -> {
-                allHabits.sortedBy { it.taskModel.title }
-            }
-
-            null -> {
-                allHabits.sortedByDescending { it.taskModel.createdAt }
-            }
+            null -> allHabits.sortByDefault()
+            is TaskSort.ByStartDate -> allHabits.sortByStartDate()
+            is TaskSort.ByPriority -> allHabits.sortByPriority()
+            is TaskSort.ByTitle -> allHabits.sortByTitle()
         }
     }
 

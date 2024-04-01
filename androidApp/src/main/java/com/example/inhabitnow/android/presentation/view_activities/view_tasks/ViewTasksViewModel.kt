@@ -4,6 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
+import com.example.inhabitnow.android.presentation.view_activities.base.BaseViewTasksViewModel
+import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenConfig
+import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskSort
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenConfig
@@ -11,6 +14,8 @@ import com.example.inhabitnow.android.presentation.view_activities.view_tasks.co
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenState
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
+import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_full_tasks.ReadFullTasksUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,11 +32,19 @@ class ViewTasksViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     readFullTasksUseCase: ReadFullTasksUseCase,
     readTagsUseCase: ReadTagsUseCase,
+    archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
+    deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
-) : BaseViewModel<ViewTasksScreenEvent, ViewTasksScreenState, ViewTasksScreenNavigation, ViewTasksScreenConfig>() {
-    private val filterByTagsIdsState = MutableStateFlow<Set<String>>(emptySet())
-    private val filterByStatusState = MutableStateFlow<TaskFilterByStatus.HabitStatus?>(null)
-    private val sortState = MutableStateFlow<TaskSort.HabitsSort?>(null)
+) : BaseViewTasksViewModel<ViewTasksScreenEvent, ViewTasksScreenState, ViewTasksScreenNavigation, ViewTasksScreenConfig>(
+    readTagsUseCase = readTagsUseCase,
+    archiveTaskByIdUseCase = archiveTaskByIdUseCase,
+    deleteTaskByIdUseCase = deleteTaskByIdUseCase,
+    defaultDispatcher = defaultDispatcher
+) {
+
+    private val filterByStatusState = MutableStateFlow<TaskFilterByStatus.TaskStatus?>(null)
+    private val sortState = MutableStateFlow<TaskSort.TasksSort?>(null)
+
     private val allTasksState = readFullTasksUseCase()
         .stateIn(
             viewModelScope,
@@ -46,9 +59,11 @@ class ViewTasksViewModel @Inject constructor(
         sortState
     ) { allTasks, filterByTagsIds, filterByStatus, sort ->
         allTasks
-//            .asSequence()
-//            .let { if (filterByTagsIds.isNotEmpty()) }
-//            .toList()
+            .asSequence()
+            .let { if (filterByTagsIds.isNotEmpty()) it.filterByTags(filterByTagsIds) else it }
+            .let { if (filterByStatus != null) it.filterByStatus(filterByStatus) else it }
+            .sortHabits(sort)
+            .toList()
     }
 
     override val uiScreenState: StateFlow<ViewTasksScreenState>
@@ -58,10 +73,32 @@ class ViewTasksViewModel @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    private fun Sequence<FullTaskModel.FullTask>.filterByTags(
-        filterByTagsIds: Set<String>
-    ) = this.let { allTasks ->
+    override fun setUpBaseNavigationState(baseSN: BaseViewTasksScreenNavigation) {
+        TODO("Not yet implemented")
+    }
 
+    override fun setUpBaseConfigState(baseConfig: BaseViewTasksScreenConfig) {
+        TODO("Not yet implemented")
+    }
+
+    private fun Sequence<FullTaskModel.FullTask>.filterByStatus(
+        filterByStatus: TaskFilterByStatus.TaskStatus
+    ) = this.let { allTasks ->
+        when (filterByStatus) {
+            is TaskFilterByStatus.OnlyActive -> allTasks.filterByOnlyActive()
+            is TaskFilterByStatus.OnlyArchived -> allTasks.filterByOnlyArchived()
+        }
+    }
+
+    private fun Sequence<FullTaskModel.FullTask>.sortHabits(
+        sort: TaskSort.TasksSort?
+    ): Sequence<FullTaskModel.FullTask> = this.let { allHabits ->
+        when (sort) {
+            null -> allHabits.sortByDefault()
+            is TaskSort.ByStartDate -> allHabits.sortByStartDate()
+            is TaskSort.ByPriority -> allHabits.sortByPriority()
+            is TaskSort.ByTitle -> allHabits.sortByTitle()
+        }
     }
 
 }

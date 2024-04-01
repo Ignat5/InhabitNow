@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.inhabitnow.android.R
+import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.model.SelectableTagModel
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskSort
 import com.example.inhabitnow.domain.model.tag.TagModel
@@ -192,12 +193,11 @@ object BaseFilterSortBuilder {
 
     @Composable
     fun ChipFilterByTags(
-        allTags: List<TagModel>,
-        filterByTagsIds: Set<String>,
+        allSelectableTags: List<SelectableTagModel>,
         onTagClick: (String) -> Unit
     ) {
-        val isFilterActive = remember(filterByTagsIds) {
-            filterByTagsIds.isNotEmpty()
+        val isFilterActive = remember(allSelectableTags) {
+            allSelectableTags.any { it.isSelected }
         }
         var isExpanded by remember {
             mutableStateOf(false)
@@ -223,21 +223,18 @@ object BaseFilterSortBuilder {
                 expanded = isExpanded,
                 onDismissRequest = { isExpanded = false }
             ) {
-                allTags.forEach { tagModel ->
-                    val isSelected = remember(filterByTagsIds) {
-                        tagModel.id in filterByTagsIds
-                    }
-                    key(tagModel.id) {
+                allSelectableTags.forEach { selectableTag ->
+                    key(selectableTag.tagModel.id) {
                         DropdownMenuItem(
                             modifier = Modifier.background(
-                                if (isSelected) MaterialTheme.colorScheme.surfaceContainerHighest
+                                if (selectableTag.isSelected) MaterialTheme.colorScheme.surfaceContainerHighest
                                 else Color.Transparent
                             ),
                             text = {
-                                ItemTag(tagModel = tagModel)
+                                ItemTag(tagModel = selectableTag.tagModel)
                             },
                             onClick = {
-                                onTagClick(tagModel.id)
+                                onTagClick(selectableTag.tagModel.id)
                             }
                         )
                     }
