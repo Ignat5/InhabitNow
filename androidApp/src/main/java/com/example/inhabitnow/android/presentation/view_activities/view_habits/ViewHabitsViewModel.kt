@@ -45,14 +45,12 @@ class ViewHabitsViewModel @Inject constructor(
     archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
     deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
-) : BaseViewTasksViewModel<ViewHabitsScreenEvent, ViewHabitsScreenState, ViewHabitsScreenNavigation, ViewHabitsScreenConfig>(
+) : BaseViewTasksViewModel<ViewHabitsScreenEvent, ViewHabitsScreenState, ViewHabitsScreenNavigation, ViewHabitsScreenConfig, TaskFilterByStatus.HabitStatus, TaskSort.HabitsSort>(
     readTagsUseCase = readTagsUseCase,
     archiveTaskByIdUseCase = archiveTaskByIdUseCase,
     deleteTaskByIdUseCase = deleteTaskByIdUseCase,
     defaultDispatcher = defaultDispatcher
 ) {
-    private val filterByStatusState = MutableStateFlow<TaskFilterByStatus.HabitStatus?>(null)
-    private val sortState = MutableStateFlow<TaskSort.HabitsSort?>(null)
     private val allHabitsState = readFullHabitsUseCase()
         .stateIn(
             viewModelScope,
@@ -185,7 +183,7 @@ class ViewHabitsViewModel @Inject constructor(
     }
 
     private fun onEditResult(result: ViewHabitActionsScreenResult.Edit) {
-        onEditTask(result.taskId)
+        super.onEditTask(result.taskId)
     }
 
     private fun onHabitClick(event: ViewHabitsScreenEvent.OnHabitClick) {
@@ -202,28 +200,11 @@ class ViewHabitsViewModel @Inject constructor(
     }
 
     private fun onFilterByStatusClick(event: ViewHabitsScreenEvent.OnFilterByStatusClick) {
-        filterByStatusState.update { oldStatus ->
-            super.produceFilterByStatus(
-                currentFilter = oldStatus,
-                newFilter = event.filterByStatus
-            )
-        }
-        val clickedFilter = event.filterByStatus
-        val currentFilter = filterByStatusState.value
-        filterByStatusState.update {
-            if (clickedFilter != currentFilter) {
-                clickedFilter
-            } else null
-        }
+        super.onFilterByStatusClick(event.filterByStatus)
     }
 
     private fun onSortClick(event: ViewHabitsScreenEvent.OnSortClick) {
-        sortState.update { oldSort ->
-            super.produceSort(
-                currentSort = oldSort,
-                newSort = event.sort
-            )
-        }
+        super.onSortClick(event.sort)
     }
 
     override fun setUpBaseConfigState(baseConfig: BaseViewTasksScreenConfig) {

@@ -35,15 +35,12 @@ class ViewTasksViewModel @Inject constructor(
     archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
     deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
-) : BaseViewTasksViewModel<ViewTasksScreenEvent, ViewTasksScreenState, ViewTasksScreenNavigation, ViewTasksScreenConfig>(
+) : BaseViewTasksViewModel<ViewTasksScreenEvent, ViewTasksScreenState, ViewTasksScreenNavigation, ViewTasksScreenConfig, TaskFilterByStatus.TaskStatus, TaskSort.TasksSort>(
     readTagsUseCase = readTagsUseCase,
     archiveTaskByIdUseCase = archiveTaskByIdUseCase,
     deleteTaskByIdUseCase = deleteTaskByIdUseCase,
     defaultDispatcher = defaultDispatcher
 ) {
-
-    private val filterByStatusState = MutableStateFlow<TaskFilterByStatus.TaskStatus?>(null)
-    private val sortState = MutableStateFlow<TaskSort.TasksSort?>(null)
 
     private val allTasksState = readFullTasksUseCase()
         .stateIn(

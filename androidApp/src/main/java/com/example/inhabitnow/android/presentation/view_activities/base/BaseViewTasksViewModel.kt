@@ -32,15 +32,23 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-abstract class BaseViewTasksViewModel<SE : ScreenEvent, SS : ScreenState, SN : ScreenNavigation, SC : ScreenConfig>(
+abstract class BaseViewTasksViewModel<SE : ScreenEvent, SS : ScreenState, SN : ScreenNavigation, SC : ScreenConfig, TFS : TaskFilterByStatus, TS : TaskSort>(
     readTagsUseCase: ReadTagsUseCase,
     private val archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
     private val deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
     private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<SE, SS, SN, SC>() {
     private val todayDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
     private val _filterByTagsIdsState = MutableStateFlow<Set<String>>(emptySet())
     protected val filterByTagsIdsState: StateFlow<Set<String>> = _filterByTagsIdsState
+
+    private val _filterByStatusState = MutableStateFlow<TFS?>(null)
+    protected val filterByStatusState: StateFlow<TFS?> = _filterByStatusState
+
+    private val _sortState = MutableStateFlow<TS?>(null)
+    protected val sortState: StateFlow<TS?> = _sortState
+
     private val allTagsState = readTagsUseCase()
         .stateIn(
             viewModelScope,
@@ -159,20 +167,18 @@ abstract class BaseViewTasksViewModel<SE : ScreenEvent, SS : ScreenState, SN : S
         setUpBaseConfigState(BaseViewTasksScreenConfig.ConfirmDeleteTask(taskId))
     }
 
-    protected fun <T : TaskFilterByStatus> produceFilterByStatus(
-        currentFilter: T?,
-        newFilter: T,
-    ): T? {
-        return if (newFilter == currentFilter) null
-        else newFilter
+    protected fun onSortClick(sort: TS) {
+        _sortState.update { oldState ->
+            if (sort == oldState) null
+            else sort
+        }
     }
 
-    protected fun <T : TaskSort> produceSort(
-        currentSort: T?,
-        newSort: T,
-    ): T? {
-        return if (newSort == currentSort) null
-        else newSort
+    protected fun onFilterByStatusClick(filterByStatus: TFS) {
+        _filterByStatusState.update { oldFilter ->
+            if (filterByStatus == oldFilter) null
+            else filterByStatus
+        }
     }
 
     protected abstract fun setUpBaseNavigationState(baseSN: BaseViewTasksScreenNavigation)
@@ -191,12 +197,12 @@ abstract class BaseViewTasksViewModel<SE : ScreenEvent, SS : ScreenState, SN : S
         allTasks.filter { fullTask ->
             val inDatePeriod = when (val dc = fullTask.taskModel.dateContent) {
                 is TaskContentModel.DateContent.Day -> {
-                    dc.date >= todayDate
+                    dc.date <= todayDate
                 }
 
                 is TaskContentModel.DateContent.Period -> {
-                    dc.startDate >= todayDate &&
-                            (dc.endDate?.let { it <= todayDate } ?: true)
+                    dc.startDate <= todayDate &&
+                            (dc.endDate?.let { it >= todayDate } ?: true)
                 }
             }
             !fullTask.taskModel.isArchived && inDatePeriod
