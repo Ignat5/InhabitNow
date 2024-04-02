@@ -31,7 +31,17 @@ fun ProgressLimitType.toDisplay() = when (this) {
 //    ProgressLimitType.NoMoreThan -> "No more than"
 }
 
-fun TaskContentModel.FrequencyContent.EveryDay.toDisplay() = "Every day"
+fun TaskContentModel.FrequencyContent.toDisplay(): String {
+    return when (this) {
+        is TaskContentModel.FrequencyContent.EveryDay -> {
+            "Every day"
+        }
+
+        is TaskContentModel.FrequencyContent.DaysOfWeek -> {
+            this.daysOfWeek.toDisplay()
+        }
+    }
+}
 
 fun TaskContentModel.FrequencyContent.DaysOfWeek.toDisplay(): String {
     return this.daysOfWeek.toDisplay()

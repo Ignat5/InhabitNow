@@ -315,10 +315,7 @@ object BaseCreateEditTaskBuilder {
         onClick: () -> Unit
     ) {
         val dataText = remember(item) {
-            when (val fc = item.frequencyContent) {
-                is TaskContentModel.FrequencyContent.EveryDay -> fc.toDisplay()
-                is TaskContentModel.FrequencyContent.DaysOfWeek -> fc.toDisplay()
-            }
+            item.frequencyContent.toDisplay()
         }
         BasicItemConfig(
             iconResId = R.drawable.ic_frequency,

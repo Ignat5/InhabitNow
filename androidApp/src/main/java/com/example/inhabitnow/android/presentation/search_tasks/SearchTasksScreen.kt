@@ -37,9 +37,11 @@ import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.search_tasks.components.SearchTasksScreenEvent
 import com.example.inhabitnow.android.presentation.search_tasks.components.SearchTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.search_tasks.components.SearchTasksScreenState
+import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.android.ui.toDatePeriodDisplay
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.domain.model.task.TaskModel
+import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 
 @Composable
 fun SearchTasksScreen(onNavigation: (SearchTasksScreenNavigation) -> Unit) {
@@ -137,31 +139,13 @@ private fun ItemTask(
                 tint = MaterialTheme.colorScheme.onSurface,
                 contentDescription = null
             )
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = item.dateContent.toDatePeriodDisplay(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Text(
-                    text = item.type.toDisplay(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }

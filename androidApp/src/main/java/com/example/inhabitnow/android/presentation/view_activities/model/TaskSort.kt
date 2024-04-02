@@ -1,10 +1,11 @@
 package com.example.inhabitnow.android.presentation.view_activities.model
 
 sealed interface TaskSort {
-    data object ByStartDate : HabitsSort, TasksSort
-    data object ByPriority : HabitsSort, TasksSort
-    data object ByTitle : HabitsSort, TasksSort
+    data object ByStartDate : Common
+    data object ByPriority : Common
+    data object ByTitle : Common
 
+    sealed interface Common : HabitsSort, TasksSort
     sealed interface HabitsSort : TaskSort
     sealed interface TasksSort : TaskSort
 
@@ -14,5 +15,8 @@ sealed interface TaskSort {
 
         val allHabitsSorts
             get() = allSorts.filterIsInstance<TaskSort.HabitsSort>()
+
+        val allTasksSorts
+            get() = allSorts.filterIsInstance<TasksSort>()
     }
 }

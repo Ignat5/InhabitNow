@@ -29,7 +29,7 @@ import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.navigation.view_schedule.viewScheduleScreen
 import com.example.inhabitnow.android.navigation.view_habits.viewHabits
-import com.example.inhabitnow.android.navigation.view_all_tasks.viewAllTasks
+import com.example.inhabitnow.android.navigation.view_tasks.viewAllTasks
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.main.MainViewModel
 import com.example.inhabitnow.android.presentation.main.components.MainScreenConfig
@@ -39,7 +39,9 @@ import com.example.inhabitnow.android.presentation.main.config.pick_task_progres
 import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeDialog
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
+import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenNavigation
+import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -130,17 +132,37 @@ fun NavGraphBuilder.mainGraph(
                             onMenuClick = {},
                             onNavigation = { destination ->
                                 when (destination) {
-                                    is ViewHabitsScreenNavigation.Search -> {
-                                        onNavigateToSearchTasks()
-                                    }
-
-                                    is ViewHabitsScreenNavigation.EditTask -> {
-                                        onNavigateToEditTask(destination.taskId)
+                                    is ViewHabitsScreenNavigation.Base -> {
+                                        when (val baseNS = destination.baseNS) {
+                                            is BaseViewTasksScreenNavigation.EditTask -> {
+                                                onNavigateToEditTask(baseNS.taskId)
+                                            }
+                                            is BaseViewTasksScreenNavigation.Search -> {
+                                                onNavigateToSearchTasks()
+                                            }
+                                        }
                                     }
                                 }
                             }
                         )
-                        viewAllTasks()
+                        viewAllTasks(
+                            onMenuClick = {},
+                            onNavigation = { destination ->
+                                when (destination) {
+                                    is ViewTasksScreenNavigation.Base -> {
+                                        when (val baseNS = destination.baseNS) {
+                                            is BaseViewTasksScreenNavigation.EditTask -> {
+                                                onNavigateToEditTask(baseNS.taskId)
+                                            }
+                                            is BaseViewTasksScreenNavigation.Search -> {
+                                                onNavigateToSearchTasks()
+                                            }
+                                        }
+                                    }
+
+                                }
+                            }
+                        )
                     }
                 }
             }
