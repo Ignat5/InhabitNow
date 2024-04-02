@@ -8,6 +8,10 @@ SELECT * FROM RecordTable tRecord
 WHERE tRecord.taskId = :taskId AND
 tRecord.epochDay = :targetEpochDay;
 
+selectRecordsByTaskId:
+SELECT * FROM RecordTable tRecord
+WHERE tRecord.taskId = :taskId;
+
 insertRecord:
 INSERT OR REPLACE INTO RecordTable
 VALUES ?;

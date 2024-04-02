@@ -28,6 +28,10 @@ class DefaultRecordDataSource(
         )
     }
 
+    override fun readRecordsByTaskId(taskId: String): Flow<List<RecordTable>> = readQueryList {
+        recordDao.selectRecordsByTaskId(taskId = taskId)
+    }
+
     override suspend fun insertRecord(recordTable: RecordTable): ResultModel<Unit> = runQuery {
         recordDao.insertRecord(recordTable)
     }

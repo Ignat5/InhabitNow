@@ -228,6 +228,31 @@ ON tTag.id = tCross.tagId
 WHERE tTask.deletedAt IS NULL AND
 tTask.type IN :allTaskTypes;
 
+selectTaskWithAllTimeContentById:
+SELECT
+tTask.id task_id,
+tTask.type task_type,
+tTask.progressType task_progressType,
+tTask.title task_title,
+tTask.description task_description,
+tTask.startEpochDay task_startEpochDay,
+tTask.endEpochDay task_endEpochDay,
+tTask.priority task_priority,
+tTask.createdAt task_createdAt,
+tTask.deletedAt task_deletedAt,
+
+tTaskContent.id taskContent_id,
+tTaskContent.taskId taskContent_taskId,
+tTaskContent.contentType taskContent_contentType,
+tTaskContent.content taskContent_content,
+tTaskContent.startEpochDay taskContent_startEpochDay,
+tTaskContent.createdAt taskContent_createdAt
+
+FROM TaskTable tTask
+INNER JOIN TaskContentTable tTaskContent
+ON tTaskContent.taskId = tTask.id
+WHERE tTask.id = :taskId;
+
 updateTaskTitleById:
 UPDATE TaskTable SET title = :title
 WHERE id = :taskId;

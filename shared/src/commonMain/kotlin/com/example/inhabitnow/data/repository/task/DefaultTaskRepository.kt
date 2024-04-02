@@ -5,9 +5,14 @@ import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.core.util.randomUUID
 import com.example.inhabitnow.data.data_source.task.TaskDataSource
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
+import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
+import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
+import com.example.inhabitnow.data.model.task.content.ProgressContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import com.example.inhabitnow.data.model.task.derived.FullTaskEntity
 import com.example.inhabitnow.data.model.task.derived.SelectFullTasksQuery
+import com.example.inhabitnow.data.model.task.derived.TaskWithAllContentEntity
+import com.example.inhabitnow.data.util.toBaseTaskContentEntity
 import com.example.inhabitnow.data.util.toEpochDay
 import com.example.inhabitnow.data.util.toJson
 import com.example.inhabitnow.data.util.toReminderEntity
@@ -97,6 +102,32 @@ class DefaultTaskRepository(
                     }
                 } else emptyList()
             }
+
+    override fun readTaskWithAllTimeContentById(taskId: String): Flow<TaskWithAllContentEntity?> =
+        taskDataSource.readTaskWithAllTimeContentById(taskId).map { queryList ->
+            if (queryList.isNotEmpty()) {
+                withContext(defaultDispatcher) {
+                    val tTask = queryList.first().toTaskTable()
+                    val allTaskContent = queryList
+                        .distinctBy { it.taskContent_id }
+                        .map { it.toTaskContentTable() }
+                        .map { it.toBaseTaskContentEntity(json) }
+
+                    val allProgressContent =
+                        allTaskContent.filterIsInstance<ProgressContentEntity>()
+                    val allFrequencyContent =
+                        allTaskContent.filterIsInstance<FrequencyContentEntity>()
+                    val allArchiveContent = allTaskContent.filterIsInstance<ArchiveContentEntity>()
+
+                    TaskWithAllContentEntity(
+                        taskEntity = tTask.toTaskEntity(json),
+                        allProgressContent = allProgressContent,
+                        allFrequencyContent = allFrequencyContent,
+                        allArchiveContent = allArchiveContent
+                    )
+                }
+            } else null
+        }
 
     override suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {

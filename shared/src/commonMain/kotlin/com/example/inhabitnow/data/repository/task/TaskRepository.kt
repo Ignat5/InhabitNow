@@ -5,6 +5,7 @@ import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import com.example.inhabitnow.data.model.task.derived.FullTaskEntity
+import com.example.inhabitnow.data.model.task.derived.TaskWithAllContentEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
 
@@ -13,6 +14,7 @@ interface TaskRepository {
     fun readTasksWithContentBySearchQuery(searchQuery: String): Flow<List<TaskWithContentEntity>>
     fun readFullTasksByDate(targetDate: LocalDate): Flow<List<FullTaskEntity>>
     fun readFullTasksByType(allTaskTypes: Set<TaskType>): Flow<List<FullTaskEntity>>
+    fun readTaskWithAllTimeContentById(taskId: String): Flow<TaskWithAllContentEntity?>
     suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit>
     suspend fun saveTaskById(taskId: String): ResultModel<Unit>
     suspend fun deleteTaskById(taskId: String): ResultModel<Unit>
