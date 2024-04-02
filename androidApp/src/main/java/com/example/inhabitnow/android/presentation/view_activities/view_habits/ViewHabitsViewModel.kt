@@ -52,11 +52,7 @@ class ViewHabitsViewModel @Inject constructor(
     defaultDispatcher = defaultDispatcher
 ) {
     private val allHabitsState = readFullHabitsUseCase()
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            emptyList()
-        )
+
     private val allProcessedHabitsState = combine(
         allHabitsState,
         filterByTagsIdsState,
@@ -187,7 +183,7 @@ class ViewHabitsViewModel @Inject constructor(
     }
 
     private fun onHabitClick(event: ViewHabitsScreenEvent.OnHabitClick) {
-        allHabitsState.value.find { it.taskModel.id == event.taskId }?.let { fullHabit ->
+        allProcessedHabitsState.value.data?.find { it.taskModel.id == event.taskId }?.let { fullHabit ->
             setUpConfigState(
                 ViewHabitsScreenConfig.ViewHabitActions(
                     stateHolder = ViewHabitActionsStateHolder(

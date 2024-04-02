@@ -13,5 +13,8 @@ sealed interface TaskFilterByStatus {
 
         val allHabitFilters: List<TaskFilterByStatus.HabitStatus>
             get() = allFilters.filterIsInstance<TaskFilterByStatus.HabitStatus>()
+
+        val allTasksFilters: List<TaskStatus>
+            get() = allFilters.filterIsInstance<TaskStatus>()
     }
 }

@@ -15,5 +15,8 @@ sealed interface TaskSort {
 
         val allHabitsSorts
             get() = allSorts.filterIsInstance<TaskSort.HabitsSort>()
+
+        val allTasksSorts
+            get() = allSorts.filterIsInstance<TasksSort>()
     }
 }

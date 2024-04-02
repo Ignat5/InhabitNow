@@ -1,10 +1,10 @@
-package com.example.inhabitnow.android.presentation.view_activities.view_habits
+package com.example.inhabitnow.android.presentation.view_activities.view_tasks
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,12 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,67 +29,58 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.model.SelectableTagModel
-import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskDialog
-import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskDialog
 import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_activities.base.BaseViewTasksBuilder
-import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenConfig
 import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenEvent
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskSort
-import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenConfig
-import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenEvent
-import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenNavigation
-import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenState
-import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.ViewHabitActionsDialog
-import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.components.ViewHabitActionsScreenResult
-import com.example.inhabitnow.android.ui.base.BaseFilterSortBuilder
+import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenEvent
+import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenNavigation
+import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenState
 import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
-import com.example.inhabitnow.android.ui.toDatePeriodDisplay
-import com.example.inhabitnow.android.ui.toDisplay
+import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
 
 @Composable
-fun ViewHabitsScreen(
+fun ViewTasksScreen(
     onMenuClick: () -> Unit,
-    onNavigation: (ViewHabitsScreenNavigation) -> Unit
+    onNavigation: (ViewTasksScreenNavigation) -> Unit
 ) {
-    val viewModel: ViewHabitsViewModel = hiltViewModel()
+    val viewModel: ViewTasksViewModel = hiltViewModel()
     BaseScreen(
         viewModel = viewModel,
         onNavigation = onNavigation,
         configContent = { config, onEvent ->
-            ViewHabitsScreenConfigStateless(config, onEvent)
+
         }
     ) { state, onEvent ->
-        ViewHabitsScreenStateless(
-            onMenuClick = onMenuClick,
-            state = state,
-            onEvent = onEvent
-        )
+        ViewTasksScreenStateless(onMenuClick, state, onEvent)
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ViewHabitsScreenStateless(
+private fun ViewTasksScreenStateless(
     onMenuClick: () -> Unit,
-    state: ViewHabitsScreenState,
-    onEvent: (ViewHabitsScreenEvent) -> Unit
+    state: ViewTasksScreenState,
+    onEvent: (ViewTasksScreenEvent) -> Unit
 ) {
     Scaffold(
         topBar = {
             ScreenTopBar(
                 onMenuClick = onMenuClick,
                 onSearchClick = {
-                    onEvent(ViewHabitsScreenEvent.Base(BaseViewTasksScreenEvent.OnSearchClick))
+                    onEvent(
+                        ViewTasksScreenEvent.Base(
+                            BaseViewTasksScreenEvent.OnSearchClick
+                        )
+                    )
                 }
             )
         }
@@ -102,7 +90,10 @@ private fun ViewHabitsScreenStateless(
                 .fillMaxSize()
                 .padding(it)
         ) {
-            BaseViewTasksBuilder.NoDataMessage(boxScope = this, result = state.allTasksResult)
+            BaseViewTasksBuilder.NoDataMessage(
+                boxScope = this,
+                result = state.allTasksResult
+            )
             Column(modifier = Modifier.fillMaxWidth()) {
                 FilterSortChipRow(
                     allSelectableTags = state.allSelectableTags,
@@ -110,43 +101,40 @@ private fun ViewHabitsScreenStateless(
                     sort = state.sort,
                     onTagClick = { tagId ->
                         onEvent(
-                            ViewHabitsScreenEvent.Base(
+                            ViewTasksScreenEvent.Base(
                                 BaseViewTasksScreenEvent.OnTagClick(tagId)
                             )
                         )
                     },
                     onFilterClick = { filter ->
-                        onEvent(ViewHabitsScreenEvent.OnFilterByStatusClick(filter))
+                        onEvent(ViewTasksScreenEvent.OnFilterByStatusClick(filter))
                     },
                     onSortClick = { sort ->
-                        onEvent(ViewHabitsScreenEvent.OnSortClick(sort))
+                        onEvent(ViewTasksScreenEvent.OnSortClick(sort))
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                val itemsData = remember(state.allTasksResult) {
+                    state.allTasksResult.data ?: emptyList()
+                }
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    when (state.allTasksResult) {
-                        is UIResultModel.Loading, is UIResultModel.Data -> {
-                            val allHabits = state.allTasksResult.data ?: emptyList()
-                            itemsIndexed(
-                                items = allHabits,
-                                key = { _, item -> item.taskModel.id }
-                            ) { index, item ->
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    ItemHabit(
-                                        item = item,
-                                        onClick = {
-                                            onEvent(ViewHabitsScreenEvent.OnHabitClick(item.taskModel.id))
-                                        },
-                                        modifier = Modifier.animateItemPlacement()
-                                    )
-                                    if (index != allHabits.lastIndex) {
-                                        BaseTaskItemBuilder.TaskDivider()
-                                    }
-                                }
+                    itemsIndexed(
+                        items = itemsData,
+                        key = { _, item -> item.taskModel.id }
+                    ) { index, item ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            ItemTask(
+                                item = item,
+                                onClick = {
+                                    onEvent(ViewTasksScreenEvent.OnTaskClick(item.taskModel.id))
+                                },
+                                modifier = Modifier.animateItemPlacement()
+                            )
+                            if (index != itemsData.lastIndex) {
+                                BaseTaskItemBuilder.TaskDivider()
                             }
                         }
-
-                        else -> Unit
                     }
                 }
             }
@@ -155,8 +143,8 @@ private fun ViewHabitsScreenStateless(
 }
 
 @Composable
-private fun ItemHabit(
-    item: FullTaskModel.FullHabit,
+private fun ItemTask(
+    item: FullTaskModel.FullTask,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -178,7 +166,7 @@ private fun ItemHabit(
 }
 
 @Composable
-private fun TitleRow(item: FullTaskModel.FullHabit) {
+private fun TitleRow(item: FullTaskModel.FullTask) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -198,7 +186,7 @@ private fun TitleRow(item: FullTaskModel.FullHabit) {
 }
 
 @Composable
-private fun HabitDetailsRow(item: FullTaskModel.FullHabit) {
+private fun HabitDetailsRow(item: FullTaskModel.FullTask) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -207,9 +195,17 @@ private fun HabitDetailsRow(item: FullTaskModel.FullHabit) {
         BaseTaskItemBuilder.ChipTaskType(taskType = item.taskModel.type)
         BaseTaskItemBuilder.ChipTaskProgressType(taskProgressType = item.taskModel.progressType)
         BaseTaskItemBuilder.ChipTaskPriority(priority = item.taskModel.priority)
-        BaseTaskItemBuilder.ChipTaskStartDate(date = item.taskModel.dateContent.startDate)
-        item.taskModel.dateContent.endDate?.let { endDate ->
-            BaseTaskItemBuilder.ChipTaskEndDate(date = endDate)
+        when (val dc = item.taskModel.dateContent) {
+            is TaskContentModel.DateContent.Day -> {
+                BaseTaskItemBuilder.ChipTaskStartDate(date = dc.date)
+            }
+
+            is TaskContentModel.DateContent.Period -> {
+                BaseTaskItemBuilder.ChipTaskStartDate(date = dc.startDate)
+                dc.endDate?.let { endDate ->
+                    BaseTaskItemBuilder.ChipTaskEndDate(date = endDate)
+                }
+            }
         }
     }
 }
@@ -217,11 +213,11 @@ private fun HabitDetailsRow(item: FullTaskModel.FullHabit) {
 @Composable
 private fun FilterSortChipRow(
     allSelectableTags: List<SelectableTagModel>,
-    filterByStatus: TaskFilterByStatus.HabitStatus?,
-    sort: TaskSort.HabitsSort?,
+    filterByStatus: TaskFilterByStatus.TaskStatus?,
+    sort: TaskSort.TasksSort?,
     onTagClick: (tagId: String) -> Unit,
-    onFilterClick: (TaskFilterByStatus.HabitStatus) -> Unit,
-    onSortClick: (TaskSort.HabitsSort) -> Unit,
+    onFilterClick: (TaskFilterByStatus.TaskStatus) -> Unit,
+    onSortClick: (TaskSort.TasksSort) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyRow(
@@ -235,9 +231,10 @@ private fun FilterSortChipRow(
                 onTagClick = onTagClick
             )
         }
+
         item {
             BaseViewTasksBuilder.ChipFilterByStatus(
-                allFilters = TaskFilterByStatus.allHabitFilters,
+                allFilters = TaskFilterByStatus.allTasksFilters,
                 currentFilter = filterByStatus,
                 onFilterClick = onFilterClick,
                 getTextByFilter = { filter ->
@@ -248,18 +245,19 @@ private fun FilterSortChipRow(
                 }
             )
         }
+
         item {
             BaseViewTasksBuilder.ChipSort(
-                allSort = TaskSort.allHabitsSorts,
+                allSort = TaskSort.allTasksSorts,
                 currentSort = sort,
+                onSortClick = onSortClick,
                 getTextBySort = { sort ->
                     when (sort) {
                         is TaskSort.ByStartDate -> "By date"
                         is TaskSort.ByPriority -> "By priority"
                         is TaskSort.ByTitle -> "By title"
                     }
-                },
-                onSortClick = onSortClick
+                }
             )
         }
     }
@@ -273,7 +271,7 @@ private fun ScreenTopBar(
 ) {
     TopAppBar(
         title = {
-            Text(text = "Habits")
+            Text(text = "Tasks")
         },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
@@ -295,34 +293,4 @@ private fun ScreenTopBar(
         }
     )
 }
-
-@Composable
-private fun ViewHabitsScreenConfigStateless(
-    config: ViewHabitsScreenConfig,
-    onResultEvent: (ViewHabitsScreenEvent) -> Unit
-) {
-    when (config) {
-        is ViewHabitsScreenConfig.ViewHabitActions -> {
-            ViewHabitActionsDialog(stateHolder = config.stateHolder) {
-                onResultEvent(ViewHabitsScreenEvent.ResultEvent.ViewHabitActions(it))
-            }
-        }
-
-        is ViewHabitsScreenConfig.Base -> {
-            BaseViewTasksBuilder.BaseScreenConfig(config = config.baseConfig) {
-                onResultEvent(
-                    ViewHabitsScreenEvent.Base(
-                        it
-                    )
-                )
-            }
-        }
-    }
-}
-
-
-
-
-
-
 

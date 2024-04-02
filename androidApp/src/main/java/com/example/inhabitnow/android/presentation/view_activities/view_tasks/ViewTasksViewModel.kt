@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifier
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
+import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_activities.base.BaseViewTasksViewModel
 import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenConfig
 import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenNavigation
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,11 +45,6 @@ class ViewTasksViewModel @Inject constructor(
 ) {
 
     private val allTasksState = readFullTasksUseCase()
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            emptyList()
-        )
 
     private val allProcessedTasksState = combine(
         allTasksState,
@@ -55,27 +52,82 @@ class ViewTasksViewModel @Inject constructor(
         filterByStatusState,
         sortState
     ) { allTasks, filterByTagsIds, filterByStatus, sort ->
-        allTasks
-            .asSequence()
-            .let { if (filterByTagsIds.isNotEmpty()) it.filterByTags(filterByTagsIds) else it }
-            .let { if (filterByStatus != null) it.filterByStatus(filterByStatus) else it }
-            .sortHabits(sort)
-            .toList()
-    }
+        if (allTasks.isNotEmpty()) {
+            withContext(defaultDispatcher) {
+                UIResultModel.Data(
+                    allTasks
+                        .asSequence()
+                        .let { if (filterByTagsIds.isNotEmpty()) it.filterByTags(filterByTagsIds) else it }
+                        .let { if (filterByStatus != null) it.filterByStatus(filterByStatus) else it }
+                        .sortHabits(sort)
+                        .toList()
+                )
+            }
+        } else UIResultModel.NoData
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        UIResultModel.Loading(null)
+    )
 
-    override val uiScreenState: StateFlow<ViewTasksScreenState>
-        get() = TODO("Not yet implemented")
+    override val uiScreenState: StateFlow<ViewTasksScreenState> =
+        combine(
+            allProcessedTasksState,
+            allSelectableTagsState,
+            filterByStatusState,
+            sortState
+        ) { allProcessedTasks, allSelectableTags, filterByStatus, sort ->
+            ViewTasksScreenState(
+                allTasksResult = allProcessedTasks,
+                allSelectableTags = allSelectableTags,
+                filterByStatus = filterByStatus,
+                sort = sort
+            )
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            ViewTasksScreenState(
+                allTasksResult = allProcessedTasksState.value,
+                allSelectableTags = allSelectableTagsState.value,
+                filterByStatus = filterByStatusState.value,
+                sort = sortState.value
+            )
+        )
 
     override fun onEvent(event: ViewTasksScreenEvent) {
-        TODO("Not yet implemented")
+        when (event) {
+            is ViewTasksScreenEvent.Base -> onBaseEvent(event.baseEvent)
+            is ViewTasksScreenEvent.OnFilterByStatusClick ->
+                onFilterByStatusClick(event)
+
+            is ViewTasksScreenEvent.OnSortClick ->
+                onSortClick(event)
+
+            is ViewTasksScreenEvent.OnTaskClick ->
+                onTaskClick(event)
+        }
+    }
+
+    private fun onTaskClick(event: ViewTasksScreenEvent.OnTaskClick) {
+        super.onEditTask(event.taskId)
+    }
+
+    private fun onFilterByStatusClick(event: ViewTasksScreenEvent.OnFilterByStatusClick) {
+        super.onFilterByStatusClick(event.filter)
+    }
+
+    private fun onSortClick(event: ViewTasksScreenEvent.OnSortClick) {
+        super.onSortClick(event.sort)
     }
 
     override fun setUpBaseNavigationState(baseSN: BaseViewTasksScreenNavigation) {
-        TODO("Not yet implemented")
+        setUpNavigationState(
+            ViewTasksScreenNavigation.Base(baseSN)
+        )
     }
 
     override fun setUpBaseConfigState(baseConfig: BaseViewTasksScreenConfig) {
-        TODO("Not yet implemented")
+        setUpConfigState(ViewTasksScreenConfig.Base(baseConfig))
     }
 
     private fun Sequence<FullTaskModel.FullTask>.filterByStatus(

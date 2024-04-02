@@ -197,7 +197,7 @@ abstract class BaseViewTasksViewModel<SE : ScreenEvent, SS : ScreenState, SN : S
         allTasks.filter { fullTask ->
             val inDatePeriod = when (val dc = fullTask.taskModel.dateContent) {
                 is TaskContentModel.DateContent.Day -> {
-                    dc.date <= todayDate
+                    dc.date >= todayDate
                 }
 
                 is TaskContentModel.DateContent.Period -> {

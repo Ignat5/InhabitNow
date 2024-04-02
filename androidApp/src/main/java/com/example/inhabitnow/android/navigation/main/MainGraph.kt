@@ -29,7 +29,7 @@ import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.navigation.AppNavDest
 import com.example.inhabitnow.android.navigation.view_schedule.viewScheduleScreen
 import com.example.inhabitnow.android.navigation.view_habits.viewHabits
-import com.example.inhabitnow.android.navigation.view_all_tasks.viewAllTasks
+import com.example.inhabitnow.android.navigation.view_tasks.viewAllTasks
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.main.MainViewModel
 import com.example.inhabitnow.android.presentation.main.components.MainScreenConfig
@@ -41,6 +41,7 @@ import com.example.inhabitnow.android.presentation.main.config.pick_task_type.Pi
 import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
 import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenNavigation
+import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenNavigation
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -132,7 +133,7 @@ fun NavGraphBuilder.mainGraph(
                             onNavigation = { destination ->
                                 when (destination) {
                                     is ViewHabitsScreenNavigation.Base -> {
-                                        when (val baseNS = destination.baseSN) {
+                                        when (val baseNS = destination.baseNS) {
                                             is BaseViewTasksScreenNavigation.EditTask -> {
                                                 onNavigateToEditTask(baseNS.taskId)
                                             }
@@ -144,7 +145,24 @@ fun NavGraphBuilder.mainGraph(
                                 }
                             }
                         )
-                        viewAllTasks()
+                        viewAllTasks(
+                            onMenuClick = {},
+                            onNavigation = { destination ->
+                                when (destination) {
+                                    is ViewTasksScreenNavigation.Base -> {
+                                        when (val baseNS = destination.baseNS) {
+                                            is BaseViewTasksScreenNavigation.EditTask -> {
+                                                onNavigateToEditTask(baseNS.taskId)
+                                            }
+                                            is BaseViewTasksScreenNavigation.Search -> {
+                                                onNavigateToSearchTasks()
+                                            }
+                                        }
+                                    }
+
+                                }
+                            }
+                        )
                     }
                 }
             }
