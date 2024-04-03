@@ -6,6 +6,7 @@ import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import com.example.inhabitnow.data.model.task.derived.FullTaskEntity
 import com.example.inhabitnow.data.repository.task.TaskRepository
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
+import com.example.inhabitnow.domain.util.DomainUtil.checkIfTaskScheduled
 import com.example.inhabitnow.domain.util.toFullTaskModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
@@ -49,16 +50,7 @@ class DefaultReadFullTasksByDateUseCase(
             it.taskWithContentEntity.let { taskWithContent ->
                 val isDeleted = taskWithContent.task.deletedAt != null
                 val isArchived = taskWithContent.archiveContent.content.isArchived
-                val isScheduled = when (val fc = taskWithContent.frequencyContent.content) {
-                    is TaskContentEntity.FrequencyContent.EveryDay -> true
-                    is TaskContentEntity.FrequencyContent.OneDay -> {
-                        taskWithContent.task.startDate == targetDate
-                    }
-
-                    is TaskContentEntity.FrequencyContent.DaysOfWeek -> {
-                        targetDate.dayOfWeek in fc.daysOfWeek
-                    }
-                }
+                val isScheduled = taskWithContent.frequencyContent.content.checkIfTaskScheduled(targetDate)
                 !isDeleted && !isArchived && isScheduled
             }
         }

@@ -20,6 +20,7 @@ import database.RecordTable
 import database.ReminderTable
 import database.SelectFullTasksByDate
 import database.SelectFullTasksByType
+import database.SelectTaskWithAllTimeContentById
 import database.SelectTaskWithContentById
 import database.SelectTasksWithContentBySearchQuery
 import database.TagTable
@@ -243,7 +244,7 @@ suspend fun TaskTable.toTaskWithContentEntity(
     }
 }
 
-private fun List<TaskContentTable>.toBaseTaskContentEntity(
+internal fun List<TaskContentTable>.toBaseTaskContentEntity(
     contentType: TaskContentEntity.Type,
     json: Json
 ): BaseTaskContentEntity? = this.let { allTaskContent ->
@@ -410,6 +411,32 @@ fun SelectTasksWithContentBySearchQuery.toTaskTable(): TaskTable {
 }
 
 fun SelectTasksWithContentBySearchQuery.toTaskContentTable(): TaskContentTable {
+    return TaskContentTable(
+        id = taskContent_id,
+        taskId = taskContent_taskId,
+        contentType = taskContent_contentType,
+        content = taskContent_content,
+        startEpochDay = taskContent_startEpochDay,
+        createdAt = taskContent_createdAt
+    )
+}
+
+fun SelectTaskWithAllTimeContentById.toTaskTable(): TaskTable {
+    return TaskTable(
+        id = task_id,
+        type = task_type,
+        progressType = task_progressType,
+        title = task_title,
+        description = task_description,
+        startEpochDay = task_startEpochDay,
+        endEpochDay = task_endEpochDay,
+        priority = task_priority,
+        createdAt = task_createdAt,
+        deletedAt = task_deletedAt
+    )
+}
+
+fun SelectTaskWithAllTimeContentById.toTaskContentTable(): TaskContentTable {
     return TaskContentTable(
         id = taskContent_id,
         taskId = taskContent_taskId,

@@ -14,6 +14,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.edit.compone
 fun NavGraphBuilder.editTaskScreen(
     onViewTaskReminders: (taskId: String) -> Unit,
     onViewTags: () -> Unit,
+    onViewStatistics: (taskId: String) -> Unit,
     onBack: () -> Unit
 ) {
     composable(
@@ -39,10 +40,11 @@ fun NavGraphBuilder.editTaskScreen(
                         }
                     }
 
-                    is EditTaskScreenNavigation.Back -> onBack()
-                    else -> {
-                        /* TODO */
+                    is EditTaskScreenNavigation.ViewStatistics -> {
+                        onViewStatistics(destination.taskId)
                     }
+
+                    is EditTaskScreenNavigation.Back -> onBack()
                 }
             }
         )

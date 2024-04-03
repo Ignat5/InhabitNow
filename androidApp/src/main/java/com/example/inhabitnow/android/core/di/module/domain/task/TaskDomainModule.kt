@@ -5,6 +5,8 @@ import com.example.inhabitnow.data.repository.record.RecordRepository
 import com.example.inhabitnow.data.repository.task.TaskRepository
 import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.archive_task_by_id.DefaultArchiveTaskByIdUseCase
+import com.example.inhabitnow.domain.use_case.calculate_statistics.CalculateStatisticsUseCase
+import com.example.inhabitnow.domain.use_case.calculate_statistics.DefaultCalculateStatisticsUseCase
 import com.example.inhabitnow.domain.use_case.delete_task_by_id.DefaultDeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_full_habits.DefaultReadFullHabitsUseCase
@@ -217,6 +219,19 @@ object TaskDomainModule {
             taskRepository = taskRepository,
             recordRepository = recordRepository,
             externalScope = externalScope
+        )
+    }
+
+    @Provides
+    fun provideCalculateStatisticsUseCase(
+        taskRepository: TaskRepository,
+        recordRepository: RecordRepository,
+        @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher
+    ): CalculateStatisticsUseCase {
+        return DefaultCalculateStatisticsUseCase(
+            taskRepository = taskRepository,
+            recordRepository = recordRepository,
+            defaultDispatcher = defaultDispatcher
         )
     }
 

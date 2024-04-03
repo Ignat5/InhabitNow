@@ -46,6 +46,15 @@ class DefaultRecordRepository(
         }
     }
 
+    override fun readRecordsByTaskId(taskId: String): Flow<List<RecordEntity>> =
+        recordDataSource.readRecordsByTaskId(taskId).map { queryList ->
+            if (queryList.isNotEmpty()) {
+                withContext(defaultDispatcher) {
+                    queryList.map { it.toRecordEntity(json) }
+                }
+            } else emptyList()
+        }
+
     override suspend fun saveRecord(
         taskId: String,
         targetDate: LocalDate,

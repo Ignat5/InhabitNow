@@ -9,6 +9,7 @@ import kotlinx.datetime.LocalDate
 interface RecordRepository {
     fun readRecordsByDate(targetDate: LocalDate): Flow<List<RecordEntity>>
     fun readRecordByTaskIdAndDate(taskId: String, targetDate: LocalDate): Flow<RecordEntity?>
+    fun readRecordsByTaskId(taskId: String): Flow<List<RecordEntity>>
     suspend fun saveRecord(
         taskId: String,
         targetDate: LocalDate,

@@ -48,6 +48,7 @@ import com.example.inhabitnow.android.presentation.view_schedule.components.View
 fun NavGraphBuilder.mainGraph(
     onNavigateToCreateTask: (taskId: String) -> Unit,
     onNavigateToEditTask: (taskId: String) -> Unit,
+    onNavigateToViewStatistics: (taskId: String) -> Unit,
     onNavigateToSearchTasks: () -> Unit
 ) {
     composable(
@@ -141,6 +142,9 @@ fun NavGraphBuilder.mainGraph(
                                                 onNavigateToSearchTasks()
                                             }
                                         }
+                                    }
+                                    is ViewHabitsScreenNavigation.ViewStatistics -> {
+                                        onNavigateToViewStatistics(destination.taskId)
                                     }
                                 }
                             }

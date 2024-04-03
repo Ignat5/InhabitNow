@@ -5,4 +5,5 @@ import com.example.inhabitnow.android.presentation.view_activities.base.componen
 
 sealed interface ViewHabitsScreenNavigation : ScreenNavigation {
     data class Base(val baseNS: BaseViewTasksScreenNavigation) : ViewHabitsScreenNavigation
+    data class ViewStatistics(val taskId: String) : ViewHabitsScreenNavigation
 }

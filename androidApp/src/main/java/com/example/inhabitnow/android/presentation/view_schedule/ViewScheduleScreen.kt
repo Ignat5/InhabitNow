@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -319,7 +320,8 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
         },
         modifier = Modifier.size(32.dp),
         color = progressColor,
-        trackColor = containerColor
+        trackColor = containerColor,
+        strokeWidth = 2.dp,
     )
 }
 
