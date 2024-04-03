@@ -11,6 +11,7 @@ import com.example.inhabitnow.android.presentation.view_statistics.components.Vi
 import com.example.inhabitnow.android.presentation.view_statistics.components.ViewStatisticsScreenState
 import com.example.inhabitnow.android.presentation.view_statistics.model.UICompletionModel
 import com.example.inhabitnow.android.presentation.view_statistics.model.UIStatisticsModel
+import com.example.inhabitnow.android.presentation.view_statistics.model.UIStatusCountModel
 import com.example.inhabitnow.android.presentation.view_statistics.model.UIStreakModel
 import com.example.inhabitnow.domain.model.statistics.TaskStatisticsModel
 import com.example.inhabitnow.domain.model.task.TaskModel
@@ -58,6 +59,12 @@ class ViewStatisticsViewModel @Inject constructor(
                 currentMonthCompletionCount = DEFAULT_VALUE,
                 currentYearCompletionCount = DEFAULT_VALUE,
                 allTimeCompletionCount = DEFAULT_VALUE,
+            ),
+            statusCountModel = UIStatusCountModel(
+                completedCount = DEFAULT_VALUE,
+                pendingCount = DEFAULT_VALUE,
+                skippedCount = DEFAULT_VALUE,
+                failedCount = DEFAULT_VALUE
             )
         )
     )
@@ -101,6 +108,12 @@ class ViewStatisticsViewModel @Inject constructor(
             currentMonthCompletionCount = currentMonthCompletionCount,
             currentYearCompletionCount = currentYearCompletionCount,
             allTimeCompletionCount = allTimeCompletionCount
+        ),
+        statusCountModel = UIStatusCountModel(
+            completedCount = completedCount,
+            pendingCount = pendingCount,
+            skippedCount = skippedCount,
+            failedCount = failedCount
         )
     )
 

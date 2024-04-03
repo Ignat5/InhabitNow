@@ -71,6 +71,10 @@ class DefaultCalculateStatisticsUseCase(
                         calculateCompletionRate(statusMap)
                     }
 
+                    val statusCountDef = async {
+                        calculateStatusCount(statusMap)
+                    }
+
                     TaskStatisticsModel(
                         habitScore = habitScoreDef.await(),
                         currentStreak = streakDef.await().current,
@@ -79,12 +83,27 @@ class DefaultCalculateStatisticsUseCase(
                         currentMonthCompletionCount = completionRateDef.await().perMonthCount,
                         currentYearCompletionCount = completionRateDef.await().perYearCount,
                         allTimeCompletionCount = completionRateDef.await().allTimeCount,
+                        completedCount = statusCountDef.await().completedCount,
+                        pendingCount = statusCountDef.await().pendingCount,
+                        skippedCount = statusCountDef.await().skippedCount,
+                        failedCount = statusCountDef.await().failedCount,
                         statusMap = statusMap
                     )
 
                 } ?: return@withContext null
             } ?: return@withContext null
         }
+
+    private fun calculateStatusCount(statusMap: Map<LocalDate, TaskStatus>): StatusCountModel {
+        statusMap.values.let { allStatuses ->
+            return StatusCountModel(
+                completedCount = allStatuses.count { it is TaskStatus.Completed },
+                pendingCount = allStatuses.count { it is TaskStatus.NotCompleted.Pending },
+                skippedCount = allStatuses.count { it is TaskStatus.NotCompleted.Skipped },
+                failedCount = allStatuses.count { it is TaskStatus.NotCompleted.Failed }
+            )
+        }
+    }
 
     private fun calculateCompletionRate(statusMap: Map<LocalDate, TaskStatus>): CompletionRateModel {
         var perWeekCount = 0
@@ -139,7 +158,12 @@ class DefaultCalculateStatisticsUseCase(
                         }
 
                         is TaskStatus.NotCompleted -> {
-                            currentStreakCount = 0
+                            when (status) {
+                                is TaskStatus.NotCompleted.Skipped -> Unit
+                                is TaskStatus.NotCompleted.Pending, is TaskStatus.NotCompleted.Failed -> {
+                                    currentStreakCount = 0
+                                }
+                            }
                         }
                     }
                 }
@@ -149,10 +173,12 @@ class DefaultCalculateStatisticsUseCase(
     }
 
     private fun calculateHabitScore(statusMap: Map<LocalDate, TaskStatus>): Float {
-        if (statusMap.isEmpty()) return 0f
-        val allCount = statusMap.size.toFloat()
-        val completedCount = statusMap.values.count { it is TaskStatus.Completed }.toFloat()
-        return completedCount / allCount
+        statusMap.filterValues { it !is TaskStatus.NotCompleted.Skipped }.let { map ->
+            if (map.isEmpty()) return 0f
+            val allCount = map.size.toFloat()
+            val completedCount = map.values.count { it is TaskStatus.Completed }.toFloat()
+            return completedCount / allCount
+        }
     }
 
     private suspend fun getStatusMap(
@@ -228,5 +254,12 @@ class DefaultCalculateStatisticsUseCase(
         val perMonthCount: Int,
         val perYearCount: Int,
         val allTimeCount: Int,
+    )
+
+    private data class StatusCountModel(
+        val completedCount: Int,
+        val pendingCount: Int,
+        val skippedCount: Int,
+        val failedCount: Int
     )
 }

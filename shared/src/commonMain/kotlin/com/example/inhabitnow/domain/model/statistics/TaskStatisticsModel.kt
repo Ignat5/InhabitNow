@@ -10,5 +10,9 @@ data class TaskStatisticsModel(
     val currentMonthCompletionCount: Int,
     val currentYearCompletionCount: Int,
     val allTimeCompletionCount: Int,
+    val completedCount: Int,
+    val pendingCount: Int,
+    val skippedCount: Int,
+    val failedCount: Int,
     val statusMap: Map<LocalDate, TaskStatus>
 )

@@ -43,6 +43,7 @@ import com.example.inhabitnow.android.presentation.view_statistics.components.Vi
 import com.example.inhabitnow.android.presentation.view_statistics.components.ViewStatisticsScreenState
 import com.example.inhabitnow.android.presentation.view_statistics.model.UICompletionModel
 import com.example.inhabitnow.android.presentation.view_statistics.model.UIStatisticsModel
+import com.example.inhabitnow.android.presentation.view_statistics.model.UIStatusCountModel
 import com.example.inhabitnow.android.presentation.view_statistics.model.UIStreakModel
 
 @Composable
@@ -88,6 +89,7 @@ private fun ViewStatisticsScreenStateless(
                 HabitScoreSection(state.uiStatisticsModel.habitScorePercent)
                 StreakSection(state.uiStatisticsModel.streakModel)
                 CompletionSection(state.uiStatisticsModel.completionModel)
+                StatusCountSection(state.uiStatisticsModel.statusCountModel)
             }
         }
     }
@@ -116,7 +118,7 @@ private fun HabitScoreSection(habitScorePercent: Int) {
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.primaryContainer,
                 strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
-                strokeWidth = 8.dp
+                strokeWidth = 2.dp
             )
             Text(
                 text = "$habitScorePercent",
@@ -196,6 +198,46 @@ private fun CompletionSection(completionModel: UICompletionModel) {
             }
             ItemStatistics(title = title, data = "$data")
             if (index != allCompletionTypes.lastIndex) {
+                HorizontalDivider()
+            }
+        }
+    }
+}
+
+private enum class StatusType {
+    Completed,
+    Pending,
+    Skipped,
+    Failed
+}
+
+@Composable
+private fun StatusCountSection(
+    statusCountModel: UIStatusCountModel
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SectionTitle(title = "Status")
+        Spacer(modifier = Modifier.height(8.dp))
+        val allStatusTypes = remember { StatusType.entries }
+        allStatusTypes.forEachIndexed { index, statusType ->
+            val title = remember {
+                when (statusType) {
+                    StatusType.Completed -> "Done"
+                    StatusType.Pending -> "Pending"
+                    StatusType.Skipped -> "Skipped"
+                    StatusType.Failed -> "Failed"
+                }
+            }
+            val data = remember(statusCountModel) {
+                when (statusType) {
+                    StatusType.Completed -> statusCountModel.completedCount
+                    StatusType.Pending -> statusCountModel.pendingCount
+                    StatusType.Skipped -> statusCountModel.skippedCount
+                    StatusType.Failed -> statusCountModel.failedCount
+                }
+            }
+            ItemStatistics(title = title, data = "$data")
+            if (index != allStatusTypes.lastIndex) {
                 HorizontalDivider()
             }
         }

@@ -7,6 +7,7 @@ data class UIStatisticsModel(
     val habitScorePercent: Int,
     val streakModel: UIStreakModel,
     val completionModel: UICompletionModel,
+    val statusCountModel: UIStatusCountModel
 )
 
 @Stable
@@ -21,4 +22,12 @@ data class UICompletionModel(
     val currentMonthCompletionCount: Int,
     val currentYearCompletionCount: Int,
     val allTimeCompletionCount: Int
+)
+
+@Stable
+data class UIStatusCountModel(
+    val completedCount: Int,
+    val pendingCount: Int,
+    val skippedCount: Int,
+    val failedCount: Int
 )
