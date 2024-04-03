@@ -38,7 +38,7 @@ class DefaultCalculateStatisticsUseCase(
     private val defaultDispatcher: CoroutineDispatcher
 ) : CalculateStatisticsUseCase {
 
-    suspend operator fun invoke(taskId: String) {
+    override suspend operator fun invoke(taskId: String): TaskStatisticsModel? =
         withContext(defaultDispatcher) {
             val taskWithAllContentDef = async {
                 taskRepository.readTaskWithAllTimeContentById(taskId).firstOrNull()
@@ -82,10 +82,9 @@ class DefaultCalculateStatisticsUseCase(
                         statusMap = statusMap
                     )
 
-                } ?: throw IllegalStateException()
-            } ?: throw IllegalStateException()
+                } ?: return@withContext null
+            } ?: return@withContext null
         }
-    }
 
     private fun calculateCompletionRate(statusMap: Map<LocalDate, TaskStatus>): CompletionRateModel {
         var perWeekCount = 0
@@ -150,6 +149,7 @@ class DefaultCalculateStatisticsUseCase(
     }
 
     private fun calculateHabitScore(statusMap: Map<LocalDate, TaskStatus>): Float {
+        if (statusMap.isEmpty()) return 0f
         val allCount = statusMap.size.toFloat()
         val completedCount = statusMap.values.count { it is TaskStatus.Completed }.toFloat()
         return completedCount / allCount

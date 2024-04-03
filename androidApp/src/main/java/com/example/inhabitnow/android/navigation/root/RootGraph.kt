@@ -12,6 +12,7 @@ import com.example.inhabitnow.android.navigation.create_task.createTaskScreen
 import com.example.inhabitnow.android.navigation.edit_task.editTaskScreen
 import com.example.inhabitnow.android.navigation.main.mainGraph
 import com.example.inhabitnow.android.navigation.search_tasks.searchTasksScreen
+import com.example.inhabitnow.android.navigation.view_statistics.viewStatistics
 import com.example.inhabitnow.android.navigation.view_tags.viewTagsScreen
 import com.example.inhabitnow.android.navigation.view_task_reminders.viewTaskRemindersScreen
 
@@ -84,8 +85,14 @@ fun RootGraph() {
                         route = AppNavDest.buildViewTagsRoute()
                     )
                 },
+                onViewStatistics = { taskId ->
+                    navController.navigate(
+                        route = AppNavDest.buildViewStatisticsRoute(taskId)
+                    )
+                },
                 onBack = onBack
             )
+            viewStatistics(onBack = onBack)
         }
     }
 }
