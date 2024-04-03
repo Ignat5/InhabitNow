@@ -163,7 +163,7 @@ class ViewHabitsViewModel @Inject constructor(
     }
 
     private fun onViewStatisticsAction(taskId: String) {
-        /* TODO */
+        setUpNavigationState(ViewHabitsScreenNavigation.ViewStatistics(taskId))
     }
 
     private fun onArchiveAction(taskId: String) {
@@ -183,16 +183,17 @@ class ViewHabitsViewModel @Inject constructor(
     }
 
     private fun onHabitClick(event: ViewHabitsScreenEvent.OnHabitClick) {
-        allProcessedHabitsState.value.data?.find { it.taskModel.id == event.taskId }?.let { fullHabit ->
-            setUpConfigState(
-                ViewHabitsScreenConfig.ViewHabitActions(
-                    stateHolder = ViewHabitActionsStateHolder(
-                        habitModel = fullHabit.taskModel,
-                        holderScope = provideChildScope()
+        allProcessedHabitsState.value.data?.find { it.taskModel.id == event.taskId }
+            ?.let { fullHabit ->
+                setUpConfigState(
+                    ViewHabitsScreenConfig.ViewHabitActions(
+                        stateHolder = ViewHabitActionsStateHolder(
+                            habitModel = fullHabit.taskModel,
+                            holderScope = provideChildScope()
+                        )
                     )
                 )
-            )
-        }
+            }
     }
 
     private fun onFilterByStatusClick(event: ViewHabitsScreenEvent.OnFilterByStatusClick) {

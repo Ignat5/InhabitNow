@@ -44,6 +44,11 @@ fun RootGraph() {
                         route = AppNavDest.buildEditTaskRoute(taskId)
                     )
                 },
+                onNavigateToViewStatistics = { taskId ->
+                    navController.navigate(
+                        route = AppNavDest.buildViewStatisticsRoute(taskId)
+                    )
+                },
                 onNavigateToSearchTasks = {
                     navController.navigate(
                         route = AppNavDest.buildSearchTasksRoute()
