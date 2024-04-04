@@ -33,6 +33,11 @@ class DefaultReminderRepository(
     override fun readRemindersCountByTaskId(taskId: String): Flow<Int> =
         reminderDataSource.readRemindersCountByTaskId(taskId).map { it.toInt() }
 
+    override fun readReminderById(reminderId: String): Flow<ReminderEntity?> =
+        reminderDataSource.readReminderById(reminderId).map {
+            it?.toReminderEntity(json)
+        }
+
     override suspend fun saveReminder(reminderEntity: ReminderEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {
             reminderDataSource.insertReminder(reminderEntity.toReminderTable(json))

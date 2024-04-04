@@ -10,6 +10,7 @@ import kotlinx.datetime.LocalTime
 interface ReminderRepository {
     fun readRemindersByTaskId(taskId: String): Flow<List<ReminderEntity>>
     fun readRemindersCountByTaskId(taskId: String): Flow<Int>
+    fun readReminderById(reminderId: String): Flow<ReminderEntity?>
     suspend fun saveReminder(reminderEntity: ReminderEntity): ResultModel<Unit>
     suspend fun updateReminderById(
         reminderId: String,

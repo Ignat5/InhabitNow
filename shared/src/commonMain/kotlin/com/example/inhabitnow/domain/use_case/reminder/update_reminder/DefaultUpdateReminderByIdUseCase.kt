@@ -6,7 +6,7 @@ import com.example.inhabitnow.data.model.reminder.content.ReminderContentEntity
 import com.example.inhabitnow.data.repository.reminder.ReminderRepository
 import com.example.inhabitnow.domain.model.exceptions.SaveReminderException
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
-import com.example.inhabitnow.domain.util.checkIfOverlaps
+import com.example.inhabitnow.domain.util.DomainUtil
 import com.example.inhabitnow.domain.util.toScheduleModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -62,8 +62,10 @@ class DefaultUpdateReminderByIdUseCase(
             allReminders
                 .filter { it.id != reminderId }
                 .any { nextReminder ->
-                    nextReminder.time == reminderTime &&
-                            nextReminder.schedule.checkIfOverlaps(reminderSchedule)
+                    nextReminder.time == reminderTime && DomainUtil.checkIfRemindersOverlap(
+                        sourceSchedule = nextReminder.schedule,
+                        targetSchedule = reminderSchedule
+                    )
                 }
         } ?: false
 
