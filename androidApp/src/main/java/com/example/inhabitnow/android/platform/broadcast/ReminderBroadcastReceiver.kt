@@ -1,4 +1,4 @@
-package com.example.inhabitnow.android.platform.broadcast_receiver
+package com.example.inhabitnow.android.platform.broadcast
 
 import android.content.BroadcastReceiver
 import android.content.Context

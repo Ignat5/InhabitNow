@@ -7,8 +7,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.ui.limitNumberToString
 import com.example.inhabitnow.core.type.ProgressLimitType
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
-import com.example.inhabitnow.domain.util.DomainConst
-import com.example.inhabitnow.domain.util.DomainUtil
+import com.example.inhabitnow.domain.use_case.validate_limit_number.ValidateInputLimitNumberUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.update
 
 class PickTaskNumberProgressStateHolder(
     initProgressContent: TaskContentModel.ProgressContent.Number,
+    private val validateInputLimitNumberUseCase: ValidateInputLimitNumberUseCase,
     override val holderScope: CoroutineScope
 ) : BaseResultStateHolder<PickTaskNumberProgressScreenEvent, PickTaskNumberProgressScreenState, PickTaskNumberProgressScreenResult>() {
 
@@ -32,7 +32,7 @@ class PickTaskNumberProgressStateHolder(
         MutableStateFlow<String>(initProgressContent.limitUnit)
 
     private val limitNumberValidator: (value: String) -> Boolean = { value ->
-        value.isEmpty() || DomainUtil.validateInputLimitNumber(value)
+        value.isEmpty() || validateInputLimitNumberUseCase(value)
     }
 
     override val uiScreenState: StateFlow<PickTaskNumberProgressScreenState> =
@@ -118,7 +118,7 @@ class PickTaskNumberProgressStateHolder(
             limitNumber = limitNumber,
             limitNumberValidator = limitNumberValidator,
             limitUnit = limitUnit,
-            canSave = DomainUtil.validateInputLimitNumber(limitNumber)
+            canSave = validateInputLimitNumberUseCase(limitNumber)
         )
     }
 }

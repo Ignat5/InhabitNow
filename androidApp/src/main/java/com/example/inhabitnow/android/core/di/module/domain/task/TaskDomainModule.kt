@@ -37,6 +37,8 @@ import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.Default
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.DefaultUpdateTaskTitleByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
+import com.example.inhabitnow.domain.use_case.validate_limit_number.DefaultValidateInputLimitNumberUseCase
+import com.example.inhabitnow.domain.use_case.validate_limit_number.ValidateInputLimitNumberUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -233,6 +235,11 @@ object TaskDomainModule {
             recordRepository = recordRepository,
             defaultDispatcher = defaultDispatcher
         )
+    }
+
+    @Provides
+    fun provideValidateInputLimitNumberUseCase(): ValidateInputLimitNumberUseCase {
+        return DefaultValidateInputLimitNumberUseCase()
     }
 
 }

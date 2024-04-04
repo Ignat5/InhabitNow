@@ -29,6 +29,7 @@ import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
 import com.example.inhabitnow.domain.use_case.read_full_tasks_by_date.ReadFullTasksByDateUseCase
 import com.example.inhabitnow.domain.use_case.record.read_records_by_date.ReadRecordsByDateUseCase
 import com.example.inhabitnow.domain.use_case.record.save_record.SaveRecordUseCase
+import com.example.inhabitnow.domain.use_case.validate_limit_number.ValidateInputLimitNumberUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -61,6 +62,7 @@ class ViewScheduleViewModel @Inject constructor(
     private val readFullTasksByDateUseCase: ReadFullTasksByDateUseCase,
     private val readRecordsByDateUseCase: ReadRecordsByDateUseCase,
     private val saveRecordUseCase: SaveRecordUseCase,
+    private val validateInputLimitNumberUseCase: ValidateInputLimitNumberUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<ViewScheduleScreenEvent, ViewScheduleScreenState, ViewScheduleScreenNavigation, ViewScheduleScreenConfig>() {
     private val todayDateState = MutableStateFlow(nowDate)
@@ -267,6 +269,7 @@ class ViewScheduleViewModel @Inject constructor(
                 stateHolder = EnterTaskNumberRecordStateHolder(
                     taskWithRecord = taskWithRecord,
                     date = currentDateState.value,
+                    validateInputLimitNumberUseCase = validateInputLimitNumberUseCase,
                     holderScope = provideChildScope()
                 )
             )
@@ -398,6 +401,7 @@ class ViewScheduleViewModel @Inject constructor(
                 stateHolder = EnterTaskNumberRecordStateHolder(
                     taskWithRecord = taskWithRecordModel,
                     date = currentDateState.value,
+                    validateInputLimitNumberUseCase = validateInputLimitNumberUseCase,
                     holderScope = provideChildScope()
                 )
             )

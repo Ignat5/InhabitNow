@@ -6,8 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
-import com.example.inhabitnow.android.platform.broadcast_receiver.ReminderBroadcastReceiver
+import com.example.inhabitnow.android.platform.broadcast.ReminderBroadcastReceiver
 import com.example.inhabitnow.android.platform.util.ReminderUtil
 import com.example.inhabitnow.core.platform.ReminderManager
 

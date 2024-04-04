@@ -40,6 +40,7 @@ import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.Update
 import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.UpdateTaskPriorityByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
+import com.example.inhabitnow.domain.use_case.validate_limit_number.ValidateInputLimitNumberUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -67,6 +68,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
     private val updateTaskFrequencyByIdUseCase: UpdateTaskFrequencyByIdUseCase,
     private val updateTaskDateUseCase: UpdateTaskDateUseCase,
     private val saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
+    private val validateInputLimitNumberUseCase: ValidateInputLimitNumberUseCase,
     private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<SE, SS, SN, SC>() {
 
@@ -288,6 +290,7 @@ abstract class BaseCreateEditTaskViewModel<SE : ScreenEvent, SS : ScreenState, S
                 BaseCreateEditTaskScreenConfig.PickTaskNumberProgress(
                     stateHolder = PickTaskNumberProgressStateHolder(
                         initProgressContent = pc,
+                        validateInputLimitNumberUseCase = validateInputLimitNumberUseCase,
                         holderScope = provideChildScope()
                     )
                 )

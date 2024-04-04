@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".platform.broadcast_receiver.ReminderBroadcastReceiver"/>
+        <receiver android:name=".platform.broadcast.ReminderBroadcastReceiver"/>
 
     </application>
 </manifest> 
