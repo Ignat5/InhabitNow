@@ -2,11 +2,13 @@ package com.example.inhabitnow.domain.use_case.save_task_by_id
 
 import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.data.repository.task.TaskRepository
+import com.example.inhabitnow.domain.use_case.reminder.set_up_task_reminders.SetUpTaskRemindersUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class DefaultSaveTaskByIdUseCase(
     private val taskRepository: TaskRepository,
+    private val setUpTaskRemindersUseCase: SetUpTaskRemindersUseCase,
     private val externalScope: CoroutineScope
 ) : SaveTaskByIdUseCase {
 
@@ -14,7 +16,7 @@ class DefaultSaveTaskByIdUseCase(
         val resultModel = taskRepository.saveTaskById(taskId)
         if (resultModel is ResultModel.Success) {
             externalScope.launch {
-                /* TODO(set up reminders) */
+                setUpTaskRemindersUseCase(taskId)
             }
         }
         return resultModel

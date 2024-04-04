@@ -30,29 +30,31 @@ class DefaultSetUpNextReminderUseCase(
     private val defaultDispatcher: CoroutineDispatcher
 ) : SetUpNextReminderUseCase {
 
-    suspend operator fun invoke(reminderId: String) = withContext(defaultDispatcher) {
-        reminderRepository.readReminderById(reminderId).firstOrNull()?.let { reminderEntity ->
-            taskRepository.readTaskWithContentById(reminderEntity.taskId).firstOrNull()
-                ?.let { taskWithContentEntity ->
-                    if (taskWithContentEntity.checkIfActive()) {
-                        if (reminderEntity.type in setOf(ReminderType.Notification)) {
-                            calculateNextReminderDateTime(
-                                taskWithContentEntity,
-                                reminderEntity
-                            )?.let { targetDateTime ->
-                                reminderManager.resetReminderById(reminderId)
-                                targetDateTime
-                                    .toInstant(TimeZone.currentSystemDefault())
-                                    .toEpochMilliseconds().let { epochMillis ->
-                                        reminderManager.setReminder(
-                                            reminderId = reminderId,
-                                            epochMillis = epochMillis
-                                        )
-                                    }
+    override suspend operator fun invoke(reminderId: String) {
+        withContext(defaultDispatcher) {
+            reminderRepository.readReminderById(reminderId).firstOrNull()?.let { reminderEntity ->
+                taskRepository.readTaskWithContentById(reminderEntity.taskId).firstOrNull()
+                    ?.let { taskWithContentEntity ->
+                        if (taskWithContentEntity.checkIfActive()) {
+                            if (reminderEntity.type in setOf(ReminderType.Notification)) {
+                                calculateNextReminderDateTime(
+                                    taskWithContentEntity,
+                                    reminderEntity
+                                )?.let { targetDateTime ->
+                                    reminderManager.resetReminderById(reminderId)
+                                    targetDateTime
+                                        .toInstant(TimeZone.currentSystemDefault())
+                                        .toEpochMilliseconds().let { epochMillis ->
+                                            reminderManager.setReminder(
+                                                reminderId = reminderId,
+                                                epochMillis = epochMillis
+                                            )
+                                        }
+                                }
                             }
                         }
                     }
-                }
+            }
         }
     }
 

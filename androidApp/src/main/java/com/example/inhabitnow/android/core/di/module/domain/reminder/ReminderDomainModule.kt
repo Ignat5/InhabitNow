@@ -20,6 +20,8 @@ import com.example.inhabitnow.domain.use_case.reminder.save_reminder.DefaultSave
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.SaveReminderUseCase
 import com.example.inhabitnow.domain.use_case.reminder.set_up_next_reminder.DefaultSetUpNextReminderUseCase
 import com.example.inhabitnow.domain.use_case.reminder.set_up_next_reminder.SetUpNextReminderUseCase
+import com.example.inhabitnow.domain.use_case.reminder.set_up_task_reminders.DefaultSetUpTaskRemindersUseCase
+import com.example.inhabitnow.domain.use_case.reminder.set_up_task_reminders.SetUpTaskRemindersUseCase
 import com.example.inhabitnow.domain.use_case.reminder.update_reminder.DefaultUpdateReminderByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.update_reminder.UpdateReminderByIdUseCase
 import dagger.Module
@@ -55,13 +57,22 @@ object ReminderDomainModule {
     }
 
     @Provides
+    fun provideReadRemindersCountByTaskIdUseCase(
+        reminderRepository: ReminderRepository
+    ): ReadRemindersCountByTaskIdUseCase {
+        return DefaultReadRemindersCountByTaskIdUseCase(reminderRepository = reminderRepository)
+    }
+
+    @Provides
     fun provideSaveReminderUseCase(
         reminderRepository: ReminderRepository,
+        setUpNextReminderUseCase: SetUpNextReminderUseCase,
         @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher,
         externalScope: CoroutineScope
     ): SaveReminderUseCase {
         return DefaultSaveReminderUseCase(
             reminderRepository = reminderRepository,
+            setUpNextReminderUseCase = setUpNextReminderUseCase,
             defaultDispatcher = defaultDispatcher,
             externalScope = externalScope
         )
@@ -81,21 +92,29 @@ object ReminderDomainModule {
     @Provides
     fun provideUpdateReminderByIdUseCase(
         reminderRepository: ReminderRepository,
+        setUpNextReminderUseCase: SetUpNextReminderUseCase,
         @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher,
         externalScope: CoroutineScope
     ): UpdateReminderByIdUseCase {
         return DefaultUpdateReminderByIdUseCase(
             reminderRepository = reminderRepository,
+            setUpNextReminderUseCase = setUpNextReminderUseCase,
             defaultDispatcher = defaultDispatcher,
             externalScope = externalScope
         )
     }
 
     @Provides
-    fun provideReadRemindersCountByTaskIdUseCase(
-        reminderRepository: ReminderRepository
-    ): ReadRemindersCountByTaskIdUseCase {
-        return DefaultReadRemindersCountByTaskIdUseCase(reminderRepository = reminderRepository)
+    fun provideSetUpTaskRemindersUseCase(
+        reminderRepository: ReminderRepository,
+        setUpNextReminderUseCase: SetUpNextReminderUseCase,
+        @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher,
+    ): SetUpTaskRemindersUseCase {
+        return DefaultSetUpTaskRemindersUseCase(
+            reminderRepository = reminderRepository,
+            setUpNextReminderUseCase = setUpNextReminderUseCase,
+            defaultDispatcher = defaultDispatcher
+        )
     }
 
     @Provides
