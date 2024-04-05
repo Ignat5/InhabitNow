@@ -12,4 +12,16 @@ interface RecordDataSource {
     suspend fun updateRecordEntryById(recordId: String, entry: String): ResultModel<Unit>
     suspend fun deleteRecordById(recordId: String): ResultModel<Unit>
     suspend fun deleteRecordsByTaskId(taskId: String): ResultModel<Unit>
+    suspend fun deleteRecordsBeforeDateByTaskId(
+        taskId: String,
+        targetEpochDay: Long
+    ): ResultModel<Unit>
+    suspend fun deleteRecordsAfterDateByTaskId(
+        taskId: String,
+        targetEpochDay: Long
+    ): ResultModel<Unit>
+    suspend fun deleteRecordsBeforeAfterDateByTaskId(
+        taskId: String,
+        targetEpochDay: Long
+    ): ResultModel<Unit>
 }

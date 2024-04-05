@@ -52,4 +52,34 @@ class DefaultRecordDataSource(
         recordDao.deleteRecordsByTaskId(taskId)
     }
 
+    override suspend fun deleteRecordsBeforeDateByTaskId(
+        taskId: String,
+        targetEpochDay: Long
+    ): ResultModel<Unit> = runQuery {
+        recordDao.deleteRecordsBeforeDateByTaskId(
+            taskId = taskId,
+            targetEpochDay = targetEpochDay
+        )
+    }
+
+    override suspend fun deleteRecordsAfterDateByTaskId(
+        taskId: String,
+        targetEpochDay: Long
+    ): ResultModel<Unit> = runQuery {
+        recordDao.deleteRecordsAfterDateByTaskId(
+            taskId = taskId,
+            targetEpochDay = targetEpochDay
+        )
+    }
+
+    override suspend fun deleteRecordsBeforeAfterDateByTaskId(
+        taskId: String,
+        targetEpochDay: Long
+    ): ResultModel<Unit> = runTransaction {
+        recordDao.apply {
+            deleteRecordsBeforeDateByTaskId(taskId, targetEpochDay)
+            deleteRecordsAfterDateByTaskId(taskId, targetEpochDay)
+        }
+    }
+
 }

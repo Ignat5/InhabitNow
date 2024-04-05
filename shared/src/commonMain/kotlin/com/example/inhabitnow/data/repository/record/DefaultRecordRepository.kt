@@ -83,4 +83,28 @@ class DefaultRecordRepository(
     override suspend fun deleteRecordsByTaskId(taskId: String): ResultModel<Unit> =
         recordDataSource.deleteRecordsByTaskId(taskId)
 
+    override suspend fun deleteRecordsBeforeDateByTaskId(
+        taskId: String,
+        targetDate: LocalDate
+    ): ResultModel<Unit> = recordDataSource.deleteRecordsBeforeDateByTaskId(
+        taskId = taskId,
+        targetEpochDay = targetDate.toEpochDay()
+    )
+
+    override suspend fun deleteRecordsAfterDateByTaskId(
+        taskId: String,
+        targetDate: LocalDate
+    ): ResultModel<Unit> = recordDataSource.deleteRecordsAfterDateByTaskId(
+        taskId = taskId,
+        targetEpochDay = targetDate.toEpochDay()
+    )
+
+    override suspend fun deleteRecordsBeforeAfterDateByTaskId(
+        taskId: String,
+        targetDate: LocalDate
+    ): ResultModel<Unit> = recordDataSource.deleteRecordsBeforeAfterDateByTaskId(
+        taskId = taskId,
+        targetEpochDay = targetDate.toEpochDay()
+    )
+
 }

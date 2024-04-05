@@ -156,10 +156,14 @@ object TaskDomainModule {
     @Provides
     fun provideUpdateTaskDateByIdUseCase(
         taskRepository: TaskRepository,
+        recordRepository: RecordRepository,
+        setUpTaskRemindersUseCase: SetUpTaskRemindersUseCase,
         externalScope: CoroutineScope
     ): UpdateTaskDateUseCase {
         return DefaultUpdateTaskDateUseCase(
             taskRepository = taskRepository,
+            recordRepository = recordRepository,
+            setUpTaskRemindersUseCase = setUpTaskRemindersUseCase,
             externalScope = externalScope
         )
     }
@@ -198,10 +202,12 @@ object TaskDomainModule {
     @Provides
     fun provideDeleteTaskByIdUseCase(
         taskRepository: TaskRepository,
+        resetTaskRemindersUseCase: ResetTaskRemindersUseCase,
         externalScope: CoroutineScope
     ): DeleteTaskByIdUseCase {
         return DefaultDeleteTaskByIdUseCase(
             taskRepository = taskRepository,
+            resetTaskRemindersUseCase = resetTaskRemindersUseCase,
             externalScope = externalScope
         )
     }
@@ -225,11 +231,13 @@ object TaskDomainModule {
     fun provideRestartHabitByIdUseCase(
         taskRepository: TaskRepository,
         recordRepository: RecordRepository,
+        setUpTaskRemindersUseCase: SetUpTaskRemindersUseCase,
         externalScope: CoroutineScope
     ): RestartHabitByIdUseCase {
         return DefaultRestartHabitByIdUseCase(
             taskRepository = taskRepository,
             recordRepository = recordRepository,
+            setUpTaskRemindersUseCase = setUpTaskRemindersUseCase,
             externalScope = externalScope
         )
     }

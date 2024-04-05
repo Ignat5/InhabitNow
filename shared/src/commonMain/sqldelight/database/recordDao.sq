@@ -27,3 +27,13 @@ WHERE id = :recordId;
 deleteRecordsByTaskId:
 DELETE FROM RecordTable
 WHERE taskId = :taskId;
+
+deleteRecordsBeforeDateByTaskId:
+DELETE FROM RecordTable
+WHERE taskId = :taskId AND
+epochDay < :targetEpochDay;
+
+deleteRecordsAfterDateByTaskId:
+DELETE FROM RecordTable
+WHERE taskId = :taskId AND
+epochDay > :targetEpochDay;

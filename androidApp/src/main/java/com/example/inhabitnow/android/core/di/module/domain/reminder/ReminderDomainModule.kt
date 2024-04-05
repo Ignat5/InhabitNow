@@ -83,10 +83,12 @@ object ReminderDomainModule {
     @Provides
     fun provideDeleteReminderByIdUseCase(
         reminderRepository: ReminderRepository,
+        reminderManager: ReminderManager,
         externalScope: CoroutineScope
     ): DeleteReminderByIdUseCase {
         return DefaultDeleteReminderByIdUseCase(
             reminderRepository = reminderRepository,
+            reminderManager = reminderManager,
             externalScope = externalScope
         )
     }

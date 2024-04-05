@@ -76,19 +76,4 @@ interface TaskRepository {
         contentId: String,
         content: TaskContentEntity.ArchiveContent
     ): ResultModel<Unit>
-    suspend fun saveTaskProgressContent(
-        taskId: String,
-        targetDate: LocalDate,
-        content: TaskContentEntity.ProgressContent
-    ): ResultModel<Unit>
-    suspend fun saveTaskFrequencyContent(
-        taskId: String,
-        targetDate: LocalDate,
-        content: TaskContentEntity.FrequencyContent
-    ): ResultModel<Unit>
-    suspend fun saveTaskArchiveContent(
-        taskId: String,
-        targetDate: LocalDate,
-        content: TaskContentEntity.ArchiveContent
-    ): ResultModel<Unit>
 }
