@@ -129,6 +129,24 @@ class DefaultTaskRepository(
             } else null
         }
 
+    override suspend fun getTaskProgressByTaskId(taskId: String): ProgressContentEntity? =
+        taskDataSource.getTaskContentByTaskId(
+            taskId = taskId,
+            taskContentType = TaskContentEntity.Type.Progress.toJson(json)
+        )?.toBaseTaskContentEntity(json) as? ProgressContentEntity
+
+    override suspend fun getTaskFrequencyByTaskId(taskId: String): FrequencyContentEntity? =
+        taskDataSource.getTaskContentByTaskId(
+            taskId = taskId,
+            taskContentType = TaskContentEntity.Type.Frequency.toJson(json)
+        )?.toBaseTaskContentEntity(json) as? FrequencyContentEntity
+
+    override suspend fun getTaskArchiveByTaskId(taskId: String): ArchiveContentEntity? =
+        taskDataSource.getTaskContentByTaskId(
+            taskId = taskId,
+            taskContentType = TaskContentEntity.Type.Archive.toJson(json)
+        )?.toBaseTaskContentEntity(json) as? ArchiveContentEntity
+
     override suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {
             taskDataSource.insertTaskWithContent(
@@ -140,6 +158,48 @@ class DefaultTaskRepository(
                 )
             )
         }
+
+    override suspend fun saveTaskProgress(
+        taskId: String,
+        progressContent: TaskContentEntity.ProgressContent,
+        startDate: LocalDate
+    ): ResultModel<Unit> = ProgressContentEntity(
+        id = randomUUID(),
+        taskId = taskId,
+        content = progressContent,
+        startDate = startDate,
+        createdAt = Clock.System.now().toEpochMilliseconds()
+    ).toTaskContentTable(json).let { taskContentTable ->
+        taskDataSource.insertTaskContent(taskContentTable)
+    }
+
+    override suspend fun saveTaskFrequency(
+        taskId: String,
+        frequencyContent: TaskContentEntity.FrequencyContent,
+        startDate: LocalDate
+    ): ResultModel<Unit> = FrequencyContentEntity(
+        id = randomUUID(),
+        taskId = taskId,
+        content = frequencyContent,
+        startDate = startDate,
+        createdAt = Clock.System.now().toEpochMilliseconds()
+    ).toTaskContentTable(json).let { taskContentTable ->
+        taskDataSource.insertTaskContent(taskContentTable)
+    }
+
+    override suspend fun saveTaskArchive(
+        taskId: String,
+        archiveContent: TaskContentEntity.ArchiveContent,
+        startDate: LocalDate
+    ): ResultModel<Unit> = ArchiveContentEntity(
+        id = randomUUID(),
+        taskId = taskId,
+        content = archiveContent,
+        startDate = startDate,
+        createdAt = Clock.System.now().toEpochMilliseconds()
+    ).toTaskContentTable(json).let { taskContentTable ->
+        taskDataSource.insertTaskContent(taskContentTable)
+    }
 
     override suspend fun updateTaskTitleById(
         taskId: String,
@@ -201,6 +261,30 @@ class DefaultTaskRepository(
         taskId = taskId,
         taskStartEpochDay = taskStartDate.toEpochDay(),
         taskEndEpochDay = taskEndDate.toEpochDay()
+    )
+
+    override suspend fun updateTaskProgress(
+        contentId: String,
+        content: TaskContentEntity.ProgressContent
+    ): ResultModel<Unit> = taskDataSource.updateTaskContentById(
+        contentId = contentId,
+        content = content.toJson(json)
+    )
+
+    override suspend fun updateTaskFrequency(
+        contentId: String,
+        content: TaskContentEntity.FrequencyContent
+    ): ResultModel<Unit> = taskDataSource.updateTaskContentById(
+        contentId = contentId,
+        content = content.toJson(json)
+    )
+
+    override suspend fun updateTaskArchive(
+        contentId: String,
+        content: TaskContentEntity.ArchiveContent
+    ): ResultModel<Unit> = taskDataSource.updateTaskContentById(
+        contentId = contentId,
+        content = content.toJson(json)
     )
 
     override suspend fun saveTaskProgressContent(

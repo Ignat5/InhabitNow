@@ -16,6 +16,8 @@ import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.DefaultReadRemindersCountByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_count_by_task_id.ReadRemindersCountByTaskIdUseCase
+import com.example.inhabitnow.domain.use_case.reminder.reset_task_reminders.DefaultResetTaskRemindersUseCase
+import com.example.inhabitnow.domain.use_case.reminder.reset_task_reminders.ResetTaskRemindersUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.DefaultSaveReminderUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.SaveReminderUseCase
 import com.example.inhabitnow.domain.use_case.reminder.set_up_next_reminder.DefaultSetUpNextReminderUseCase
@@ -140,6 +142,19 @@ object ReminderDomainModule {
         return DefaultSetUpNextReminderUseCase(
             reminderRepository = reminderRepository,
             taskRepository = taskRepository,
+            reminderManager = reminderManager,
+            defaultDispatcher = defaultDispatcher
+        )
+    }
+
+    @Provides
+    fun provideResetTaskRemindersUseCase(
+        reminderRepository: ReminderRepository,
+        reminderManager: ReminderManager,
+        @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher
+    ): ResetTaskRemindersUseCase {
+        return DefaultResetTaskRemindersUseCase(
+            reminderRepository = reminderRepository,
             reminderManager = reminderManager,
             defaultDispatcher = defaultDispatcher
         )

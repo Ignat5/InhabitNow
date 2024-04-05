@@ -19,6 +19,7 @@ import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.Defau
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_tasks_by_search_query.DefaultReadTasksBySearchQueryUseCase
 import com.example.inhabitnow.domain.use_case.read_tasks_by_search_query.ReadTasksBySearchQueryUseCase
+import com.example.inhabitnow.domain.use_case.reminder.reset_task_reminders.ResetTaskRemindersUseCase
 import com.example.inhabitnow.domain.use_case.reminder.set_up_task_reminders.SetUpTaskRemindersUseCase
 import com.example.inhabitnow.domain.use_case.restart_habit_by_id.DefaultRestartHabitByIdUseCase
 import com.example.inhabitnow.domain.use_case.restart_habit_by_id.RestartHabitByIdUseCase
@@ -140,11 +141,13 @@ object TaskDomainModule {
     @Provides
     fun provideUpdateTaskFrequencyByIdUseCase(
         taskRepository: TaskRepository,
+        setUpTaskRemindersUseCase: SetUpTaskRemindersUseCase,
         @DefaultDispatcherQualifier defaultDispatcher: CoroutineDispatcher,
         externalScope: CoroutineScope
     ): UpdateTaskFrequencyByIdUseCase {
         return DefaultUpdateTaskFrequencyByIdUseCase(
             taskRepository = taskRepository,
+            setUpTaskRemindersUseCase = setUpTaskRemindersUseCase,
             defaultDispatcher = defaultDispatcher,
             externalScope = externalScope
         )
@@ -206,10 +209,14 @@ object TaskDomainModule {
     @Provides
     fun provideArchiveTaskByIdUseCase(
         taskRepository: TaskRepository,
+        setUpTaskRemindersUseCase: SetUpTaskRemindersUseCase,
+        resetTaskRemindersUseCase: ResetTaskRemindersUseCase,
         externalScope: CoroutineScope
     ): ArchiveTaskByIdUseCase {
         return DefaultArchiveTaskByIdUseCase(
             taskRepository = taskRepository,
+            setUpTaskRemindersUseCase = setUpTaskRemindersUseCase,
+            resetTaskRemindersUseCase = resetTaskRemindersUseCase,
             externalScope = externalScope
         )
     }

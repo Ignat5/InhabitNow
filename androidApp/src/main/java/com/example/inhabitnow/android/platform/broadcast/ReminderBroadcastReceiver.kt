@@ -1,11 +1,27 @@
 package com.example.inhabitnow.android.platform.broadcast
 
+import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannelGroup
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationChannelCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.PendingIntentCompat
+import com.example.inhabitnow.android.MainActivity
+import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.core.di.module.presentation.PresentationComponent
 import com.example.inhabitnow.android.platform.util.ReminderUtil
+import com.example.inhabitnow.android.ui.toHourMinute
+import com.example.inhabitnow.core.type.ReminderType
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
 import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
@@ -32,7 +48,7 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
                 coroutineScope {
                     launch {
                         getReminderWithTaskById(reminderId)?.let { reminderWithTaskModel ->
-                            showReminderNotification(reminderWithTaskModel)
+                            showReminder(reminderWithTaskModel, context)
                         }
                     }
                     launch {
@@ -44,8 +60,81 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun showReminderNotification(reminderWithTask: ReminderWithTaskModel) {
+    private fun showReminder(
+        reminderWithTask: ReminderWithTaskModel,
+        context: Context
+    ) {
         Log.d("myTag", "showReminderNotification: reminderWithTask: $reminderWithTask")
+        NotificationManagerCompat.from(context).let { notificationManager ->
+            if (notificationManager.areNotificationsEnabled()) {
+                when (reminderWithTask.reminderModel.type) {
+                    ReminderType.Notification -> showNotificationReminder(reminderWithTask, context)
+                    else -> return
+                }
+            }
+        }
+    }
+
+    private fun showNotificationReminder(
+        reminderWithTask: ReminderWithTaskModel,
+        context: Context
+    ) {
+        val channel = createNotificationReminderChannel(context)
+        val pendingContentIntent = run {
+            val contentIntent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            val requestCode = ReminderUtil.stringToInteger(reminderWithTask.reminderModel.taskId)
+            PendingIntent.getActivity(
+                context,
+                requestCode,
+                contentIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+        val notification = NotificationCompat.Builder(context, channel.id)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(reminderWithTask.taskModel.title)
+            .setContentText(reminderWithTask.reminderModel.time.toHourMinute())
+            .setPriority(NotificationManager.IMPORTANCE_HIGH)
+            .setCategory(Notification.CATEGORY_REMINDER)
+            .setAutoCancel(true)
+            .setContentIntent(pendingContentIntent)
+            .build()
+
+        val notificationId = ReminderUtil.stringToInteger(reminderWithTask.reminderModel.taskId)
+        showNotification(context, notificationId, notification)
+    }
+
+    private fun showNotification(
+        context: Context,
+        notificationId: Int,
+        notification: Notification
+    ) {
+        NotificationManagerCompat.from(context).let { notificationManager ->
+            val isPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            } else true
+            if (isPermissionGranted) {
+                notificationManager.notify(notificationId, notification)
+            }
+        }
+    }
+
+    private fun createNotificationReminderChannel(context: Context): NotificationChannelCompat {
+        val notificationManager = NotificationManagerCompat.from(context)
+        val channelName = "Notification reminders"
+        val channel = NotificationChannelCompat.Builder(
+            NOTIFICATION_REMINDER_CHANNEL_ID,
+            NotificationManagerCompat.IMPORTANCE_HIGH
+        )
+            .setName(channelName)
+            .setImportance(NotificationManagerCompat.IMPORTANCE_HIGH)
+            .setShowBadge(true)
+            .build()
+
+        notificationManager.createNotificationChannel(channel)
+        return channel
     }
 
     private suspend fun getReminderWithTaskById(reminderId: String): ReminderWithTaskModel? =
@@ -83,5 +172,9 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
         val reminderModel: ReminderModel,
         val taskModel: TaskModel
     )
+
+    companion object {
+        private const val NOTIFICATION_REMINDER_CHANNEL_ID = "NOTIFICATION_REMINDER_CHANNEL_ID"
+    }
 
 }
