@@ -16,6 +16,7 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.PendingIntentCompat
+import androidx.core.content.ContextCompat
 import com.example.inhabitnow.android.MainActivity
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.core.di.module.presentation.PresentationComponent
@@ -113,7 +114,10 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
     ) {
         NotificationManagerCompat.from(context).let { notificationManager ->
             val isPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
             } else true
             if (isPermissionGranted) {
                 notificationManager.notify(notificationId, notification)

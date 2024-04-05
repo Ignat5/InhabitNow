@@ -22,27 +22,23 @@ class DefaultReminderManager(private val context: Context) : ReminderManager {
 
     private fun setUpAlarm(reminderId: String, epochMillis: Long) {
         runCatching {
-            val areNotificationsEnabled =
-                (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).areNotificationsEnabled()
-            if (areNotificationsEnabled) {
-                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                val pendingIntent = buildPendingIntent(reminderId)
-                val canScheduleExactAlarms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    alarmManager.canScheduleExactAlarms()
-                } else true
-                if (canScheduleExactAlarms) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        epochMillis,
-                        pendingIntent
-                    )
-                } else {
-                    alarmManager.setAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        epochMillis,
-                        pendingIntent
-                    )
-                }
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val pendingIntent = buildPendingIntent(reminderId)
+            val canScheduleExactAlarms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                alarmManager.canScheduleExactAlarms()
+            } else true
+            if (canScheduleExactAlarms) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    epochMillis,
+                    pendingIntent
+                )
+            } else {
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    epochMillis,
+                    pendingIntent
+                )
             }
         }.onFailure {
             it.printStackTrace()
