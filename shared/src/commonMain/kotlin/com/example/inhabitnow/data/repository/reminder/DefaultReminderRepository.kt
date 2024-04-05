@@ -44,6 +44,8 @@ class DefaultReminderRepository(
     override fun readReminderIdsByTaskId(taskId: String): Flow<List<String>> =
         reminderDataSource.readReminderIdsByTaskId(taskId)
 
+    override fun readReminderIds(): Flow<List<String>> = reminderDataSource.readReminderIds()
+
     override suspend fun saveReminder(
         taskId: String,
         reminderType: ReminderType,

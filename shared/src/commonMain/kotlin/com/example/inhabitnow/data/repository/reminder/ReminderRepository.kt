@@ -12,6 +12,7 @@ interface ReminderRepository {
     fun readRemindersCountByTaskId(taskId: String): Flow<Int>
     fun readReminderById(reminderId: String): Flow<ReminderEntity?>
     fun readReminderIdsByTaskId(taskId: String): Flow<List<String>>
+    fun readReminderIds(): Flow<List<String>>
     suspend fun saveReminder(
         taskId: String,
         reminderType: ReminderType,

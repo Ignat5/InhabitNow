@@ -4,6 +4,7 @@ import com.example.inhabitnow.android.App
 import com.example.inhabitnow.domain.use_case.read_task_with_content_by_id.ReadTaskWithContentByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.check_reminder_scheduled.CheckReminderScheduledUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminder_by_id.ReadReminderByIdUseCase
+import com.example.inhabitnow.domain.use_case.reminder.set_up_all_tasks_reminders.SetUpAllRemindersUseCase
 import com.example.inhabitnow.domain.use_case.reminder.set_up_next_reminder.SetUpNextReminderUseCase
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -32,6 +33,9 @@ object PresentationComponent {
     val readTaskWithContentByIdUseCase: ReadTaskWithContentByIdUseCase
         get() = entryPoint.provideReadTaskWithContentByIdUseCase()
 
+    val setUpAllRemindersUseCase: SetUpAllRemindersUseCase
+        get() = entryPoint.provideSetUpAllRemindersUseCase()
+
     val externalScope: CoroutineScope
         get() = entryPoint.provideExternalScope()
 
@@ -42,6 +46,7 @@ object PresentationComponent {
         fun provideCheckReminderScheduledUseCase(): CheckReminderScheduledUseCase
         fun provideReadReminderByIdUseCase(): ReadReminderByIdUseCase
         fun provideReadTaskWithContentByIdUseCase(): ReadTaskWithContentByIdUseCase
+        fun provideSetUpAllRemindersUseCase(): SetUpAllRemindersUseCase
         fun provideExternalScope(): CoroutineScope
     }
 
