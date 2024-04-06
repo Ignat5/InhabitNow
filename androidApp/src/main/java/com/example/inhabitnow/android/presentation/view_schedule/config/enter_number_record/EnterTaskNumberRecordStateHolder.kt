@@ -7,8 +7,8 @@ import com.example.inhabitnow.android.presentation.view_schedule.config.enter_nu
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskWithRecordModel
 import com.example.inhabitnow.android.ui.limitNumberToString
 import com.example.inhabitnow.domain.model.record.content.RecordContentModel
+import com.example.inhabitnow.domain.use_case.validate_limit_number.ValidateInputLimitNumberUseCase
 import com.example.inhabitnow.domain.util.DomainConst
-import com.example.inhabitnow.domain.util.DomainUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,6 +22,7 @@ import kotlinx.datetime.LocalDate
 class EnterTaskNumberRecordStateHolder(
     private val taskWithRecord: TaskWithRecordModel.Habit.HabitContinuous.HabitNumber,
     private val date: LocalDate,
+    private val validateInputLimitNumberUseCase: ValidateInputLimitNumberUseCase,
     override val holderScope: CoroutineScope
 ) : BaseResultStateHolder<EnterTaskNumberRecordScreenEvent, EnterTaskNumberRecordScreenState, EnterTaskNumberRecordScreenResult>() {
 
@@ -29,13 +30,13 @@ class EnterTaskNumberRecordStateHolder(
         (taskWithRecord.recordEntry as? RecordContentModel.Entry.Number)?.number ?: DomainConst.MIN_LIMIT_NUMBER
 
     private val inputNumberValidator: (String) -> Boolean = { input ->
-        input.isEmpty() || DomainUtil.validateInputLimitNumber(input)
+        input.isEmpty() || validateInputLimitNumberUseCase(input)
     }
 
     private val inputNumberState = MutableStateFlow(initNumber.limitNumberToString())
 
     private val canConfirmState = inputNumberState.map { input ->
-        DomainUtil.validateInputLimitNumber(input)
+        validateInputLimitNumberUseCase(input)
     }.stateIn(
         holderScope,
         SharingStarted.Eagerly,

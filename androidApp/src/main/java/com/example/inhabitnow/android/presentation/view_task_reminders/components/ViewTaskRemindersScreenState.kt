@@ -7,5 +7,6 @@ import com.example.inhabitnow.domain.model.reminder.ReminderModel
 
 @Immutable
 data class ViewTaskRemindersScreenState(
-    val allRemindersResultModel: UIResultModel<List<ReminderModel>>
+    val allRemindersResultModel: UIResultModel<List<ReminderModel>>,
+//    val notificationPermissionRequestStatus: NotificationPermissionRequestStatus
 ) : ScreenState

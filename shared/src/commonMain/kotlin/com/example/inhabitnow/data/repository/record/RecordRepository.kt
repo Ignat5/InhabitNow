@@ -21,4 +21,16 @@ interface RecordRepository {
     ): ResultModel<Unit>
     suspend fun deleteRecordById(recordId: String): ResultModel<Unit>
     suspend fun deleteRecordsByTaskId(taskId: String): ResultModel<Unit>
+    suspend fun deleteRecordsBeforeDateByTaskId(
+        taskId: String,
+        targetDate: LocalDate
+    ): ResultModel<Unit>
+    suspend fun deleteRecordsAfterDateByTaskId(
+        taskId: String,
+        targetDate: LocalDate
+    ): ResultModel<Unit>
+    suspend fun deleteRecordsBeforeAfterDateByTaskId(
+        taskId: String,
+        targetDate: LocalDate
+    ): ResultModel<Unit>
 }

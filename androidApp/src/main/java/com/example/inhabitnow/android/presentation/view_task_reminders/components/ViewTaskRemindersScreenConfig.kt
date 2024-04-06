@@ -16,4 +16,9 @@ sealed interface ViewTaskRemindersScreenConfig : ScreenConfig {
     data class ConfirmDeleteReminder(
         val reminderId: String
     ) : ViewTaskRemindersScreenConfig
+
+    data class CheckNotificationPermission(val shouldSkipRationale: Boolean) :
+        ViewTaskRemindersScreenConfig
+
+    data object NotificationPermissionRationale : ViewTaskRemindersScreenConfig
 }

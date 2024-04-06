@@ -31,6 +31,7 @@ import com.example.inhabitnow.domain.use_case.update_task_frequency_by_id.Update
 import com.example.inhabitnow.domain.use_case.update_task_priority_by_id.UpdateTaskPriorityByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_progress_by_id.UpdateTaskProgressByIdUseCase
 import com.example.inhabitnow.domain.use_case.update_task_title_by_id.UpdateTaskTitleByIdUseCase
+import com.example.inhabitnow.domain.use_case.validate_limit_number.ValidateInputLimitNumberUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
@@ -55,6 +56,7 @@ class EditTaskViewModel @Inject constructor(
     updateTaskDescriptionByIdUseCase: UpdateTaskDescriptionByIdUseCase,
     updateTaskPriorityByIdUseCase: UpdateTaskPriorityByIdUseCase,
     saveTagCrossByTaskIdUseCase: SaveTagCrossByTaskIdUseCase,
+    validateInputLimitNumberUseCase: ValidateInputLimitNumberUseCase,
     private val archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
     private val deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
     private val restartHabitByIdUseCase: RestartHabitByIdUseCase,
@@ -72,6 +74,7 @@ class EditTaskViewModel @Inject constructor(
     updateTaskFrequencyByIdUseCase = updateTaskFrequencyByIdUseCase,
     updateTaskDateUseCase = updateTaskDateUseCase,
     saveTagCrossByTaskIdUseCase = saveTagCrossByTaskIdUseCase,
+    validateInputLimitNumberUseCase = validateInputLimitNumberUseCase,
     defaultDispatcher = defaultDispatcher
 ) {
 

@@ -1,6 +1,10 @@
 package com.example.inhabitnow.android.presentation.view_task_reminders
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,12 +27,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
@@ -40,10 +51,18 @@ import com.example.inhabitnow.android.presentation.view_task_reminders.component
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.confirm_delete_reminder.ConfirmDeleteReminderDialog
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.create.CreateReminderDialog
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.EditReminderDialog
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.permission.CheckNotificationPermissionScreenResult
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.permission.NotificationPermissionRationaleDialog
+import com.example.inhabitnow.android.ui.currentActivity
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
 import com.example.inhabitnow.android.ui.toIconResId
 import com.example.inhabitnow.domain.model.reminder.ReminderModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun ViewTaskRemindersScreen(
@@ -130,6 +149,58 @@ private fun ViewTaskRemindersScreenStateless(
                     )
                 }
             }
+
+//            if (state.shouldCheckNotificationPermission) {
+//                PermissionHandler(onResult = { result ->
+//                    onEvent(
+//                        ViewTaskRemindersScreenEvent.ResultEvent.CheckNotificationPermission(
+//                            result
+//                        )
+//                    )
+//                })
+//            }
+        }
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+private fun PermissionHandler(
+    shouldSkipRationale: Boolean,
+    onResult: (CheckNotificationPermissionScreenResult) -> Unit
+) {
+    val context = LocalContext.current
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val permissionState =
+            rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+        LaunchedEffect(Unit) {
+            snapshotFlow { permissionState.status }
+                .distinctUntilChanged()
+                .collectLatest { status ->
+                    when (status) {
+                        is PermissionStatus.Granted -> {
+                            onResult(CheckNotificationPermissionScreenResult.Granted)
+                        }
+
+                        is PermissionStatus.Denied -> {
+                            if (shouldSkipRationale) {
+                                permissionState.launchPermissionRequest()
+                            } else {
+                                if (status.shouldShowRationale) {
+                                    onResult(CheckNotificationPermissionScreenResult.ShowRationale)
+                                } else {
+                                    permissionState.launchPermissionRequest()
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+    } else {
+        if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+            onResult(CheckNotificationPermissionScreenResult.Granted)
+        } else {
+            onResult(CheckNotificationPermissionScreenResult.Denied)
         }
     }
 }
@@ -137,7 +208,7 @@ private fun ViewTaskRemindersScreenStateless(
 @Composable
 private fun ScreenConfigStateless(
     config: ViewTaskRemindersScreenConfig,
-    onResult: (ViewTaskRemindersScreenEvent.ResultEvent) -> Unit
+    onResult: (ViewTaskRemindersScreenEvent) -> Unit
 ) {
     when (config) {
         is ViewTaskRemindersScreenConfig.CreateReminder -> {
@@ -165,6 +236,20 @@ private fun ScreenConfigStateless(
                 reminderId = config.reminderId,
                 onResult = {
                     onResult(ViewTaskRemindersScreenEvent.ResultEvent.ConfirmDeleteReminder(it))
+                }
+            )
+        }
+
+        is ViewTaskRemindersScreenConfig.CheckNotificationPermission -> {
+            PermissionHandler(shouldSkipRationale = config.shouldSkipRationale) {
+                onResult(ViewTaskRemindersScreenEvent.ResultEvent.CheckNotificationPermission(it))
+            }
+        }
+
+        is ViewTaskRemindersScreenConfig.NotificationPermissionRationale -> {
+            NotificationPermissionRationaleDialog(
+                onDismissRequest = {
+                    onResult(ViewTaskRemindersScreenEvent.OnNotificationPermissionRationalDismissRequest)
                 }
             )
         }

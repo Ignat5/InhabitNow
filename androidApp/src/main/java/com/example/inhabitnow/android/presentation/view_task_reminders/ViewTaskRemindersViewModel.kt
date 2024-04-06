@@ -14,6 +14,9 @@ import com.example.inhabitnow.android.presentation.view_task_reminders.config.cr
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.create.components.CreateReminderScreenResult
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.EditReminderStateHolder
 import com.example.inhabitnow.android.presentation.view_task_reminders.config.create_edit_reminder.edit.components.EditReminderScreenResult
+import com.example.inhabitnow.android.presentation.view_task_reminders.config.permission.CheckNotificationPermissionScreenResult
+import com.example.inhabitnow.core.model.ResultModelWithException
+import com.example.inhabitnow.core.type.ReminderType
 import com.example.inhabitnow.domain.use_case.reminder.delete_reminder_by_id.DeleteReminderByIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.read_reminders_by_task_id.ReadRemindersByTaskIdUseCase
 import com.example.inhabitnow.domain.use_case.reminder.save_reminder.SaveReminderUseCase
@@ -44,8 +47,7 @@ class ViewTaskRemindersViewModel @Inject constructor(
             emptyList()
         )
 
-    override val uiScreenState: StateFlow<ViewTaskRemindersScreenState> =
-        allRemindersState.map { allReminders ->
+    override val uiScreenState: StateFlow<ViewTaskRemindersScreenState> = allRemindersState.map { allReminders ->
             ViewTaskRemindersScreenState(
                 allRemindersResultModel = if (allReminders.isEmpty()) UIResultModel.NoData
                 else UIResultModel.Data(allReminders)
@@ -65,6 +67,9 @@ class ViewTaskRemindersViewModel @Inject constructor(
             is ViewTaskRemindersScreenEvent.OnCreateReminderClick -> onCreateReminderClick()
             is ViewTaskRemindersScreenEvent.OnDeleteReminderClick -> onDeleteReminderClick(event)
             is ViewTaskRemindersScreenEvent.OnBackClick -> onBackClick()
+            is ViewTaskRemindersScreenEvent.OnNotificationPermissionRationalDismissRequest ->
+                onNotificationPermissionRationalDismissRequest()
+
         }
     }
 
@@ -79,7 +84,24 @@ class ViewTaskRemindersViewModel @Inject constructor(
             is ViewTaskRemindersScreenEvent.ResultEvent.EditReminder ->
                 onEditReminderResultEvent(event)
 
+            is ViewTaskRemindersScreenEvent.ResultEvent.CheckNotificationPermission ->
+                onCheckNotificationPermissionResultEvent(event)
+
         }
+    }
+
+    private fun onCheckNotificationPermissionResultEvent(event: ViewTaskRemindersScreenEvent.ResultEvent.CheckNotificationPermission) {
+        onIdleToAction {
+            when (event.result) {
+                is CheckNotificationPermissionScreenResult.ShowRationale -> onShowRationale()
+                is CheckNotificationPermissionScreenResult.Granted -> Unit
+                is CheckNotificationPermissionScreenResult.Denied -> Unit
+            }
+        }
+    }
+
+    private fun onShowRationale() {
+        setUpConfigState(ViewTaskRemindersScreenConfig.NotificationPermissionRationale)
     }
 
     private fun onEditReminderResultEvent(event: ViewTaskRemindersScreenEvent.ResultEvent.EditReminder) {
@@ -131,12 +153,25 @@ class ViewTaskRemindersViewModel @Inject constructor(
 
     private fun onConfirmCreateReminder(result: CreateReminderScreenResult.Confirm) {
         viewModelScope.launch {
-            saveReminderUseCase(
+            val resultModel = saveReminderUseCase(
                 taskId = taskId,
                 reminderType = result.type,
                 reminderTime = result.time,
                 reminderSchedule = result.schedule
             )
+            when (resultModel) {
+                is ResultModelWithException.Success -> {
+                    if (result.type in setOf(ReminderType.Notification)) {
+                        setUpConfigState(ViewTaskRemindersScreenConfig.CheckNotificationPermission(
+                            shouldSkipRationale = false
+                        ))
+                    }
+                }
+
+                is ResultModelWithException.Error -> {
+                    /* TODO() */
+                }
+            }
         }
     }
 
@@ -168,6 +203,12 @@ class ViewTaskRemindersViewModel @Inject constructor(
 
     private fun onDeleteReminderClick(event: ViewTaskRemindersScreenEvent.OnDeleteReminderClick) {
         setUpConfigState(ViewTaskRemindersScreenConfig.ConfirmDeleteReminder(event.reminderId))
+    }
+
+    private fun onNotificationPermissionRationalDismissRequest() {
+        setUpConfigState(ViewTaskRemindersScreenConfig.CheckNotificationPermission(
+            shouldSkipRationale = true
+        ))
     }
 
     private fun onBackClick() {

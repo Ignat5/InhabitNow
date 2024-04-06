@@ -129,6 +129,24 @@ class DefaultTaskRepository(
             } else null
         }
 
+    override suspend fun getTaskProgressByTaskId(taskId: String): ProgressContentEntity? =
+        taskDataSource.getTaskContentByTaskId(
+            taskId = taskId,
+            taskContentType = TaskContentEntity.Type.Progress.toJson(json)
+        )?.toBaseTaskContentEntity(json) as? ProgressContentEntity
+
+    override suspend fun getTaskFrequencyByTaskId(taskId: String): FrequencyContentEntity? =
+        taskDataSource.getTaskContentByTaskId(
+            taskId = taskId,
+            taskContentType = TaskContentEntity.Type.Frequency.toJson(json)
+        )?.toBaseTaskContentEntity(json) as? FrequencyContentEntity
+
+    override suspend fun getTaskArchiveByTaskId(taskId: String): ArchiveContentEntity? =
+        taskDataSource.getTaskContentByTaskId(
+            taskId = taskId,
+            taskContentType = TaskContentEntity.Type.Archive.toJson(json)
+        )?.toBaseTaskContentEntity(json) as? ArchiveContentEntity
+
     override suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit> =
         withContext(defaultDispatcher) {
             taskDataSource.insertTaskWithContent(
@@ -140,6 +158,48 @@ class DefaultTaskRepository(
                 )
             )
         }
+
+    override suspend fun saveTaskProgress(
+        taskId: String,
+        progressContent: TaskContentEntity.ProgressContent,
+        startDate: LocalDate
+    ): ResultModel<Unit> = ProgressContentEntity(
+        id = randomUUID(),
+        taskId = taskId,
+        content = progressContent,
+        startDate = startDate,
+        createdAt = Clock.System.now().toEpochMilliseconds()
+    ).toTaskContentTable(json).let { taskContentTable ->
+        taskDataSource.insertTaskContent(taskContentTable)
+    }
+
+    override suspend fun saveTaskFrequency(
+        taskId: String,
+        frequencyContent: TaskContentEntity.FrequencyContent,
+        startDate: LocalDate
+    ): ResultModel<Unit> = FrequencyContentEntity(
+        id = randomUUID(),
+        taskId = taskId,
+        content = frequencyContent,
+        startDate = startDate,
+        createdAt = Clock.System.now().toEpochMilliseconds()
+    ).toTaskContentTable(json).let { taskContentTable ->
+        taskDataSource.insertTaskContent(taskContentTable)
+    }
+
+    override suspend fun saveTaskArchive(
+        taskId: String,
+        archiveContent: TaskContentEntity.ArchiveContent,
+        startDate: LocalDate
+    ): ResultModel<Unit> = ArchiveContentEntity(
+        id = randomUUID(),
+        taskId = taskId,
+        content = archiveContent,
+        startDate = startDate,
+        createdAt = Clock.System.now().toEpochMilliseconds()
+    ).toTaskContentTable(json).let { taskContentTable ->
+        taskDataSource.insertTaskContent(taskContentTable)
+    }
 
     override suspend fun updateTaskTitleById(
         taskId: String,
@@ -203,71 +263,29 @@ class DefaultTaskRepository(
         taskEndEpochDay = taskEndDate.toEpochDay()
     )
 
-    override suspend fun saveTaskProgressContent(
-        taskId: String,
-        targetDate: LocalDate,
+    override suspend fun updateTaskProgress(
+        contentId: String,
         content: TaskContentEntity.ProgressContent
-    ): ResultModel<Unit> = saveTaskContent(
-        taskId = taskId,
-        targetDate = targetDate,
-        content = content
+    ): ResultModel<Unit> = taskDataSource.updateTaskContentById(
+        contentId = contentId,
+        content = content.toJson(json)
     )
 
-    override suspend fun saveTaskFrequencyContent(
-        taskId: String,
-        targetDate: LocalDate,
+    override suspend fun updateTaskFrequency(
+        contentId: String,
         content: TaskContentEntity.FrequencyContent
-    ): ResultModel<Unit> = saveTaskContent(
-        taskId = taskId,
-        targetDate = targetDate,
-        content = content
+    ): ResultModel<Unit> = taskDataSource.updateTaskContentById(
+        contentId = contentId,
+        content = content.toJson(json)
     )
 
-    override suspend fun saveTaskArchiveContent(
-        taskId: String,
-        targetDate: LocalDate,
+    override suspend fun updateTaskArchive(
+        contentId: String,
         content: TaskContentEntity.ArchiveContent
-    ): ResultModel<Unit> = saveTaskContent(
-        taskId = taskId,
-        targetDate = targetDate,
-        content = content
+    ): ResultModel<Unit> = taskDataSource.updateTaskContentById(
+        contentId = contentId,
+        content = content.toJson(json)
     )
-
-    private suspend fun saveTaskContent(
-        taskId: String,
-        targetDate: LocalDate,
-        content: TaskContentEntity
-    ): ResultModel<Unit> = withContext(defaultDispatcher) {
-        val contentType = when (content) {
-            is TaskContentEntity.ProgressContent -> TaskContentEntity.Type.Progress
-            is TaskContentEntity.FrequencyContent -> TaskContentEntity.Type.Frequency
-            is TaskContentEntity.ArchiveContent -> TaskContentEntity.Type.Archive
-        }
-        taskDataSource.getTaskContentByTaskId(
-            taskId = taskId,
-            taskContentType = contentType.toJson(json)
-        )?.let { taskContentTable ->
-            val targetDateEpochDay = targetDate.toEpochDay()
-            val isNew = targetDateEpochDay > taskContentTable.startEpochDay
-            if (isNew) {
-                taskDataSource.insertTaskContent(
-                    TaskContentTable(
-                        id = randomUUID(),
-                        taskId = taskContentTable.taskId,
-                        contentType = taskContentTable.contentType,
-                        content = content.toJson(json),
-                        startEpochDay = targetDateEpochDay,
-                        createdAt = Clock.System.now().toEpochMilliseconds()
-                    )
-                )
-            } else {
-                taskDataSource.updateTaskContentById(
-                    contentId = taskContentTable.id,
-                    content = content.toJson(json)
-                )
-            }
-        } ?: ResultModel.Error(IllegalStateException())
-    }
 
     private suspend fun List<SelectFullTasksQuery>.toFullTaskEntityList() = this.let { queryList ->
         coroutineScope {

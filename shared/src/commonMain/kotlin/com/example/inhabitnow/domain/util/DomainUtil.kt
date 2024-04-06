@@ -2,15 +2,16 @@ package com.example.inhabitnow.domain.util
 
 import com.example.inhabitnow.core.type.ProgressLimitType
 import com.example.inhabitnow.data.model.record.content.RecordContentEntity
+import com.example.inhabitnow.data.model.reminder.content.ReminderContentEntity
+import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.TaskContentEntity
 import com.example.inhabitnow.domain.model.statistics.TaskStatus
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
-object DomainUtil {
-    fun validateInputLimitNumber(input: String): Boolean {
-        return input.toDoubleOrNull()
-            ?.let { it in DomainConst.MIN_LIMIT_NUMBER..DomainConst.MAX_LIMIT_NUMBER } ?: false
-    }
+internal object DomainUtil {
 
     internal fun TaskContentEntity.FrequencyContent.checkIfTaskScheduled(targetDate: LocalDate): Boolean =
         this.let { fc ->
@@ -23,6 +24,52 @@ object DomainUtil {
                 }
             }
         }
+
+    internal fun TaskWithContentEntity.checkIfActive(targetDate: LocalDate): Boolean =
+        this.let { taskWithContentEntity ->
+            val isDeleted = taskWithContentEntity.task.deletedAt != null
+            val isArchived = taskWithContentEntity.archiveContent.content.isArchived
+            val inDateRange = taskWithContentEntity.task.let { task ->
+                val endDate = task.endDate
+                    ?: Instant.DISTANT_FUTURE.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                targetDate in task.startDate..endDate
+            }
+            !isDeleted && !isArchived && inDateRange
+        }
+
+    internal fun TaskWithContentEntity.checkIfActive(): Boolean =
+        this.let { taskWithContentEntity ->
+            val isDeleted = taskWithContentEntity.task.deletedAt != null
+            val isArchived = taskWithContentEntity.archiveContent.content.isArchived
+            !isDeleted && !isArchived
+        }
+
+    internal fun ReminderContentEntity.ScheduleContent.checkIfScheduled(targetDate: LocalDate): Boolean =
+        this.let { scheduleContent ->
+            when (scheduleContent) {
+                is ReminderContentEntity.ScheduleContent.EveryDay -> true
+                is ReminderContentEntity.ScheduleContent.DaysOfWeek -> {
+                    targetDate.dayOfWeek in scheduleContent.daysOfWeek
+                }
+            }
+        }
+
+    internal fun checkIfRemindersOverlap(
+        sourceSchedule: ReminderContentEntity.ScheduleContent,
+        targetSchedule: ReminderContentEntity.ScheduleContent
+    ): Boolean {
+        return when (sourceSchedule) {
+            is ReminderContentEntity.ScheduleContent.EveryDay -> true
+            is ReminderContentEntity.ScheduleContent.DaysOfWeek -> {
+                when (targetSchedule) {
+                    is ReminderContentEntity.ScheduleContent.EveryDay -> true
+                    is ReminderContentEntity.ScheduleContent.DaysOfWeek -> {
+                        sourceSchedule.daysOfWeek.any { it in targetSchedule.daysOfWeek }
+                    }
+                }
+            }
+        }
+    }
 
     internal fun TaskContentEntity.ProgressContent.getTaskStatusByEntry(entry: RecordContentEntity.Entry?): TaskStatus {
         return when (entry) {

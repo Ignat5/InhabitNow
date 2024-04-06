@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.kotlin.serialization)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.accompanist.permissions)
     ksp(libs.hilt.android.compiler)
     ksp(libs.hilt.compiler)
 }

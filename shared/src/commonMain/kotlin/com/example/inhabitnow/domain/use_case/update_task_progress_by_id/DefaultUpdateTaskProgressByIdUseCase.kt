@@ -20,11 +20,19 @@ class DefaultUpdateTaskProgressByIdUseCase(
         progressContent: TaskContentModel.ProgressContent
     ): ResultModel<Unit> = withContext(defaultDispatcher) {
         val targetDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-        taskRepository.saveTaskProgressContent(
-            taskId = taskId,
-            targetDate = targetDate,
-            content = progressContent.toProgressContentEntity()
-        )
+        taskRepository.getTaskProgressByTaskId(taskId)?.let { progressContentEntity ->
+            if (targetDate > progressContentEntity.startDate) {
+                taskRepository.saveTaskProgress(
+                    taskId = taskId,
+                    progressContent = progressContent.toProgressContentEntity(),
+                    startDate = targetDate
+                )
+            } else {
+                taskRepository.updateTaskProgress(
+                    contentId = progressContentEntity.id,
+                    content = progressContent.toProgressContentEntity()
+                )
+            }
+        } ?: ResultModel.Error(NoSuchElementException())
     }
-
 }

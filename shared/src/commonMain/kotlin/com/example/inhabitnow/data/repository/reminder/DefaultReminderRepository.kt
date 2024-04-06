@@ -1,7 +1,9 @@
 package com.example.inhabitnow.data.repository.reminder
 
 import com.example.inhabitnow.core.model.ResultModel
+import com.example.inhabitnow.core.model.map
 import com.example.inhabitnow.core.type.ReminderType
+import com.example.inhabitnow.core.util.randomUUID
 import com.example.inhabitnow.data.data_source.reminder.ReminderDataSource
 import com.example.inhabitnow.data.model.reminder.ReminderEntity
 import com.example.inhabitnow.data.model.reminder.content.ReminderContentEntity
@@ -12,6 +14,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.json.Json
 
@@ -33,9 +36,37 @@ class DefaultReminderRepository(
     override fun readRemindersCountByTaskId(taskId: String): Flow<Int> =
         reminderDataSource.readRemindersCountByTaskId(taskId).map { it.toInt() }
 
-    override suspend fun saveReminder(reminderEntity: ReminderEntity): ResultModel<Unit> =
+    override fun readReminderById(reminderId: String): Flow<ReminderEntity?> =
+        reminderDataSource.readReminderById(reminderId).map {
+            it?.toReminderEntity(json)
+        }
+
+    override fun readReminderIdsByTaskId(taskId: String): Flow<List<String>> =
+        reminderDataSource.readReminderIdsByTaskId(taskId)
+
+    override fun readReminderIds(): Flow<List<String>> = reminderDataSource.readReminderIds()
+
+    override suspend fun saveReminder(
+        taskId: String,
+        reminderType: ReminderType,
+        reminderTime: LocalTime,
+        reminderSchedule: ReminderContentEntity.ScheduleContent
+    ): ResultModel<String> =
         withContext(defaultDispatcher) {
-            reminderDataSource.insertReminder(reminderEntity.toReminderTable(json))
+            val reminderId = randomUUID()
+            ReminderEntity(
+                id = reminderId,
+                taskId = taskId,
+                type = reminderType,
+                time = reminderTime,
+                schedule = reminderSchedule,
+                createdAt = Clock.System.now().toEpochMilliseconds()
+            ).let { reminderEntity ->
+                reminderDataSource.insertReminder(reminderEntity.toReminderTable(json))
+                    .map { _ ->
+                        reminderId
+                    }
+            }
         }
 
     override suspend fun updateReminderById(

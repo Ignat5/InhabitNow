@@ -1,5 +1,8 @@
 package com.example.inhabitnow.android.ui
 
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.activity.ComponentActivity
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
 import com.example.inhabitnow.core.type.ProgressLimitType
@@ -178,4 +181,10 @@ fun TaskScheduleStatusType.toDisplay() = when (this) {
     is TaskScheduleStatusType.Done -> "done"
     is TaskScheduleStatusType.Skipped -> "skipped"
     is TaskScheduleStatusType.Failed -> "failed"
+}
+
+fun Context.currentActivity(): ComponentActivity? = when (this) {
+    is ComponentActivity -> this
+    is ContextWrapper -> this.baseContext.currentActivity()
+    else -> null
 }
