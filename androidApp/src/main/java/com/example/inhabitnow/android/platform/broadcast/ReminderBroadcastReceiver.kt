@@ -94,7 +94,7 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
             )
         }
         val notification = NotificationCompat.Builder(context, channel.id)
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.ic_notification) // TODO (replace with app icon)
             .setContentTitle(reminderWithTask.taskModel.title)
             .setContentText(reminderWithTask.reminderModel.time.toHourMinute())
             .setPriority(NotificationManager.IMPORTANCE_HIGH)
@@ -118,7 +118,7 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
                     context,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED
-            } else true
+            } else notificationManager.areNotificationsEnabled()
             if (isPermissionGranted) {
                 notificationManager.notify(notificationId, notification)
             }
