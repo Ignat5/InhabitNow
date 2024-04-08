@@ -20,18 +20,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -46,10 +44,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -57,6 +53,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateDialog
+import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeDialog
+import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeDialog
 import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenConfig
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
@@ -73,13 +71,9 @@ import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.android.ui.limitNumberToString
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
-import com.example.inhabitnow.android.ui.toMonthDay
 import com.example.inhabitnow.android.ui.toShortMonthDayYear
 import com.example.inhabitnow.core.type.ProgressLimitType
-import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.record.content.RecordContentModel
-import com.example.inhabitnow.domain.model.reminder.ReminderModel
-import com.example.inhabitnow.domain.model.tag.TagModel
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -126,7 +120,15 @@ private fun ViewScheduleScreenStateless(
                     onEvent(ViewScheduleScreenEvent.OnPickDateClick)
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            ScreenFAB(
+                onClick = {
+                    onEvent(ViewScheduleScreenEvent.OnCreateTaskClick)
+                }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) {
         Box(
             modifier = Modifier
@@ -557,21 +559,19 @@ private fun ViewScheduleConfigStateless(
                 onResultEvent(ViewScheduleScreenEvent.ResultEvent.ViewHabitRecordActions(it))
             }
         }
-    }
-}
 
-@Composable
-private fun ProvideContentColorTextStyle(
-    contentColor: Color,
-    textStyle: TextStyle,
-    content: @Composable () -> Unit
-) {
-    val mergedStyle = LocalTextStyle.current.merge(textStyle)
-    CompositionLocalProvider(
-        LocalContentColor provides contentColor,
-        LocalTextStyle provides mergedStyle,
-        content = content
-    )
+        is ViewScheduleScreenConfig.PickTaskType -> {
+            PickTaskTypeDialog(allTaskTypes = config.allTaskTypes) {
+                onResultEvent(ViewScheduleScreenEvent.ResultEvent.PickTaskType(it))
+            }
+        }
+
+        is ViewScheduleScreenConfig.PickTaskProgressType -> {
+            PickTaskProgressTypeDialog(allTaskProgressTypes = config.allTaskProgressTypes) {
+                onResultEvent(ViewScheduleScreenEvent.ResultEvent.PickTaskProgressType(it))
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -606,4 +606,11 @@ private fun ScreenTopAppBar(
             }
         }
     )
+}
+
+@Composable
+private fun ScreenFAB(onClick: () -> Unit) {
+    FloatingActionButton(onClick = onClick) {
+        Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = null)
+    }
 }

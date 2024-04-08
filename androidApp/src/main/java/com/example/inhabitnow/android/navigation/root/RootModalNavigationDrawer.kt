@@ -63,6 +63,8 @@ fun RootModalNavigationDrawer(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(16.dp))
                     ItemSetNavigationDestination(
                         items = allMainDestinations,
                         currentBackStackEntry = currentBackStackEntry,

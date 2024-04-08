@@ -6,7 +6,12 @@ import com.example.inhabitnow.core.type.TaskType
 
 interface SaveDefaultTaskUseCase {
     suspend operator fun invoke(
-        taskType: TaskType,
-        taskProgressType: TaskProgressType
+        requestType: RequestType
     ): ResultModel<String>
+
+    sealed interface RequestType {
+        data class CreateHabit(val taskProgressType: TaskProgressType) : RequestType
+        data object CreateRecurringTask : RequestType
+        data object CreateTask : RequestType
+    }
 }

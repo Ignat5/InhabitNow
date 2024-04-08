@@ -1,9 +1,12 @@
 package com.example.inhabitnow.data.repository.task
 
 import com.example.inhabitnow.core.model.ResultModel
+import com.example.inhabitnow.core.model.map
+import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.core.util.randomUUID
 import com.example.inhabitnow.data.data_source.task.TaskDataSource
+import com.example.inhabitnow.data.model.task.TaskEntity
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
 import com.example.inhabitnow.data.model.task.content.FrequencyContentEntity
@@ -147,16 +150,62 @@ class DefaultTaskRepository(
             taskContentType = TaskContentEntity.Type.Archive.toJson(json)
         )?.toBaseTaskContentEntity(json) as? ArchiveContentEntity
 
-    override suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit> =
+    override suspend fun saveDefaultTaskWithContent(
+        taskType: TaskType,
+        taskProgressType: TaskProgressType,
+        title: String,
+        description: String,
+        startDate: LocalDate,
+        endDate: LocalDate?,
+        priority: Int,
+        progressContent: TaskContentEntity.ProgressContent,
+        frequencyContent: TaskContentEntity.FrequencyContent,
+        archiveContent: TaskContentEntity.ArchiveContent,
+    ): ResultModel<String> =
         withContext(defaultDispatcher) {
-            taskDataSource.insertTaskWithContent(
-                taskTable = taskWithContentEntity.task.toTaskTable(json),
-                allTaskContent = listOf(
-                    taskWithContentEntity.progressContent.toTaskContentTable(json),
-                    taskWithContentEntity.frequencyContent.toTaskContentTable(json),
-                    taskWithContentEntity.archiveContent.toTaskContentTable(json)
-                )
+            val taskId: String = randomUUID()
+            val createdAt = Clock.System.now().toEpochMilliseconds()
+            val taskEntity = TaskEntity(
+                id = taskId,
+                type = taskType,
+                progressType = taskProgressType,
+                title = title,
+                description = description,
+                startDate = startDate,
+                endDate = endDate,
+                priority = priority,
+                createdAt = createdAt,
+                deletedAt = createdAt
             )
+            val progressContentEntity = ProgressContentEntity(
+                id = randomUUID(),
+                taskId = taskId,
+                content = progressContent,
+                startDate = startDate,
+                createdAt = createdAt
+            )
+            val frequencyContentEntity = FrequencyContentEntity(
+                id = randomUUID(),
+                taskId = taskId,
+                content = frequencyContent,
+                startDate = startDate,
+                createdAt = createdAt
+            )
+            val archiveContentEntity = ArchiveContentEntity(
+                id = randomUUID(),
+                taskId = taskId,
+                content = archiveContent,
+                startDate = startDate,
+                createdAt = createdAt
+            )
+            taskDataSource.insertTaskWithContent(
+                taskTable = taskEntity.toTaskTable(json),
+                allTaskContent = listOf(
+                    progressContentEntity.toTaskContentTable(json),
+                    frequencyContentEntity.toTaskContentTable(json),
+                    archiveContentEntity.toTaskContentTable(json)
+                )
+            ).map { taskId }
         }
 
     override suspend fun saveTaskProgress(

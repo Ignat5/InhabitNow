@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -95,7 +97,15 @@ private fun ViewHabitsScreenStateless(
                     onEvent(ViewHabitsScreenEvent.Base(BaseViewTasksScreenEvent.OnSearchClick))
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            ScreenFAB(
+                onClick = {
+
+                }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) {
         Box(
             modifier = Modifier
@@ -317,6 +327,13 @@ private fun ViewHabitsScreenConfigStateless(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ScreenFAB(onClick: () -> Unit) {
+    FloatingActionButton(onClick = onClick) {
+        Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = null)
     }
 }
 

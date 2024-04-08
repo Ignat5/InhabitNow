@@ -23,80 +23,60 @@ class DefaultSaveDefaultTaskUseCase(
     private val defaultDispatcher: CoroutineDispatcher
 ) : SaveDefaultTaskUseCase {
 
-    override suspend operator fun invoke(
-        taskType: TaskType,
-        taskProgressType: TaskProgressType
-    ): ResultModel<String> = withContext(defaultDispatcher) {
-        val taskId: String = randomUUID()
-        val nowInstant = Clock.System.now()
-        val nowMillis = nowInstant.toEpochMilliseconds()
-        val startDate = nowInstant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-        val endDate = when (taskType) {
-            TaskType.SingleTask -> startDate
-            else -> null
-        }
-        val task = TaskEntity(
-            id = taskId,
-            type = taskType,
-            progressType = taskProgressType,
-            title = DomainConst.DEFAULT_TASK_TITLE,
-            description = DomainConst.DEFAULT_TASK_DESCRIPTION,
-            startDate = startDate,
-            endDate = endDate,
-            priority = DomainConst.DEFAULT_PRIORITY,
-            createdAt = nowMillis,
-            deletedAt = nowMillis
-        )
-        val progressContent = ProgressContentEntity(
-            id = randomUUID(),
-            taskId = taskId,
-            content = when (taskProgressType) {
-                TaskProgressType.YesNo -> TaskContentEntity.ProgressContent.YesNo
-                TaskProgressType.Number -> TaskContentEntity.ProgressContent.Number(
-                    limitType = DomainConst.DEFAULT_LIMIT_TYPE,
-                    limitNumber = DomainConst.DEFAULT_LIMIT_NUMBER,
-                    limitUnit = DomainConst.DEFAULT_LIMIT_UNIT
-                )
+    override suspend operator fun invoke(requestType: SaveDefaultTaskUseCase.RequestType): ResultModel<String> =
+        withContext(defaultDispatcher) {
+            val startDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+            val resultModel = taskRepository.saveDefaultTaskWithContent(
+                taskType = when (requestType) {
+                    is SaveDefaultTaskUseCase.RequestType.CreateHabit -> TaskType.Habit
+                    is SaveDefaultTaskUseCase.RequestType.CreateRecurringTask -> TaskType.RecurringTask
+                    is SaveDefaultTaskUseCase.RequestType.CreateTask -> TaskType.SingleTask
+                },
+                taskProgressType = when (requestType) {
+                    is SaveDefaultTaskUseCase.RequestType.CreateHabit -> requestType.taskProgressType
+                    is SaveDefaultTaskUseCase.RequestType.CreateRecurringTask -> TaskProgressType.YesNo
+                    is SaveDefaultTaskUseCase.RequestType.CreateTask -> TaskProgressType.YesNo
+                },
+                title = DomainConst.DEFAULT_TASK_TITLE,
+                description = DomainConst.DEFAULT_TASK_DESCRIPTION,
+                startDate = startDate,
+                endDate = when (requestType) {
+                    is SaveDefaultTaskUseCase.RequestType.CreateHabit -> null
+                    is SaveDefaultTaskUseCase.RequestType.CreateRecurringTask -> null
+                    is SaveDefaultTaskUseCase.RequestType.CreateTask -> startDate
+                },
+                priority = DomainConst.DEFAULT_PRIORITY,
+                progressContent = when (requestType) {
+                    is SaveDefaultTaskUseCase.RequestType.CreateHabit -> {
+                        when (requestType.taskProgressType) {
+                            TaskProgressType.YesNo -> TaskContentEntity.ProgressContent.YesNo
+                            TaskProgressType.Number -> TaskContentEntity.ProgressContent.Number(
+                                limitType = DomainConst.DEFAULT_LIMIT_TYPE,
+                                limitNumber = DomainConst.DEFAULT_LIMIT_NUMBER,
+                                limitUnit = DomainConst.DEFAULT_LIMIT_UNIT
+                            )
 
-                TaskProgressType.Time -> TaskContentEntity.ProgressContent.Time(
-                    limitType = DomainConst.DEFAULT_LIMIT_TYPE,
-                    limitTime = DomainConst.DEFAULT_LIMIT_TIME
-                )
-            },
-            startDate = startDate,
-            createdAt = nowMillis
-        )
-        val frequencyContent = FrequencyContentEntity(
-            id = randomUUID(),
-            taskId = taskId,
-            content = when (taskType) {
-                TaskType.SingleTask -> TaskContentEntity.FrequencyContent.OneDay
-                else -> TaskContentEntity.FrequencyContent.EveryDay
-            },
-            startDate = startDate,
-            createdAt = nowMillis
-        )
-        val archiveContent = ArchiveContentEntity(
-            id = randomUUID(),
-            taskId = taskId,
-            content = TaskContentEntity.ArchiveContent(
-                isArchived = DomainConst.DEFAULT_IS_ARCHIVED
-            ),
-            startDate = startDate,
-            createdAt = nowMillis
-        )
-        val resultModel = taskRepository.saveTaskWithContent(
-            taskWithContentEntity = TaskWithContentEntity(
-                task = task,
-                progressContent = progressContent,
-                frequencyContent = frequencyContent,
-                archiveContent = archiveContent
+                            TaskProgressType.Time -> TaskContentEntity.ProgressContent.Time(
+                                limitType = DomainConst.DEFAULT_LIMIT_TYPE,
+                                limitTime = DomainConst.DEFAULT_LIMIT_TIME
+                            )
+                        }
+                    }
+
+                    is SaveDefaultTaskUseCase.RequestType.CreateRecurringTask -> TaskContentEntity.ProgressContent.YesNo
+                    is SaveDefaultTaskUseCase.RequestType.CreateTask -> TaskContentEntity.ProgressContent.YesNo
+                },
+                frequencyContent = when (requestType) {
+                    is SaveDefaultTaskUseCase.RequestType.CreateHabit,
+                    is SaveDefaultTaskUseCase.RequestType.CreateRecurringTask -> {
+                        TaskContentEntity.FrequencyContent.EveryDay
+                    }
+
+                    is SaveDefaultTaskUseCase.RequestType.CreateTask -> TaskContentEntity.FrequencyContent.OneDay
+                },
+                archiveContent = TaskContentEntity.ArchiveContent(isArchived = DomainConst.DEFAULT_IS_ARCHIVED)
             )
-        )
-        when (resultModel) {
-            is ResultModel.Success -> ResultModel.Success(taskId)
-            is ResultModel.Error -> ResultModel.Error(resultModel.throwable)
+            resultModel
         }
-    }
 
 }

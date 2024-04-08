@@ -80,31 +80,33 @@ fun RootGraph() {
             }
             callback
         }
-        NavHost(
-            navController = navController,
-            startDestination = AppNavDest.ViewScheduleDestination.route,
-            route = AppNavDest.RootGraphDestination.route,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            viewScheduleScreen(
-                onMenuClick = onMenuClick,
-                onNavigate = onNavigate
-            )
-            viewHabitsScreen(
-                onMenuClick = onMenuClick,
-                onNavigate = onNavigate
-            )
-            viewTasksScreen(
-                onMenuClick = onMenuClick,
-                onNavigate = onNavigate
-            )
-            createTaskScreen(onNavigate)
-            viewTaskRemindersScreen(onNavigate)
-            viewTagsScreen(onNavigate)
-            searchTasksScreen(onNavigate)
-            editTaskScreen(onNavigate)
-            viewStatistics(onNavigate)
-            viewSettingsScreen(onNavigate)
+        Scaffold {
+            NavHost(
+                navController = navController,
+                startDestination = AppNavDest.ViewScheduleDestination.route,
+                route = AppNavDest.RootGraphDestination.route,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                viewScheduleScreen(
+                    onMenuClick = onMenuClick,
+                    onNavigate = onNavigate
+                )
+                viewHabitsScreen(
+                    onMenuClick = onMenuClick,
+                    onNavigate = onNavigate
+                )
+                viewTasksScreen(
+                    onMenuClick = onMenuClick,
+                    onNavigate = onNavigate
+                )
+                createTaskScreen(onNavigate)
+                viewTaskRemindersScreen(onNavigate)
+                viewTagsScreen(onNavigate)
+                searchTasksScreen(onNavigate)
+                editTaskScreen(onNavigate)
+                viewStatistics(onNavigate)
+                viewSettingsScreen(onNavigate)
+            }
         }
     }
 }

@@ -7,6 +7,8 @@ import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStateHolder
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.common.pick_date.model.PickDateRequestModel
+import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
+import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
 import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenConfig
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
@@ -22,13 +24,17 @@ import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskW
 import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskWithRecordModel
+import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.core.type.ProgressLimitType
+import com.example.inhabitnow.core.type.TaskProgressType
+import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.record.content.RecordContentModel
 import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
 import com.example.inhabitnow.domain.use_case.read_full_tasks_by_date.ReadFullTasksByDateUseCase
 import com.example.inhabitnow.domain.use_case.record.read_records_by_date.ReadRecordsByDateUseCase
 import com.example.inhabitnow.domain.use_case.record.save_record.SaveRecordUseCase
+import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.validate_limit_number.ValidateInputLimitNumberUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -62,6 +68,7 @@ class ViewScheduleViewModel @Inject constructor(
     private val readFullTasksByDateUseCase: ReadFullTasksByDateUseCase,
     private val readRecordsByDateUseCase: ReadRecordsByDateUseCase,
     private val saveRecordUseCase: SaveRecordUseCase,
+    private val saveDefaultTaskUseCase: SaveDefaultTaskUseCase,
     private val validateInputLimitNumberUseCase: ValidateInputLimitNumberUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<ViewScheduleScreenEvent, ViewScheduleScreenState, ViewScheduleScreenNavigation, ViewScheduleScreenConfig>() {
@@ -139,6 +146,9 @@ class ViewScheduleViewModel @Inject constructor(
             is ViewScheduleScreenEvent.OnTaskLongClick ->
                 onTaskLongClick(event)
 
+            is ViewScheduleScreenEvent.OnCreateTaskClick ->
+                onCreateTaskClick()
+
             is ViewScheduleScreenEvent.ResultEvent ->
                 onResultEvent(event)
 
@@ -172,6 +182,80 @@ class ViewScheduleViewModel @Inject constructor(
 
             is ViewScheduleScreenEvent.ResultEvent.ViewHabitRecordActions ->
                 onViewHabitRecordActionsResultEvent(event)
+
+            is ViewScheduleScreenEvent.ResultEvent.PickTaskType ->
+                onPickTaskTypeResultEvent(event)
+
+            is ViewScheduleScreenEvent.ResultEvent.PickTaskProgressType ->
+                onPickTaskProgressTypeResultEvent(event)
+        }
+    }
+
+    private fun onPickTaskProgressTypeResultEvent(event: ViewScheduleScreenEvent.ResultEvent.PickTaskProgressType) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskProgressTypeScreenResult.Confirm ->
+                    onConfirmPickTaskProgressType(result)
+
+                is PickTaskProgressTypeScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskProgressType(result: PickTaskProgressTypeScreenResult.Confirm) {
+        viewModelScope.launch {
+            val resultModel = saveDefaultTaskUseCase(
+                SaveDefaultTaskUseCase.RequestType.CreateHabit(result.taskProgressType)
+            )
+            when (resultModel) {
+                is ResultModel.Success -> {
+                    val taskId = resultModel.data
+                    setUpNavigationState(ViewScheduleScreenNavigation.CreateTask(taskId))
+                }
+
+                is ResultModel.Error -> Unit
+            }
+        }
+    }
+
+    private fun onPickTaskTypeResultEvent(event: ViewScheduleScreenEvent.ResultEvent.PickTaskType) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskTypeScreenResult.Confirm -> onConfirmPickTaskType(result)
+                is PickTaskTypeScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskType(result: PickTaskTypeScreenResult.Confirm) {
+        when (val taskType = result.taskType) {
+            TaskType.Habit -> {
+                setUpConfigState(
+                    ViewScheduleScreenConfig.PickTaskProgressType(
+                        TaskProgressType.entries
+                    )
+                )
+            }
+
+            TaskType.RecurringTask, TaskType.SingleTask -> {
+                viewModelScope.launch {
+                    val requestType = when (taskType) {
+                        TaskType.RecurringTask -> SaveDefaultTaskUseCase.RequestType.CreateRecurringTask
+                        TaskType.SingleTask -> SaveDefaultTaskUseCase.RequestType.CreateTask
+                        else -> throw IllegalStateException()
+                    }
+                    when (val resultModel = saveDefaultTaskUseCase(requestType)) {
+                        is ResultModel.Success -> {
+                            val taskId = resultModel.data
+                            setUpNavigationState(
+                                ViewScheduleScreenNavigation.CreateTask(taskId)
+                            )
+                        }
+
+                        is ResultModel.Error -> Unit
+                    }
+                }
+            }
         }
     }
 
@@ -474,6 +558,10 @@ class ViewScheduleViewModel @Inject constructor(
                 taskWithRecord.task.id
             )
         )
+    }
+
+    private fun onCreateTaskClick() {
+        setUpConfigState(ViewScheduleScreenConfig.PickTaskType(TaskType.entries))
     }
 
     private fun onPickDateClick() {

@@ -30,6 +30,14 @@ fun NavGraphBuilder.viewScheduleScreen(
                         )
                     }
 
+                    is ViewScheduleScreenNavigation.CreateTask -> {
+                        onNavigate(
+                            TargetNavDest.Destination(
+                                route = AppNavDest.buildCreateTaskRoute(destination.taskId)
+                            )
+                        )
+                    }
+
                     is ViewScheduleScreenNavigation.Search -> {
                         onNavigate(
                             TargetNavDest.Destination(route = AppNavDest.buildSearchTasksRoute())

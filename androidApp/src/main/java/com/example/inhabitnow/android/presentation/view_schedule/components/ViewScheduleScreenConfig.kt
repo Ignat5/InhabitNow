@@ -5,6 +5,8 @@ import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStat
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.EnterTaskNumberRecordStateHolder
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.EnterTaskTimeRecordStateHolder
 import com.example.inhabitnow.android.presentation.view_schedule.config.view_habit_record_actions.ViewHabitRecordActionsStateHolder
+import com.example.inhabitnow.core.type.TaskProgressType
+import com.example.inhabitnow.core.type.TaskType
 
 sealed interface ViewScheduleScreenConfig : ScreenConfig {
     data class PickDate(
@@ -21,5 +23,13 @@ sealed interface ViewScheduleScreenConfig : ScreenConfig {
 
     data class ViewHabitRecordActions(
         val stateHolder: ViewHabitRecordActionsStateHolder
+    ) : ViewScheduleScreenConfig
+
+    data class PickTaskType(
+        val allTaskTypes: List<TaskType>
+    ) : ViewScheduleScreenConfig
+
+    data class PickTaskProgressType(
+        val allTaskProgressTypes: List<TaskProgressType>
     ) : ViewScheduleScreenConfig
 }

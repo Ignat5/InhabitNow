@@ -5,4 +5,5 @@ import com.example.inhabitnow.android.presentation.base.components.navigation.Sc
 sealed interface ViewScheduleScreenNavigation : ScreenNavigation {
     data object Search : ViewScheduleScreenNavigation
     data class EditTask(val taskId: String) : ViewScheduleScreenNavigation
+    data class CreateTask(val taskId: String) : ViewScheduleScreenNavigation
 }
