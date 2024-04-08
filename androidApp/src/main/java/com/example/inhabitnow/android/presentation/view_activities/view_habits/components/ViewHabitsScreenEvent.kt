@@ -4,6 +4,7 @@ import com.example.inhabitnow.android.presentation.base.components.event.ScreenE
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskScreenResult
+import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
 import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenEvent
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskSort
@@ -17,11 +18,17 @@ sealed interface ViewHabitsScreenEvent : ScreenEvent {
 
     data class OnSortClick(val sort: TaskSort.HabitsSort) : ViewHabitsScreenEvent
 
+    data object OnCreateHabitClick : ViewHabitsScreenEvent
+
     sealed interface ResultEvent : ViewHabitsScreenEvent {
         val result: ScreenResult
 
         data class ViewHabitActions(
             override val result: ViewHabitActionsScreenResult
+        ) : ResultEvent
+
+        data class PickTaskProgressType(
+            override val result: PickTaskProgressTypeScreenResult
         ) : ResultEvent
 
     }

@@ -6,6 +6,7 @@ import com.example.inhabitnow.android.core.di.qualifier.DefaultDispatcherQualifi
 import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskScreenResult
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskScreenResult
+import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
 import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_activities.base.BaseViewTasksViewModel
 import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenConfig
@@ -19,10 +20,13 @@ import com.example.inhabitnow.android.presentation.view_activities.view_habits.c
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenState
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.ViewHabitActionsStateHolder
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.components.ViewHabitActionsScreenResult
+import com.example.inhabitnow.core.model.ResultModel
+import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
 import com.example.inhabitnow.domain.use_case.archive_task_by_id.ArchiveTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.delete_task_by_id.DeleteTaskByIdUseCase
 import com.example.inhabitnow.domain.use_case.read_full_habits.ReadFullHabitsUseCase
+import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.tag.read_tags.ReadTagsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,6 +48,7 @@ class ViewHabitsViewModel @Inject constructor(
     readTagsUseCase: ReadTagsUseCase,
     archiveTaskByIdUseCase: ArchiveTaskByIdUseCase,
     deleteTaskByIdUseCase: DeleteTaskByIdUseCase,
+    private val saveDefaultTaskUseCase: SaveDefaultTaskUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewTasksViewModel<ViewHabitsScreenEvent, ViewHabitsScreenState, ViewHabitsScreenNavigation, ViewHabitsScreenConfig, TaskFilterByStatus.HabitStatus, TaskSort.HabitsSort>(
     readTagsUseCase = readTagsUseCase,
@@ -106,11 +111,14 @@ class ViewHabitsViewModel @Inject constructor(
             is ViewHabitsScreenEvent.Base ->
                 onBaseEvent(event.baseEvent)
 
+            is ViewHabitsScreenEvent.ResultEvent ->
+                onResultEvent(event)
+
             is ViewHabitsScreenEvent.OnHabitClick ->
                 onHabitClick(event)
 
-            is ViewHabitsScreenEvent.ResultEvent ->
-                onResultEvent(event)
+            is ViewHabitsScreenEvent.OnCreateHabitClick ->
+                onCreateHabitClick()
 
             is ViewHabitsScreenEvent.OnFilterByStatusClick ->
                 onFilterByStatusClick(event)
@@ -125,6 +133,35 @@ class ViewHabitsViewModel @Inject constructor(
         when (event) {
             is ViewHabitsScreenEvent.ResultEvent.ViewHabitActions ->
                 onViewHabitActionsResult(event)
+
+            is ViewHabitsScreenEvent.ResultEvent.PickTaskProgressType ->
+                onPickTaskProgressTypeResultEvent(event)
+        }
+    }
+
+    private fun onPickTaskProgressTypeResultEvent(event: ViewHabitsScreenEvent.ResultEvent.PickTaskProgressType) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskProgressTypeScreenResult.Confirm ->
+                    onConfirmPickTaskProgressType(result)
+
+                is PickTaskProgressTypeScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskProgressType(result: PickTaskProgressTypeScreenResult.Confirm) {
+        viewModelScope.launch {
+            val resultModel =
+                saveDefaultTaskUseCase(SaveDefaultTaskUseCase.RequestType.CreateHabit(result.taskProgressType))
+            when (resultModel) {
+                is ResultModel.Success -> {
+                    val taskId = resultModel.data
+                    setUpNavigationState(ViewHabitsScreenNavigation.CreateTask(taskId))
+                }
+
+                is ResultModel.Error -> Unit
+            }
         }
     }
 
@@ -194,6 +231,10 @@ class ViewHabitsViewModel @Inject constructor(
                     )
                 )
             }
+    }
+
+    private fun onCreateHabitClick() {
+        setUpConfigState(ViewHabitsScreenConfig.PickTaskProgressType(TaskProgressType.entries))
     }
 
     private fun onFilterByStatusClick(event: ViewHabitsScreenEvent.OnFilterByStatusClick) {

@@ -50,6 +50,14 @@ fun NavGraphBuilder.viewHabitsScreen(
                             )
                         )
                     }
+
+                    is ViewHabitsScreenNavigation.CreateTask -> {
+                        onNavigate(
+                            TargetNavDest.Destination(
+                                route = AppNavDest.buildCreateTaskRoute(destination.taskId)
+                            )
+                        )
+                    }
                 }
             }
         )

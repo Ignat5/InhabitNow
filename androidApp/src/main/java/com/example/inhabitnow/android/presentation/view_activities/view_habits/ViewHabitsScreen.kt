@@ -43,6 +43,7 @@ import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.model.SelectableTagModel
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskDialog
+import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeDialog
 import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_activities.base.BaseViewTasksBuilder
 import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenConfig
@@ -101,7 +102,7 @@ private fun ViewHabitsScreenStateless(
         floatingActionButton = {
             ScreenFAB(
                 onClick = {
-
+                    onEvent(ViewHabitsScreenEvent.OnCreateHabitClick)
                 }
             )
         },
@@ -315,6 +316,12 @@ private fun ViewHabitsScreenConfigStateless(
         is ViewHabitsScreenConfig.ViewHabitActions -> {
             ViewHabitActionsDialog(stateHolder = config.stateHolder) {
                 onResultEvent(ViewHabitsScreenEvent.ResultEvent.ViewHabitActions(it))
+            }
+        }
+
+        is ViewHabitsScreenConfig.PickTaskProgressType -> {
+            PickTaskProgressTypeDialog(allTaskProgressTypes = config.allProgressTypes) {
+                onResultEvent(ViewHabitsScreenEvent.ResultEvent.PickTaskProgressType(it))
             }
         }
 
