@@ -2,29 +2,48 @@ package com.example.inhabitnow.android.navigation.view_tasks
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.example.inhabitnow.android.navigation.main.MainNavDest
+import com.example.inhabitnow.android.navigation.AppNavDest
+import com.example.inhabitnow.android.navigation.root.TargetNavDest
+import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.ViewTasksScreen
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenNavigation
 
-fun NavGraphBuilder.viewAllTasks(
+fun NavGraphBuilder.viewTasksScreen(
     onMenuClick: () -> Unit,
-    onNavigation: (ViewTasksScreenNavigation) -> Unit
+    onNavigate: (TargetNavDest) -> Unit
 ) {
     composable(
-        route = MainNavDest.ViewAllTasksDestination.route,
+        route = AppNavDest.ViewTasksDestination.route,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
         ViewTasksScreen(
             onMenuClick = onMenuClick,
-            onNavigation = onNavigation
+            onNavigation = { destination ->
+                when (destination) {
+                    is ViewTasksScreenNavigation.Base -> {
+                        when (val baseNS = destination.baseNS) {
+                            is BaseViewTasksScreenNavigation.EditTask -> {
+                                onNavigate(
+                                    TargetNavDest.Destination(
+                                        route = AppNavDest.buildEditTaskRoute(baseNS.taskId)
+                                    )
+                                )
+                            }
+
+                            is BaseViewTasksScreenNavigation.Search -> {
+                                onNavigate(
+                                    TargetNavDest.Destination(
+                                        route = AppNavDest.buildSearchTasksRoute()
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         )
     }
 }

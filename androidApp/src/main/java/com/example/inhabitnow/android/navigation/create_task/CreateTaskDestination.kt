@@ -5,14 +5,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.inhabitnow.android.navigation.AppNavDest
+import com.example.inhabitnow.android.navigation.root.TargetNavDest
 import com.example.inhabitnow.android.presentation.create_edit_task.base.components.BaseCreateEditTaskScreenNavigation
 import com.example.inhabitnow.android.presentation.create_edit_task.create.CreateTaskScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.create.components.CreateTaskScreenNavigation
 
 fun NavGraphBuilder.createTaskScreen(
-    onBack: () -> Unit,
-    onNavigateToViewTaskReminders: (taskId: String) -> Unit,
-    onNavigateToViewTags: () -> Unit
+    onNavigate: (TargetNavDest) -> Unit
 ) {
     composable(
         route = AppNavDest.CreateTaskDestination.route,
@@ -25,15 +24,26 @@ fun NavGraphBuilder.createTaskScreen(
         CreateTaskScreen(
             onNavigation = { destination ->
                 when (destination) {
-                    is CreateTaskScreenNavigation.Back -> onBack()
+                    is CreateTaskScreenNavigation.Back -> {
+                        onNavigate(TargetNavDest.Back)
+                    }
+
                     is CreateTaskScreenNavigation.Base -> {
                         when (val sn = destination.baseSN) {
                             is BaseCreateEditTaskScreenNavigation.ViewTaskReminders -> {
-                                onNavigateToViewTaskReminders(sn.taskId)
+                                onNavigate(
+                                    TargetNavDest.Destination(
+                                        route = AppNavDest.buildViewTaskRemindersRoute(sn.taskId)
+                                    )
+                                )
                             }
 
                             is BaseCreateEditTaskScreenNavigation.ViewTags -> {
-                                onNavigateToViewTags()
+                                onNavigate(
+                                    TargetNavDest.Destination(
+                                        route = AppNavDest.buildViewTagsRoute()
+                                    )
+                                )
                             }
                         }
                     }
