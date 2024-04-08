@@ -42,6 +42,14 @@ fun NavGraphBuilder.viewTasksScreen(
                             }
                         }
                     }
+
+                    is ViewTasksScreenNavigation.CreateTask -> {
+                        onNavigate(
+                            TargetNavDest.Destination(
+                                route = AppNavDest.buildCreateTaskRoute(destination.taskId)
+                            )
+                        )
+                    }
                 }
             }
         )
