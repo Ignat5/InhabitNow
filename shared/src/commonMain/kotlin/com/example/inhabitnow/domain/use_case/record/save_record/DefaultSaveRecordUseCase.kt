@@ -49,6 +49,21 @@ class DefaultSaveRecordUseCase(
                 }
             }
 
+            is SaveRecordUseCase.RequestType.EntryDone -> {
+                if (targetRecord == null) {
+                    recordRepository.saveRecord(
+                        taskId = taskId,
+                        targetDate = targetDate,
+                        entry = RecordContentEntity.Entry.Done
+                    )
+                } else {
+                    recordRepository.updateRecordEntryById(
+                        recordId = targetRecord.id,
+                        entry = RecordContentEntity.Entry.Done
+                    )
+                }
+            }
+
             is SaveRecordUseCase.RequestType.EntrySkip -> {
                 if (targetRecord == null) {
                     recordRepository.saveRecord(

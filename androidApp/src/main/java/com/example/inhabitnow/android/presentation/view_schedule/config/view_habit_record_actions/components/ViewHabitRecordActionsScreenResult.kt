@@ -15,6 +15,7 @@ sealed interface ViewHabitRecordActionsScreenResult : ScreenResult {
     sealed interface Action {
         data object Edit : Action
         data object EnterRecord : Action
+        data object Done : Action
         data object Fail : Action
         data object Skip : Action
         data object ResetEntry : Action

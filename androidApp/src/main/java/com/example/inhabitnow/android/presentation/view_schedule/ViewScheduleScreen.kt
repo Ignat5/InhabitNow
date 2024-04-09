@@ -1,6 +1,8 @@
 package com.example.inhabitnow.android.presentation.view_schedule
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -225,7 +227,9 @@ private fun ItemTaskWithRecord(
                 TitleRow(taskWithRecord = item.taskWithRecordModel)
                 DetailRow(fullTaskWithRecord = item)
             }
+//            AnimatedVisibility(visible = item.taskWithRecordModel.statusType != TaskScheduleStatusType.Locked) {
             ProgressIndicator(taskWithRecord = item.taskWithRecordModel)
+//            }
         }
     }
 }
@@ -233,6 +237,7 @@ private fun ItemTaskWithRecord(
 @Composable
 private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
     val progress: Float = when (taskWithRecord.statusType) {
+        is TaskScheduleStatusType.Locked -> PROGRESS_EMPTY
         is TaskScheduleStatusType.Pending -> PROGRESS_EMPTY
         is TaskScheduleStatusType.Done -> PROGRESS_FULL
         is TaskScheduleStatusType.Failed -> PROGRESS_FULL
@@ -312,19 +317,20 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
             }
         }
     }
-
     val containerColor = when (taskWithRecord.statusType) {
+        is TaskScheduleStatusType.Locked -> MaterialTheme.colorScheme.surfaceContainerLow
         else -> MaterialTheme.colorScheme.primaryContainer
     }
 
     val progressColor = when (taskWithRecord.statusType) {
         is TaskScheduleStatusType.Skipped -> MaterialTheme.colorScheme.surfaceContainerHigh
         is TaskScheduleStatusType.Failed -> MaterialTheme.colorScheme.errorContainer
+        is TaskScheduleStatusType.Locked -> MaterialTheme.colorScheme.surfaceContainerLow
         else -> MaterialTheme.colorScheme.onPrimaryContainer
     }
     val progressState by animateFloatAsState(
         targetValue = progress,
-        animationSpec = spring<Float>(stiffness = Spring.StiffnessVeryLow),
+        animationSpec = spring(stiffness = Spring.StiffnessVeryLow),
         label = ""
     )
     CircularProgressIndicator(

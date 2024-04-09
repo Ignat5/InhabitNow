@@ -176,6 +176,7 @@ fun Double.limitNumberToString(): String = this.let { number ->
 }
 
 fun TaskScheduleStatusType.toDisplay() = when (this) {
+    is TaskScheduleStatusType.Locked -> "locked"
     is TaskScheduleStatusType.Pending -> "pending"
     is TaskScheduleStatusType.InProgress -> "in progress"
     is TaskScheduleStatusType.Done -> "done"

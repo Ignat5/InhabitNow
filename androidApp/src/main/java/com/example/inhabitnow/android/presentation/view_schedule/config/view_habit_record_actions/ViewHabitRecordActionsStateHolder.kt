@@ -95,7 +95,7 @@ class ViewHabitRecordActionsStateHolder(
                 date = date,
                 action = when (event.action) {
                     is ItemHabitRecordAction.ContinuousProgress -> ViewHabitRecordActionsScreenResult.Action.EnterRecord
-                    is ItemHabitRecordAction.Done -> ViewHabitRecordActionsScreenResult.Action.EnterRecord
+                    is ItemHabitRecordAction.Done -> ViewHabitRecordActionsScreenResult.Action.Done
                     is ItemHabitRecordAction.Fail -> ViewHabitRecordActionsScreenResult.Action.Fail
                     is ItemHabitRecordAction.Skip -> ViewHabitRecordActionsScreenResult.Action.Skip
                     is ItemHabitRecordAction.Reset -> ViewHabitRecordActionsScreenResult.Action.ResetEntry
