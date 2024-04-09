@@ -16,7 +16,9 @@ class DefaultReadTagsUseCase(
     override operator fun invoke(): Flow<List<TagModel>> = tagRepository.readTags().map { allTags ->
         if (allTags.isNotEmpty()) {
             withContext(defaultDispatcher) {
-                allTags.map { it.toTagModel() }
+                allTags
+                    .map { it.toTagModel() }
+                    .sortedByDescending { it.createdAt }
             }
         } else emptyList()
     }

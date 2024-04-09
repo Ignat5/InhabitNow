@@ -1,9 +1,11 @@
 package com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,7 +19,7 @@ import com.example.inhabitnow.android.presentation.create_edit_task.common.confi
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_progress.time.components.PickTaskTimeProgressScreenState
 import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
 import com.example.inhabitnow.android.ui.base.BaseInputBuilder
-import com.example.inhabitnow.android.ui.base.BaseTimeInput
+import com.example.inhabitnow.android.ui.base.BaseTimeInputBuilder
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.core.type.ProgressLimitType
 
@@ -79,22 +81,29 @@ private fun PickTaskTimeProgressDialogStateless(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                BaseTimeInput(
-                    hours = state.limitHours,
-                    minutes = state.limitMinutes,
-                    onInputUpdateHours = {
+                BaseTimeInputBuilder.BaseTimeInput(
+                    initHours = state.limitHours,
+                    initMinutes = state.limitMinutes,
+                    onHoursChanged = {
                         onEvent(PickTaskTimeProgressScreenEvent.OnInputUpdateHours(it))
                     },
-                    onInputUpdateMinutes = {
+                    onMinutesChanged = {
                         onEvent(PickTaskTimeProgressScreenEvent.OnInputUpdateMinutes(it))
                     },
                     modifier = Modifier.weight(1f)
                 )
-                Text(
-                    text = "a day",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Box(
+                    modifier = Modifier
+                        .height(BaseTimeInputBuilder.itemHeight)
+                        .align(Alignment.Top),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "a day",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }

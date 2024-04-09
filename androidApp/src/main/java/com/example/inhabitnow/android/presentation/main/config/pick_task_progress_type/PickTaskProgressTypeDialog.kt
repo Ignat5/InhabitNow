@@ -24,7 +24,7 @@ import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
 import com.example.inhabitnow.core.type.TaskProgressType
 
 @Composable
-fun PickTaskProgressType(
+fun PickTaskProgressTypeDialog(
     allTaskProgressTypes: List<TaskProgressType>,
     onResult: (PickTaskProgressTypeScreenResult) -> Unit
 ) {

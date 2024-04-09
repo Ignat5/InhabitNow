@@ -5,35 +5,34 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.navOptions
 import com.example.inhabitnow.android.navigation.AppNavDest
+import com.example.inhabitnow.android.navigation.root.TargetNavDest
 import com.example.inhabitnow.android.presentation.search_tasks.SearchTasksScreen
 import com.example.inhabitnow.android.presentation.search_tasks.components.SearchTasksScreenNavigation
 
 fun NavGraphBuilder.searchTasksScreen(
-    onNavigateToEditTask: (
-        taskId: String,
-        navOptions: NavOptions
-    ) -> Unit,
-    onBack: () -> Unit
+    onNavigate: (TargetNavDest) -> Unit
 ) {
     composable(route = AppNavDest.SearchTasksDestination.route) {
         SearchTasksScreen(
             onNavigation = { destination ->
                 when (destination) {
                     is SearchTasksScreenNavigation.EditTask -> {
-                        onNavigateToEditTask(
-                            destination.taskId,
-                            navOptions {
-                                this.popUpTo(
-                                    route = AppNavDest.SearchTasksDestination.route,
-                                    popUpToBuilder = {
-                                        this.inclusive = true
-                                    }
-                                )
-                            }
+                        onNavigate(
+                            TargetNavDest.Destination(
+                                route = AppNavDest.buildEditTaskRoute(destination.taskId),
+                                navOptions = navOptions {
+                                    this.popUpTo(
+                                        route = AppNavDest.SearchTasksDestination.route,
+                                        popUpToBuilder = {
+                                            this.inclusive = true
+                                        }
+                                    )
+                                }
+                            )
                         )
                     }
 
-                    is SearchTasksScreenNavigation.Back -> onBack()
+                    is SearchTasksScreenNavigation.Back -> onNavigate(TargetNavDest.Back)
                 }
             }
         )

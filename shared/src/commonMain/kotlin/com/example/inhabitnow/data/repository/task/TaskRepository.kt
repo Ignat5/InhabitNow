@@ -1,6 +1,7 @@
 package com.example.inhabitnow.data.repository.task
 
 import com.example.inhabitnow.core.model.ResultModel
+import com.example.inhabitnow.core.type.TaskProgressType
 import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.data.model.task.TaskWithContentEntity
 import com.example.inhabitnow.data.model.task.content.ArchiveContentEntity
@@ -21,7 +22,18 @@ interface TaskRepository {
     suspend fun getTaskProgressByTaskId(taskId: String): ProgressContentEntity?
     suspend fun getTaskFrequencyByTaskId(taskId: String): FrequencyContentEntity?
     suspend fun getTaskArchiveByTaskId(taskId: String): ArchiveContentEntity?
-    suspend fun saveTaskWithContent(taskWithContentEntity: TaskWithContentEntity): ResultModel<Unit>
+    suspend fun saveDefaultTaskWithContent(
+        taskType: TaskType,
+        taskProgressType: TaskProgressType,
+        title: String,
+        description: String,
+        startDate: LocalDate,
+        endDate: LocalDate?,
+        priority: Int,
+        progressContent: TaskContentEntity.ProgressContent,
+        frequencyContent: TaskContentEntity.FrequencyContent,
+        archiveContent: TaskContentEntity.ArchiveContent,
+    ): ResultModel<String>
     suspend fun saveTaskById(taskId: String): ResultModel<Unit>
     suspend fun saveTaskProgress(
         taskId: String,

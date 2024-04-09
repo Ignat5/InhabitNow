@@ -2,25 +2,64 @@ package com.example.inhabitnow.android.navigation.view_habits
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.example.inhabitnow.android.navigation.main.MainNavDest
+import com.example.inhabitnow.android.navigation.AppNavDest
+import com.example.inhabitnow.android.navigation.root.TargetNavDest
+import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.ViewHabitsScreen
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenNavigation
 
-fun NavGraphBuilder.viewHabits(
+fun NavGraphBuilder.viewHabitsScreen(
     onMenuClick: () -> Unit,
-    onNavigation: (ViewHabitsScreenNavigation) -> Unit
+    onNavigate: (TargetNavDest) -> Unit
 ) {
     composable(
-        route = MainNavDest.ViewAllHabitsDestination.route,
+        route = AppNavDest.ViewHabitsDestination.route,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
         ViewHabitsScreen(
             onMenuClick = onMenuClick,
-            onNavigation = onNavigation
+            onNavigation = { destination ->
+                when (destination) {
+                    is ViewHabitsScreenNavigation.Base -> {
+                        when (val baseNS = destination.baseNS) {
+                            is BaseViewTasksScreenNavigation.EditTask -> {
+                                onNavigate(
+                                    TargetNavDest.Destination(
+                                        route = AppNavDest.buildEditTaskRoute(baseNS.taskId)
+                                    )
+                                )
+                            }
+
+                            is BaseViewTasksScreenNavigation.Search -> {
+                                onNavigate(
+                                    TargetNavDest.Destination(
+                                        route = AppNavDest.buildSearchTasksRoute()
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    is ViewHabitsScreenNavigation.ViewStatistics -> {
+                        onNavigate(
+                            TargetNavDest.Destination(
+                                route = AppNavDest.buildViewStatisticsRoute(destination.taskId)
+                            )
+                        )
+                    }
+
+                    is ViewHabitsScreenNavigation.CreateTask -> {
+                        onNavigate(
+                            TargetNavDest.Destination(
+                                route = AppNavDest.buildCreateTaskRoute(destination.taskId)
+                            )
+                        )
+                    }
+                }
+            }
         )
     }
 }

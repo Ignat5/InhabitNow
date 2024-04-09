@@ -22,7 +22,7 @@ import com.example.inhabitnow.android.presentation.view_task_reminders.config.cr
 import com.example.inhabitnow.android.ui.base.BaseDaysOfWeekInput
 import com.example.inhabitnow.android.ui.base.BaseDialogBuilder
 import com.example.inhabitnow.android.ui.base.BaseItemOptionBuilder
-import com.example.inhabitnow.android.ui.base.BaseTimePicker
+import com.example.inhabitnow.android.ui.base.BaseTimeInputBuilder
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.core.type.ReminderType
 import com.example.inhabitnow.domain.model.reminder.content.ReminderContentModel
@@ -137,7 +137,7 @@ private fun LazyListScope.itemPickTime(
         key = ScreenItemContentType.Time,
         contentType = ScreenItemContentType.Time
     ) {
-        BaseTimePicker(
+        BaseTimeInputBuilder.BaseTimePicker(
             initHours = initHours,
             initMinutes = initMinutes,
             onHoursChanged = onHoursChanged,

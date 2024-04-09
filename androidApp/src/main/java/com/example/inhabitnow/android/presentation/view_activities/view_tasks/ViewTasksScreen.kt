@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,9 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,14 +35,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.model.SelectableTagModel
-import com.example.inhabitnow.android.presentation.model.UIResultModel
+import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeDialog
 import com.example.inhabitnow.android.presentation.view_activities.base.BaseViewTasksBuilder
 import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenEvent
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskFilterByStatus
 import com.example.inhabitnow.android.presentation.view_activities.model.TaskSort
+import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenConfig
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenEvent
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenState
+import com.example.inhabitnow.android.ui.base.BaseCommonComponents
 import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
@@ -57,7 +59,7 @@ fun ViewTasksScreen(
         viewModel = viewModel,
         onNavigation = onNavigation,
         configContent = { config, onEvent ->
-
+            ScreenConfigStateless(config, onEvent)
         }
     ) { state, onEvent ->
         ViewTasksScreenStateless(onMenuClick, state, onEvent)
@@ -83,7 +85,15 @@ private fun ViewTasksScreenStateless(
                     )
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            BaseCommonComponents.CreateTaskFAB(
+                onClick = {
+                    onEvent(ViewTasksScreenEvent.OnCreateTaskClick)
+                }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) {
         Box(
             modifier = Modifier
@@ -160,7 +170,7 @@ private fun ItemTask(
         ) {
             TitleRow(item)
             Spacer(modifier = Modifier.height(4.dp))
-            HabitDetailsRow(item)
+            TaskDetailsRow(item)
         }
     }
 }
@@ -186,7 +196,7 @@ private fun TitleRow(item: FullTaskModel.FullTask) {
 }
 
 @Composable
-private fun HabitDetailsRow(item: FullTaskModel.FullTask) {
+private fun TaskDetailsRow(item: FullTaskModel.FullTask) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -264,6 +274,21 @@ private fun FilterSortChipRow(
     }
 }
 
+@Composable
+private fun ScreenConfigStateless(
+    config: ViewTasksScreenConfig,
+    onResultEvent: (ViewTasksScreenEvent.ResultEvent) -> Unit
+) {
+    when (config) {
+        is ViewTasksScreenConfig.PickTaskType -> {
+            PickTaskTypeDialog(allTaskTypes = config.allTaskTypes) {
+                onResultEvent(ViewTasksScreenEvent.ResultEvent.PickTaskType(it))
+            }
+        }
+        is ViewTasksScreenConfig.Base -> Unit
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScreenTopBar(
@@ -293,5 +318,12 @@ private fun ScreenTopBar(
             }
         }
     )
+}
+
+@Composable
+private fun ScreenFAB(onClick: () -> Unit) {
+    FloatingActionButton(onClick = onClick) {
+        Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = null)
+    }
 }
 

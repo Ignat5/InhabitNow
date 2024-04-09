@@ -3,6 +3,8 @@ package com.example.inhabitnow.android.presentation.view_schedule.components
 import com.example.inhabitnow.android.presentation.base.components.event.ScreenEvent
 import com.example.inhabitnow.android.presentation.base.components.result.ScreenResult
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
+import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
+import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_number_record.components.EnterTaskNumberRecordScreenResult
 import com.example.inhabitnow.android.presentation.view_schedule.config.enter_time_record.components.EnterTaskTimeRecordScreenResult
 import com.example.inhabitnow.android.presentation.view_schedule.config.view_habit_record_actions.components.ViewHabitRecordActionsScreenResult
@@ -16,6 +18,7 @@ sealed interface ViewScheduleScreenEvent : ScreenEvent {
     data object OnNextWeekClick : ViewScheduleScreenEvent
     data object OnSearchClick : ViewScheduleScreenEvent
     data object OnPickDateClick : ViewScheduleScreenEvent
+    data object OnCreateTaskClick : ViewScheduleScreenEvent
 
     sealed interface ResultEvent : ViewScheduleScreenEvent {
         val result: ScreenResult
@@ -32,5 +35,14 @@ sealed interface ViewScheduleScreenEvent : ScreenEvent {
         data class ViewHabitRecordActions(
             override val result: ViewHabitRecordActionsScreenResult
         ) : ResultEvent
+
+        data class PickTaskType(
+            override val result: PickTaskTypeScreenResult
+        ) : ResultEvent
+
+        data class PickTaskProgressType(
+            override val result: PickTaskProgressTypeScreenResult
+        ) : ResultEvent
+
     }
 }

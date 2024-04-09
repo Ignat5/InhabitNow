@@ -170,16 +170,16 @@ internal fun FullTaskEntity.toFullTaskModel(): FullTaskModel =
         is TaskModel.Habit -> {
             FullTaskModel.FullHabit(
                 taskModel = taskModel,
-                allReminders = this.allReminders.map { it.toReminderModel() },
-                allTags = this.allTags.map { it.toTagModel() }
+                allReminders = this.allReminders.map { it.toReminderModel() }.sortedBy { it.time },
+                allTags = this.allTags.map { it.toTagModel() }.sortedByDescending { it.createdAt }
             )
         }
 
         is TaskModel.Task -> {
             FullTaskModel.FullTask(
                 taskModel = taskModel,
-                allReminders = this.allReminders.map { it.toReminderModel() },
-                allTags = this.allTags.map { it.toTagModel() }
+                allReminders = this.allReminders.map { it.toReminderModel() }.sortedBy { it.time },
+                allTags = this.allTags.map { it.toTagModel() }.sortedByDescending { it.createdAt }
             )
         }
     }

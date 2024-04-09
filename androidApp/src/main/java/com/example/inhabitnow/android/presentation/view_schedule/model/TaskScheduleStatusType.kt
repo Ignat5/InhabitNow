@@ -4,6 +4,7 @@ sealed interface TaskScheduleStatusType {
     // all
     data object Pending : Habit.Continuous, Habit.YesNo, Task
     data object Done : Habit.Continuous, Habit.YesNo, Task
+    data object Locked : Habit.Continuous, Habit.YesNo, Task
 //    data object Locked : Habit.Continuous, Habit.YesNo, Task
 
     // habit

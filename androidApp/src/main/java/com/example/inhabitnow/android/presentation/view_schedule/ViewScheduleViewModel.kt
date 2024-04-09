@@ -7,6 +7,8 @@ import com.example.inhabitnow.android.presentation.base.view_model.BaseViewModel
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateStateHolder
 import com.example.inhabitnow.android.presentation.common.pick_date.components.PickDateScreenResult
 import com.example.inhabitnow.android.presentation.common.pick_date.model.PickDateRequestModel
+import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeScreenResult
+import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeScreenResult
 import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenConfig
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
@@ -19,16 +21,19 @@ import com.example.inhabitnow.android.presentation.view_schedule.config.enter_ti
 import com.example.inhabitnow.android.presentation.view_schedule.config.view_habit_record_actions.ViewHabitRecordActionsStateHolder
 import com.example.inhabitnow.android.presentation.view_schedule.config.view_habit_record_actions.components.ViewHabitRecordActionsScreenResult
 import com.example.inhabitnow.android.presentation.view_schedule.model.FullTaskWithRecordModel
-import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOfWeek
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskWithRecordModel
+import com.example.inhabitnow.core.model.ResultModel
 import com.example.inhabitnow.core.type.ProgressLimitType
+import com.example.inhabitnow.core.type.TaskProgressType
+import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.record.content.RecordContentModel
 import com.example.inhabitnow.domain.model.task.TaskModel
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
 import com.example.inhabitnow.domain.use_case.read_full_tasks_by_date.ReadFullTasksByDateUseCase
 import com.example.inhabitnow.domain.use_case.record.read_records_by_date.ReadRecordsByDateUseCase
 import com.example.inhabitnow.domain.use_case.record.save_record.SaveRecordUseCase
+import com.example.inhabitnow.domain.use_case.save_default_task.SaveDefaultTaskUseCase
 import com.example.inhabitnow.domain.use_case.validate_limit_number.ValidateInputLimitNumberUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -46,7 +51,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
@@ -62,6 +66,7 @@ class ViewScheduleViewModel @Inject constructor(
     private val readFullTasksByDateUseCase: ReadFullTasksByDateUseCase,
     private val readRecordsByDateUseCase: ReadRecordsByDateUseCase,
     private val saveRecordUseCase: SaveRecordUseCase,
+    private val saveDefaultTaskUseCase: SaveDefaultTaskUseCase,
     private val validateInputLimitNumberUseCase: ValidateInputLimitNumberUseCase,
     @DefaultDispatcherQualifier private val defaultDispatcher: CoroutineDispatcher
 ) : BaseViewModel<ViewScheduleScreenEvent, ViewScheduleScreenState, ViewScheduleScreenNavigation, ViewScheduleScreenConfig>() {
@@ -69,12 +74,22 @@ class ViewScheduleViewModel @Inject constructor(
     private val currentDateState = MutableStateFlow<LocalDate>(todayDateState.value)
     private val startOfWeekDateState = MutableStateFlow(todayDateState.value.firstDayOfWeek)
 
+    private val isLockedState =
+        combine(currentDateState, todayDateState) { currentDate, todayDate ->
+            currentDate > todayDate
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            false
+        )
+
     private val allTasksState: StateFlow<UIResultModel<List<FullTaskWithRecordModel>>> =
         currentDateState.flatMapLatest { date ->
             combine(
                 readFullTasksByDateUseCase(date),
-                readRecordsByDateUseCase(date)
-            ) { allFullTasks, allRecords ->
+                readRecordsByDateUseCase(date),
+                isLockedState
+            ) { allFullTasks, allRecords, isLocked ->
                 if (allFullTasks.isNotEmpty()) {
                     withContext(defaultDispatcher) {
                         UIResultModel.Data(
@@ -82,7 +97,7 @@ class ViewScheduleViewModel @Inject constructor(
                                 async {
                                     val recordEntry =
                                         allRecords.find { it.taskId == fullTaskModel.taskModel.id }?.entry
-                                    fullTaskModel.toFullTaskModelWithRecord(recordEntry)
+                                    fullTaskModel.toFullTaskModelWithRecord(recordEntry, isLocked)
                                 }
                             }.awaitAll().sortTasks()
                         )
@@ -93,15 +108,6 @@ class ViewScheduleViewModel @Inject constructor(
             viewModelScope,
             SharingStarted.Eagerly,
             UIResultModel.Loading(emptyList())
-        )
-
-    private val isLockedState =
-        combine(currentDateState, todayDateState) { currentDate, todayDate ->
-            currentDate > todayDate
-        }.stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            false
         )
 
     override val uiScreenState: StateFlow<ViewScheduleScreenState> =
@@ -139,6 +145,9 @@ class ViewScheduleViewModel @Inject constructor(
             is ViewScheduleScreenEvent.OnTaskLongClick ->
                 onTaskLongClick(event)
 
+            is ViewScheduleScreenEvent.OnCreateTaskClick ->
+                onCreateTaskClick()
+
             is ViewScheduleScreenEvent.ResultEvent ->
                 onResultEvent(event)
 
@@ -172,6 +181,80 @@ class ViewScheduleViewModel @Inject constructor(
 
             is ViewScheduleScreenEvent.ResultEvent.ViewHabitRecordActions ->
                 onViewHabitRecordActionsResultEvent(event)
+
+            is ViewScheduleScreenEvent.ResultEvent.PickTaskType ->
+                onPickTaskTypeResultEvent(event)
+
+            is ViewScheduleScreenEvent.ResultEvent.PickTaskProgressType ->
+                onPickTaskProgressTypeResultEvent(event)
+        }
+    }
+
+    private fun onPickTaskProgressTypeResultEvent(event: ViewScheduleScreenEvent.ResultEvent.PickTaskProgressType) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskProgressTypeScreenResult.Confirm ->
+                    onConfirmPickTaskProgressType(result)
+
+                is PickTaskProgressTypeScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskProgressType(result: PickTaskProgressTypeScreenResult.Confirm) {
+        viewModelScope.launch {
+            val resultModel = saveDefaultTaskUseCase(
+                SaveDefaultTaskUseCase.RequestType.CreateHabit(result.taskProgressType)
+            )
+            when (resultModel) {
+                is ResultModel.Success -> {
+                    val taskId = resultModel.data
+                    setUpNavigationState(ViewScheduleScreenNavigation.CreateTask(taskId))
+                }
+
+                is ResultModel.Error -> Unit
+            }
+        }
+    }
+
+    private fun onPickTaskTypeResultEvent(event: ViewScheduleScreenEvent.ResultEvent.PickTaskType) {
+        onIdleToAction {
+            when (val result = event.result) {
+                is PickTaskTypeScreenResult.Confirm -> onConfirmPickTaskType(result)
+                is PickTaskTypeScreenResult.Dismiss -> Unit
+            }
+        }
+    }
+
+    private fun onConfirmPickTaskType(result: PickTaskTypeScreenResult.Confirm) {
+        when (val taskType = result.taskType) {
+            TaskType.Habit -> {
+                setUpConfigState(
+                    ViewScheduleScreenConfig.PickTaskProgressType(
+                        TaskProgressType.entries
+                    )
+                )
+            }
+
+            TaskType.RecurringTask, TaskType.SingleTask -> {
+                viewModelScope.launch {
+                    val requestType = when (taskType) {
+                        TaskType.RecurringTask -> SaveDefaultTaskUseCase.RequestType.CreateRecurringTask
+                        TaskType.SingleTask -> SaveDefaultTaskUseCase.RequestType.CreateTask
+                        else -> throw IllegalStateException()
+                    }
+                    when (val resultModel = saveDefaultTaskUseCase(requestType)) {
+                        is ResultModel.Success -> {
+                            val taskId = resultModel.data
+                            setUpNavigationState(
+                                ViewScheduleScreenNavigation.CreateTask(taskId)
+                            )
+                        }
+
+                        is ResultModel.Error -> Unit
+                    }
+                }
+            }
         }
     }
 
@@ -194,6 +277,9 @@ class ViewScheduleViewModel @Inject constructor(
             is ViewHabitRecordActionsScreenResult.Action.EnterRecord ->
                 onEnterRecordClick(result.taskId)
 
+            is ViewHabitRecordActionsScreenResult.Action.Done ->
+                onDoneTaskClick(result.taskId)
+
             is ViewHabitRecordActionsScreenResult.Action.Fail ->
                 onFailTaskClick(result.taskId)
 
@@ -202,6 +288,16 @@ class ViewScheduleViewModel @Inject constructor(
 
             is ViewHabitRecordActionsScreenResult.Action.ResetEntry ->
                 onResetTaskEntryClick(result.taskId)
+        }
+    }
+
+    private fun onDoneTaskClick(taskId: String) {
+        viewModelScope.launch {
+            saveRecordUseCase(
+                taskId = taskId,
+                targetDate = currentDateState.value,
+                requestType = SaveRecordUseCase.RequestType.EntryDone
+            )
         }
     }
 
@@ -254,10 +350,6 @@ class ViewScheduleViewModel @Inject constructor(
                     }
                 }
 
-                is TaskWithRecordModel.Habit.HabitYesNo -> {
-                    onEnterHabitYesNoRecordClick(taskWithRecord)
-                }
-
                 else -> Unit
             }
         }
@@ -293,7 +385,7 @@ class ViewScheduleViewModel @Inject constructor(
             saveRecordUseCase(
                 taskId = taskWithRecord.task.id,
                 targetDate = currentDateState.value,
-                requestType = SaveRecordUseCase.RequestType.EntryYesNo
+                requestType = SaveRecordUseCase.RequestType.EntryDone
             )
         }
     }
@@ -476,6 +568,10 @@ class ViewScheduleViewModel @Inject constructor(
         )
     }
 
+    private fun onCreateTaskClick() {
+        setUpConfigState(ViewScheduleScreenConfig.PickTaskType(TaskType.entries))
+    }
+
     private fun onPickDateClick() {
         currentDateState.value.let { currentDate ->
             setUpConfigState(
@@ -515,7 +611,8 @@ class ViewScheduleViewModel @Inject constructor(
     }
 
     private fun FullTaskModel.toFullTaskModelWithRecord(
-        recordEntry: RecordContentModel.Entry?
+        recordEntry: RecordContentModel.Entry?,
+        isLocked: Boolean
     ): FullTaskWithRecordModel = this.let { fullTaskModel ->
         when (val taskModel = fullTaskModel.taskModel) {
             is TaskModel.Habit -> {
@@ -529,23 +626,25 @@ class ViewScheduleViewModel @Inject constructor(
                                     TaskWithRecordModel.Habit.HabitContinuous.HabitNumber(
                                         task = taskModel,
                                         recordEntry = entry,
-                                        statusType = when (entry) {
-                                            null -> TaskScheduleStatusType.Pending
-                                            is RecordContentModel.Entry.Skip -> TaskScheduleStatusType.Skipped
-                                            is RecordContentModel.Entry.Fail -> TaskScheduleStatusType.Failed
-                                            is RecordContentModel.Entry.Number -> {
-                                                val limitNumber =
-                                                    taskModel.progressContent.limitNumber
-                                                val entryNumber = entry.number
-                                                val isDone =
-                                                    when (taskModel.progressContent.limitType) {
-                                                        ProgressLimitType.AtLeast -> entryNumber >= limitNumber
-                                                        ProgressLimitType.Exactly -> entryNumber == limitNumber
-                                                    }
-                                                if (isDone) TaskScheduleStatusType.Done
-                                                else TaskScheduleStatusType.InProgress
+                                        statusType = if (isLocked) TaskScheduleStatusType.Locked else
+                                            when (entry) {
+                                                null -> TaskScheduleStatusType.Pending
+                                                is RecordContentModel.Entry.Skip -> TaskScheduleStatusType.Skipped
+                                                is RecordContentModel.Entry.Fail -> TaskScheduleStatusType.Failed
+                                                is RecordContentModel.Entry.Number -> {
+                                                    val limitNumber =
+                                                        taskModel.progressContent.limitNumber
+                                                    val entryNumber = entry.number
+                                                    val isDone =
+                                                        when (taskModel.progressContent.limitType) {
+                                                            ProgressLimitType.AtLeast -> entryNumber >= limitNumber
+                                                            ProgressLimitType.Exactly -> entryNumber == limitNumber
+                                                            ProgressLimitType.NoMoreThan -> entryNumber <= limitNumber
+                                                        }
+                                                    if (isDone) TaskScheduleStatusType.Done
+                                                    else TaskScheduleStatusType.InProgress
+                                                }
                                             }
-                                        }
                                     )
                                 FullTaskWithRecordModel(
                                     taskWithRecordModel = taskWithRecord,
@@ -561,22 +660,25 @@ class ViewScheduleViewModel @Inject constructor(
                                     TaskWithRecordModel.Habit.HabitContinuous.HabitTime(
                                         task = taskModel,
                                         recordEntry = entry,
-                                        statusType = when (entry) {
-                                            null -> TaskScheduleStatusType.Pending
-                                            is RecordContentModel.Entry.Skip -> TaskScheduleStatusType.Skipped
-                                            is RecordContentModel.Entry.Fail -> TaskScheduleStatusType.Failed
-                                            is RecordContentModel.Entry.Time -> {
-                                                val limitTime = taskModel.progressContent.limitTime
-                                                val entryTime = entry.time
-                                                val isDone =
-                                                    when (taskModel.progressContent.limitType) {
-                                                        ProgressLimitType.AtLeast -> entryTime >= limitTime
-                                                        ProgressLimitType.Exactly -> entryTime == limitTime
-                                                    }
-                                                if (isDone) TaskScheduleStatusType.Done
-                                                else TaskScheduleStatusType.InProgress
+                                        statusType = if (isLocked) TaskScheduleStatusType.Locked else
+                                            when (entry) {
+                                                null -> TaskScheduleStatusType.Pending
+                                                is RecordContentModel.Entry.Skip -> TaskScheduleStatusType.Skipped
+                                                is RecordContentModel.Entry.Fail -> TaskScheduleStatusType.Failed
+                                                is RecordContentModel.Entry.Time -> {
+                                                    val limitTime =
+                                                        taskModel.progressContent.limitTime
+                                                    val entryTime = entry.time
+                                                    val isDone =
+                                                        when (taskModel.progressContent.limitType) {
+                                                            ProgressLimitType.AtLeast -> entryTime >= limitTime
+                                                            ProgressLimitType.Exactly -> entryTime == limitTime
+                                                            ProgressLimitType.NoMoreThan -> entryTime <= limitTime
+                                                        }
+                                                    if (isDone) TaskScheduleStatusType.Done
+                                                    else TaskScheduleStatusType.InProgress
+                                                }
                                             }
-                                        }
                                     )
                                 FullTaskWithRecordModel(
                                     taskWithRecordModel = taskWithRecordModel,
@@ -593,12 +695,13 @@ class ViewScheduleViewModel @Inject constructor(
                         val taskWithContentModel = TaskWithRecordModel.Habit.HabitYesNo(
                             task = taskModel,
                             recordEntry = entry,
-                            statusType = when (entry) {
-                                null -> TaskScheduleStatusType.Pending
-                                is RecordContentModel.Entry.Skip -> TaskScheduleStatusType.Skipped
-                                is RecordContentModel.Entry.Fail -> TaskScheduleStatusType.Failed
-                                is RecordContentModel.Entry.Done -> TaskScheduleStatusType.Done
-                            }
+                            statusType = if (isLocked) TaskScheduleStatusType.Locked else
+                                when (entry) {
+                                    null -> TaskScheduleStatusType.Pending
+                                    is RecordContentModel.Entry.Skip -> TaskScheduleStatusType.Skipped
+                                    is RecordContentModel.Entry.Fail -> TaskScheduleStatusType.Failed
+                                    is RecordContentModel.Entry.Done -> TaskScheduleStatusType.Done
+                                }
                         )
                         FullTaskWithRecordModel(
                             taskWithRecordModel = taskWithContentModel,
@@ -614,10 +717,11 @@ class ViewScheduleViewModel @Inject constructor(
                 val taskWithRecord = TaskWithRecordModel.Task(
                     task = taskModel,
                     recordEntry = entry,
-                    statusType = when (entry) {
-                        null -> TaskScheduleStatusType.Pending
-                        RecordContentModel.Entry.Done -> TaskScheduleStatusType.Done
-                    }
+                    statusType = if (isLocked) TaskScheduleStatusType.Locked else
+                        when (entry) {
+                            null -> TaskScheduleStatusType.Pending
+                            RecordContentModel.Entry.Done -> TaskScheduleStatusType.Done
+                        }
                 )
                 FullTaskWithRecordModel(
                     taskWithRecordModel = taskWithRecord,
@@ -643,22 +747,6 @@ class ViewScheduleViewModel @Inject constructor(
                 -fullTaskWithRecord.taskWithRecordModel.task.priority
             }
         )
-    }
-
-    private fun provideDateItems(
-        targetDate: LocalDate,
-        currentDate: LocalDate,
-        todayDate: LocalDate
-    ): List<ItemDayOfWeek> = targetDate.firstDayOfWeek.let { startOfWeekDate ->
-        IntRange(0, DayOfWeek.entries.size - 1).map { offset ->
-            startOfWeekDate.plus(offset, DateTimeUnit.DAY).let { nextDate ->
-                when (nextDate) {
-                    currentDate -> ItemDayOfWeek.Current(nextDate)
-                    todayDate -> ItemDayOfWeek.Today(nextDate)
-                    else -> ItemDayOfWeek.Day(nextDate)
-                }
-            }
-        }
     }
 
     private val LocalDate.firstDayOfWeek

@@ -49,17 +49,21 @@ object BaseTaskItemBuilder {
 
     @Composable
     fun ChipTaskReminders(allReminders: List<ReminderModel>) {
-        LazyRow(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            items(
-                items = allReminders,
-                key = { it.id }
-            ) { item ->
-                ItemReminder(item)
+        if (allReminders.isEmpty()) return
+        val aStr = remember(allReminders) {
+            buildAnnotatedString {
+                allReminders.forEachIndexed { index, reminder ->
+                    append(reminder.time.toHourMinute())
+                    if (index != allReminders.lastIndex) {
+                        append(" • ")
+                    }
+                }
             }
         }
+        BaseIconDataItem(
+            iconResId = R.drawable.ic_clock,
+            text = aStr.text
+        )
     }
 
     @Composable
@@ -81,12 +85,13 @@ object BaseTaskItemBuilder {
 
     @Composable
     fun ChipTaskTags(allTags: List<TagModel>) {
-        val aStr = remember (allTags) {
+        if (allTags.isEmpty()) return
+        val aStr = remember(allTags) {
             buildAnnotatedString {
                 allTags.forEachIndexed { index, tagModel ->
                     append(tagModel.title)
                     if (index != allTags.lastIndex) {
-                        append(" | ")
+                        append(" • ")
                     }
                 }
             }
@@ -95,6 +100,21 @@ object BaseTaskItemBuilder {
             iconResId = R.drawable.ic_tag,
             text = aStr.text
         )
+
+//        val aStr = remember(allTags) {
+//            buildAnnotatedString {
+//                allTags.forEachIndexed { index, tagModel ->
+//                    append(tagModel.title)
+//                    if (index != allTags.lastIndex) {
+//                        append(" | ")
+//                    }
+//                }
+//            }
+//        }
+//        BaseIconDataItem(
+//            iconResId = R.drawable.ic_tag,
+//            text = aStr.text
+//        )
     }
 
     @Composable
@@ -174,6 +194,19 @@ object BaseTaskItemBuilder {
                 painter = painterResource(iconResId),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+
+    @Composable
+    private fun BaseDataItem(
+        text: String
+    ) {
+        ItemDetailContainer {
+            Text(
+                text = text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

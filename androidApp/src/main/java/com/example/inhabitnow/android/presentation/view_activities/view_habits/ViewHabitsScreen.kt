@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +43,7 @@ import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.create_edit_task.common.config.pick_tags.model.SelectableTagModel
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_archive.ConfirmArchiveTaskDialog
 import com.example.inhabitnow.android.presentation.create_edit_task.edit.config.confirm_delete.ConfirmDeleteTaskDialog
+import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeDialog
 import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_activities.base.BaseViewTasksBuilder
 import com.example.inhabitnow.android.presentation.view_activities.base.components.BaseViewTasksScreenConfig
@@ -53,6 +56,7 @@ import com.example.inhabitnow.android.presentation.view_activities.view_habits.c
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenState
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.ViewHabitActionsDialog
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.components.ViewHabitActionsScreenResult
+import com.example.inhabitnow.android.ui.base.BaseCommonComponents
 import com.example.inhabitnow.android.ui.base.BaseFilterSortBuilder
 import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.android.ui.toDatePeriodDisplay
@@ -95,7 +99,15 @@ private fun ViewHabitsScreenStateless(
                     onEvent(ViewHabitsScreenEvent.Base(BaseViewTasksScreenEvent.OnSearchClick))
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            BaseCommonComponents.CreateTaskFAB(
+                onClick = {
+                    onEvent(ViewHabitsScreenEvent.OnCreateHabitClick)
+                }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) {
         Box(
             modifier = Modifier
@@ -305,6 +317,12 @@ private fun ViewHabitsScreenConfigStateless(
         is ViewHabitsScreenConfig.ViewHabitActions -> {
             ViewHabitActionsDialog(stateHolder = config.stateHolder) {
                 onResultEvent(ViewHabitsScreenEvent.ResultEvent.ViewHabitActions(it))
+            }
+        }
+
+        is ViewHabitsScreenConfig.PickTaskProgressType -> {
+            PickTaskProgressTypeDialog(allTaskProgressTypes = config.allProgressTypes) {
+                onResultEvent(ViewHabitsScreenEvent.ResultEvent.PickTaskProgressType(it))
             }
         }
 

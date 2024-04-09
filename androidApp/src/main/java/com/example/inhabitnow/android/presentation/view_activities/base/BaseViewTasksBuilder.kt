@@ -1,16 +1,9 @@
 package com.example.inhabitnow.android.presentation.view_activities.base
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -158,7 +151,7 @@ object BaseViewTasksBuilder {
                 leadingIcon = if (isFilterActive) {
                     val icon: @Composable () -> Unit = {
                         Icon(
-                            imageVector = Icons.Default.Check,
+                            painter = painterResource(id = R.drawable.ic_check),
                             modifier = Modifier.size(16.dp),
                             contentDescription = null
                         )
@@ -185,7 +178,7 @@ object BaseViewTasksBuilder {
                         },
                         trailingIcon = {
                             Icon(
-                                imageVector = Icons.Default.Check,
+                                painter = painterResource(id = R.drawable.ic_check),
                                 modifier = Modifier
                                     .size(16.dp)
                                     .alpha(if (isSelected) 1f else 0f),

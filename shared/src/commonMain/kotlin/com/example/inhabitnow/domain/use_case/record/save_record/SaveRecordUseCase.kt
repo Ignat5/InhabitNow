@@ -17,6 +17,7 @@ interface SaveRecordUseCase {
         ) : RequestType
 
         data object EntryYesNo : RequestType
+        data object EntryDone : RequestType
         data object EntrySkip : RequestType
         data object EntryFail : RequestType
         data object EntryReset : RequestType

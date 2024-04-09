@@ -1,6 +1,8 @@
 package com.example.inhabitnow.android.presentation.view_schedule
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -20,36 +22,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -57,6 +51,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.inhabitnow.android.R
 import com.example.inhabitnow.android.presentation.base.ext.BaseScreen
 import com.example.inhabitnow.android.presentation.common.pick_date.PickDateDialog
+import com.example.inhabitnow.android.presentation.main.config.pick_task_progress_type.PickTaskProgressTypeDialog
+import com.example.inhabitnow.android.presentation.main.config.pick_task_type.PickTaskTypeDialog
 import com.example.inhabitnow.android.presentation.model.UIResultModel
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenConfig
 import com.example.inhabitnow.android.presentation.view_schedule.components.ViewScheduleScreenEvent
@@ -70,16 +66,13 @@ import com.example.inhabitnow.android.presentation.view_schedule.model.ItemDayOf
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskScheduleStatusType
 import com.example.inhabitnow.android.presentation.view_schedule.model.TaskWithRecordModel
 import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
+import com.example.inhabitnow.android.ui.base.BaseCommonComponents
 import com.example.inhabitnow.android.ui.limitNumberToString
 import com.example.inhabitnow.android.ui.toDisplay
 import com.example.inhabitnow.android.ui.toHourMinute
-import com.example.inhabitnow.android.ui.toMonthDay
 import com.example.inhabitnow.android.ui.toShortMonthDayYear
 import com.example.inhabitnow.core.type.ProgressLimitType
-import com.example.inhabitnow.core.type.TaskType
 import com.example.inhabitnow.domain.model.record.content.RecordContentModel
-import com.example.inhabitnow.domain.model.reminder.ReminderModel
-import com.example.inhabitnow.domain.model.tag.TagModel
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -126,7 +119,15 @@ private fun ViewScheduleScreenStateless(
                     onEvent(ViewScheduleScreenEvent.OnPickDateClick)
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            BaseCommonComponents.CreateTaskFAB(
+                onClick = {
+                    onEvent(ViewScheduleScreenEvent.OnCreateTaskClick)
+                }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) {
         Box(
             modifier = Modifier
@@ -226,7 +227,9 @@ private fun ItemTaskWithRecord(
                 TitleRow(taskWithRecord = item.taskWithRecordModel)
                 DetailRow(fullTaskWithRecord = item)
             }
+//            AnimatedVisibility(visible = item.taskWithRecordModel.statusType != TaskScheduleStatusType.Locked) {
             ProgressIndicator(taskWithRecord = item.taskWithRecordModel)
+//            }
         }
     }
 }
@@ -234,6 +237,7 @@ private fun ItemTaskWithRecord(
 @Composable
 private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
     val progress: Float = when (taskWithRecord.statusType) {
+        is TaskScheduleStatusType.Locked -> PROGRESS_EMPTY
         is TaskScheduleStatusType.Pending -> PROGRESS_EMPTY
         is TaskScheduleStatusType.Done -> PROGRESS_FULL
         is TaskScheduleStatusType.Failed -> PROGRESS_FULL
@@ -254,6 +258,11 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
 
                                         ProgressLimitType.Exactly -> {
                                             if (entry.number == progressContent.limitNumber) PROGRESS_FULL
+                                            else PROGRESS_EMPTY
+                                        }
+
+                                        ProgressLimitType.NoMoreThan -> {
+                                            if (entry.number <= progressContent.limitNumber) PROGRESS_FULL
                                             else PROGRESS_EMPTY
                                         }
                                     }
@@ -286,6 +295,15 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
                                                 }
                                             }
                                         }
+
+                                        ProgressLimitType.NoMoreThan -> {
+                                            entry.time.toSecondOfDay().let { entrySeconds ->
+                                                pc.limitTime.toSecondOfDay().let { limitSeconds ->
+                                                    if (entrySeconds <= limitSeconds) PROGRESS_FULL
+                                                    else PROGRESS_EMPTY
+                                                }
+                                            }
+                                        }
                                     }
                                 }
 
@@ -299,19 +317,20 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
             }
         }
     }
-
     val containerColor = when (taskWithRecord.statusType) {
+        is TaskScheduleStatusType.Locked -> MaterialTheme.colorScheme.surfaceContainerLow
         else -> MaterialTheme.colorScheme.primaryContainer
     }
 
     val progressColor = when (taskWithRecord.statusType) {
         is TaskScheduleStatusType.Skipped -> MaterialTheme.colorScheme.surfaceContainerHigh
         is TaskScheduleStatusType.Failed -> MaterialTheme.colorScheme.errorContainer
+        is TaskScheduleStatusType.Locked -> MaterialTheme.colorScheme.surfaceContainerLow
         else -> MaterialTheme.colorScheme.onPrimaryContainer
     }
     val progressState by animateFloatAsState(
         targetValue = progress,
-        animationSpec = spring<Float>(stiffness = Spring.StiffnessVeryLow),
+        animationSpec = spring(stiffness = Spring.StiffnessVeryLow),
         label = ""
     )
     CircularProgressIndicator(
@@ -364,7 +383,9 @@ private fun DetailRow(fullTaskWithRecord: FullTaskWithRecordModel) {
         BaseTaskItemBuilder.ChipTaskType(taskType = fullTaskWithRecord.taskWithRecordModel.task.type)
         BaseTaskItemBuilder.ChipTaskProgressType(taskProgressType = fullTaskWithRecord.taskWithRecordModel.task.progressType)
         BaseTaskItemBuilder.ChipTaskPriority(priority = fullTaskWithRecord.taskWithRecordModel.task.priority)
-        BaseTaskItemBuilder.ChipTaskReminders(allReminders = fullTaskWithRecord.allReminders)
+        if (fullTaskWithRecord.allReminders.isNotEmpty()) {
+            BaseTaskItemBuilder.ChipTaskReminders(allReminders = fullTaskWithRecord.allReminders)
+        }
     }
 }
 
@@ -557,21 +578,19 @@ private fun ViewScheduleConfigStateless(
                 onResultEvent(ViewScheduleScreenEvent.ResultEvent.ViewHabitRecordActions(it))
             }
         }
-    }
-}
 
-@Composable
-private fun ProvideContentColorTextStyle(
-    contentColor: Color,
-    textStyle: TextStyle,
-    content: @Composable () -> Unit
-) {
-    val mergedStyle = LocalTextStyle.current.merge(textStyle)
-    CompositionLocalProvider(
-        LocalContentColor provides contentColor,
-        LocalTextStyle provides mergedStyle,
-        content = content
-    )
+        is ViewScheduleScreenConfig.PickTaskType -> {
+            PickTaskTypeDialog(allTaskTypes = config.allTaskTypes) {
+                onResultEvent(ViewScheduleScreenEvent.ResultEvent.PickTaskType(it))
+            }
+        }
+
+        is ViewScheduleScreenConfig.PickTaskProgressType -> {
+            PickTaskProgressTypeDialog(allTaskProgressTypes = config.allTaskProgressTypes) {
+                onResultEvent(ViewScheduleScreenEvent.ResultEvent.PickTaskProgressType(it))
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
