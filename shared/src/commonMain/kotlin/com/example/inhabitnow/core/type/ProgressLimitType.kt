@@ -2,6 +2,6 @@ package com.example.inhabitnow.core.type
 
 enum class ProgressLimitType {
     AtLeast,
-//    NoMoreThan,
+    NoMoreThan,
     Exactly
 }

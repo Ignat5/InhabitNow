@@ -83,6 +83,7 @@ internal object DomainUtil {
                     val isDone = when (pc.limitType) {
                         ProgressLimitType.AtLeast -> entryNumber >= pc.limitNumber
                         ProgressLimitType.Exactly -> entryNumber == pc.limitNumber
+                        ProgressLimitType.NoMoreThan -> entryNumber <= pc.limitNumber
                     }
                     if (isDone) TaskStatus.Completed
                     else TaskStatus.NotCompleted.Pending
@@ -95,6 +96,7 @@ internal object DomainUtil {
                     val isDone = when (pc.limitType) {
                         ProgressLimitType.AtLeast -> entryTime >= pc.limitTime
                         ProgressLimitType.Exactly -> entryTime == pc.limitTime
+                        ProgressLimitType.NoMoreThan -> entryTime <= pc.limitTime
                     }
                     if (isDone) TaskStatus.Completed
                     else TaskStatus.NotCompleted.Pending

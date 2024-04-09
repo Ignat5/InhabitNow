@@ -21,7 +21,7 @@ fun TaskContentModel.ProgressContent.Time.toDisplay(): String {
 }
 
 fun TaskContentModel.ProgressContent.Number.toDisplay(): String {
-    val prefix = "${this.limitType.toDisplay()} ${this.limitNumber}".let {
+    val prefix = "${this.limitType.toDisplay()} ${this.limitNumber.limitNumberToString()}".let {
         if (this.limitUnit.isNotBlank()) "$it ${this.limitUnit}"
         else it
     }
@@ -31,7 +31,7 @@ fun TaskContentModel.ProgressContent.Number.toDisplay(): String {
 fun ProgressLimitType.toDisplay() = when (this) {
     ProgressLimitType.AtLeast -> "At least"
     ProgressLimitType.Exactly -> "Exactly"
-//    ProgressLimitType.NoMoreThan -> "No more than"
+    ProgressLimitType.NoMoreThan -> "No more than"
 }
 
 fun TaskContentModel.FrequencyContent.toDisplay(): String {

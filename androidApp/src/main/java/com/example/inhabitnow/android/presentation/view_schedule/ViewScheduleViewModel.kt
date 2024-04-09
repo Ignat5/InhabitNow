@@ -629,6 +629,7 @@ class ViewScheduleViewModel @Inject constructor(
                                                     when (taskModel.progressContent.limitType) {
                                                         ProgressLimitType.AtLeast -> entryNumber >= limitNumber
                                                         ProgressLimitType.Exactly -> entryNumber == limitNumber
+                                                        ProgressLimitType.NoMoreThan -> entryNumber <= limitNumber
                                                     }
                                                 if (isDone) TaskScheduleStatusType.Done
                                                 else TaskScheduleStatusType.InProgress
@@ -660,6 +661,7 @@ class ViewScheduleViewModel @Inject constructor(
                                                     when (taskModel.progressContent.limitType) {
                                                         ProgressLimitType.AtLeast -> entryTime >= limitTime
                                                         ProgressLimitType.Exactly -> entryTime == limitTime
+                                                        ProgressLimitType.NoMoreThan -> entryTime <= limitTime
                                                     }
                                                 if (isDone) TaskScheduleStatusType.Done
                                                 else TaskScheduleStatusType.InProgress

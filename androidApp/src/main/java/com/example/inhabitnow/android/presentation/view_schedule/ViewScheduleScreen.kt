@@ -255,6 +255,11 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
                                             if (entry.number == progressContent.limitNumber) PROGRESS_FULL
                                             else PROGRESS_EMPTY
                                         }
+
+                                        ProgressLimitType.NoMoreThan -> {
+                                            if (entry.number <= progressContent.limitNumber) PROGRESS_FULL
+                                            else PROGRESS_EMPTY
+                                        }
                                     }
                                 }
 
@@ -281,6 +286,15 @@ private fun ProgressIndicator(taskWithRecord: TaskWithRecordModel) {
                                             entry.time.toSecondOfDay().let { entrySeconds ->
                                                 pc.limitTime.toSecondOfDay().let { limitSeconds ->
                                                     if (entrySeconds == limitSeconds) PROGRESS_FULL
+                                                    else PROGRESS_EMPTY
+                                                }
+                                            }
+                                        }
+
+                                        ProgressLimitType.NoMoreThan -> {
+                                            entry.time.toSecondOfDay().let { entrySeconds ->
+                                                pc.limitTime.toSecondOfDay().let { limitSeconds ->
+                                                    if (entrySeconds <= limitSeconds) PROGRESS_FULL
                                                     else PROGRESS_EMPTY
                                                 }
                                             }
