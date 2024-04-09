@@ -383,7 +383,7 @@ object BaseCreateEditTaskBuilder {
         onClick: () -> Unit
     ) {
         BasicItemConfig(
-            iconResId = R.drawable.ic_notification,
+            iconResId = R.drawable.ic_clock,
             titleText = "Time and reminders",
             dataText = "${item.count}",
             onClick = onClick

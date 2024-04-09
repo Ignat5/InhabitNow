@@ -377,7 +377,9 @@ private fun DetailRow(fullTaskWithRecord: FullTaskWithRecordModel) {
         BaseTaskItemBuilder.ChipTaskType(taskType = fullTaskWithRecord.taskWithRecordModel.task.type)
         BaseTaskItemBuilder.ChipTaskProgressType(taskProgressType = fullTaskWithRecord.taskWithRecordModel.task.progressType)
         BaseTaskItemBuilder.ChipTaskPriority(priority = fullTaskWithRecord.taskWithRecordModel.task.priority)
-        BaseTaskItemBuilder.ChipTaskReminders(allReminders = fullTaskWithRecord.allReminders)
+        if (fullTaskWithRecord.allReminders.isNotEmpty()) {
+            BaseTaskItemBuilder.ChipTaskReminders(allReminders = fullTaskWithRecord.allReminders)
+        }
     }
 }
 
