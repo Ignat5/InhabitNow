@@ -40,18 +40,20 @@ fun RootGraph() {
         onRootDestinationClick = { rootDestination ->
             rootScope.launch {
                 drawerState.close()
-                navController.navigate(
-                    route = rootDestination.destination.route,
-                    navOptions = navOptions {
-                        this.launchSingleTop = true
-                        this.popUpTo(
-                            route = AppNavDest.RootGraphDestination.route,
-                            popUpToBuilder = {
-                                this.inclusive = false
-                            }
-                        )
-                    }
-                )
+                if (rootDestination.destination.route != currentBackStackEntry?.destination?.route) {
+                    navController.navigate(
+                        route = rootDestination.destination.route,
+                        navOptions = navOptions {
+                            this.launchSingleTop = true
+                            this.popUpTo(
+                                route = AppNavDest.RootGraphDestination.route,
+                                popUpToBuilder = {
+                                    this.inclusive = false
+                                }
+                            )
+                        }
+                    )
+                }
             }
         }
     ) {

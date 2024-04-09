@@ -56,6 +56,7 @@ import com.example.inhabitnow.android.presentation.view_activities.view_habits.c
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.components.ViewHabitsScreenState
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.ViewHabitActionsDialog
 import com.example.inhabitnow.android.presentation.view_activities.view_habits.config.view_habit_actions.components.ViewHabitActionsScreenResult
+import com.example.inhabitnow.android.ui.base.BaseCommonComponents
 import com.example.inhabitnow.android.ui.base.BaseFilterSortBuilder
 import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.android.ui.toDatePeriodDisplay
@@ -100,7 +101,7 @@ private fun ViewHabitsScreenStateless(
             )
         },
         floatingActionButton = {
-            ScreenFAB(
+            BaseCommonComponents.CreateTaskFAB(
                 onClick = {
                     onEvent(ViewHabitsScreenEvent.OnCreateHabitClick)
                 }
@@ -334,13 +335,6 @@ private fun ViewHabitsScreenConfigStateless(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun ScreenFAB(onClick: () -> Unit) {
-    FloatingActionButton(onClick = onClick) {
-        Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = null)
     }
 }
 

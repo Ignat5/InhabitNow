@@ -44,6 +44,7 @@ import com.example.inhabitnow.android.presentation.view_activities.view_tasks.co
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenEvent
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenNavigation
 import com.example.inhabitnow.android.presentation.view_activities.view_tasks.components.ViewTasksScreenState
+import com.example.inhabitnow.android.ui.base.BaseCommonComponents
 import com.example.inhabitnow.android.ui.base.BaseTaskItemBuilder
 import com.example.inhabitnow.domain.model.task.content.TaskContentModel
 import com.example.inhabitnow.domain.model.task.derived.FullTaskModel
@@ -86,7 +87,7 @@ private fun ViewTasksScreenStateless(
             )
         },
         floatingActionButton = {
-            ScreenFAB(
+            BaseCommonComponents.CreateTaskFAB(
                 onClick = {
                     onEvent(ViewTasksScreenEvent.OnCreateTaskClick)
                 }
